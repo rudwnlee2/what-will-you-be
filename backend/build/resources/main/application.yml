@@ -8,20 +8,16 @@ spring:
     username: root
     password: 1234
 
-    jpa:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
       hibernate:
-        # DDL (Data Definition Language) Auto 설정
-        # 개발 초기 단계에서는 'update'로 하여 엔티티 변경 시 DB 스키마 자동 업데이트
-        # 운영 환경에서는 'none' 또는 'validate' 권장
-        ddl-auto: update # (주의!) 운영 환경에서는 'none' 또는 'validate'로 변경 권장
-      show-sql: true # JPA/Hibernate가 실행하는 SQL 쿼리를 콘솔에 출력
-      properties:
-        hibernate:
-          format_sql: true # 출력되는 SQL 쿼리 예쁘게 포맷
-          #default_batch_fetch_size: 1000 # N+1 문제 완화 (Optional, 성능 최적화용) 나중에 성능 최적화할때 다시
-          use_sql_comments: true # 출력 SQL에 주석 추가 (Optional)
-      database: mysql # 사용하는 데이터베이스 종류 명시 (선택적)
-      database-platform: org.hibernate.dialect.MySQL8Dialect # Hibernate가 사용할 MySQL 방언 (MySQL 8.x용)
+        format_sql: true
+        use_sql_comments: true
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
 
   logging:
     level:

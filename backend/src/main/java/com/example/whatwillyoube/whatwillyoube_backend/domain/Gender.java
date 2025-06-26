@@ -1,4 +1,6 @@
 package com.example.whatwillyoube.whatwillyoube_backend.domain;
 
-public class JobRecommendationsInfo {
+public enum Gender {
+    MALE, //남성
+    FEMALE //여성
 }
