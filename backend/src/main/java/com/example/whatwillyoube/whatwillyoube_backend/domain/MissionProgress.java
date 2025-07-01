@@ -1,14 +1,20 @@
 package com.example.whatwillyoube.whatwillyoube_backend.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Table(name = "mission_progress")
 public class MissionProgress {
 
     @Id
-    private Long id;
+    private Long missions_id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

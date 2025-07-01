@@ -1,15 +1,21 @@
 package com.example.whatwillyoube.whatwillyoube_backend.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
 
 @Entity
-public class Missions {
+@Inheritance(strategy = InheritanceType.JOINED) // 또는 SINGLE_TABLE
+@DiscriminatorColumn(name = "DTYPE") // 미션 타입을 구분할 컬럼
+@Getter
+@Table(name = "missions")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public abstract class Missions {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
     private Long id;
 
     @Column(nullable = false)
@@ -18,20 +24,7 @@ public class Missions {
     @Column(nullable = false)
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MissionType missionType;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
-
-    @OneToMany
     @JoinColumn(name = "job_recommendations_id")
-    private List<Job_Recommendations> jobRecommendations;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "groups_id")
-    private Groups groups;
-
+    private JobRecommendations jobRecommendations;
 }

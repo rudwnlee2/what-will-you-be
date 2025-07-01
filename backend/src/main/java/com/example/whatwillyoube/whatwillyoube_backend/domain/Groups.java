@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "group_table")
+@Table(name = "user_groups")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Groups {
 
@@ -23,7 +23,8 @@ public class Groups {
     @Column(nullable = false)
     private LocalDateTime createdDate;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    private Member managerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_member_id")
+    private Member manager;
 
 }

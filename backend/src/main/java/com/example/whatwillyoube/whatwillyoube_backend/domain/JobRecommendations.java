@@ -1,11 +1,17 @@
 package com.example.whatwillyoube.whatwillyoube_backend.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-public class Job_Recommendations {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Table(name = "job_recommendations")
+public class JobRecommendations {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,5 +52,9 @@ public class Job_Recommendations {
 
     @Column(nullable = false)
     private LocalDateTime createdDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member Member;
 
 }

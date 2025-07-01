@@ -5,33 +5,39 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e6cdc571-b1b6-4abb-a878-2a783dfcdd7e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Groups.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/InvitationStatus.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/MBTI.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/MissionProgress.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/MissionState.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/MissionType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Missions.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Friend.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Friend.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Group.class" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/GroupMission.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/IndividualMission.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.2/checksums/checksums.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14.2/checksums/checksums.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.2/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14.2/executionHistory/executionHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.2/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14.2/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.2/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14.2/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.2/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14.2/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.2/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/8.14.2/fileHashes/resourceHashesCache.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/GroupMembers.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/GroupMembers.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/JobRecommendationsInfo.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Job_Recommendations.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Job_Recommendations.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Groups.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Groups.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Holland.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Holland.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Job_Recommendations.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Member.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Member.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/MissionsTemplate.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/MissionProgress.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/MissionProgress.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Missions.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/Missions.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/RecommendationInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/RecommendationInfo.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/java/main/com/example/whatwillyoube/whatwillyoube_backend/domain/UserMissions.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/build/resources/main/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/build/resources/main/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/GroupMembers.class.uniqueId0" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/Groups.class.uniqueId1" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/compileTransaction/stash-dir/Missions.class.uniqueId2" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/compileJava/previous-compilation-data.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Friend.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Friend.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Group.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Gender.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/GroupMembers.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/GroupMembers.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/JobRecommendationsInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/JobValue.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Job_Recommendations.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Job_Recommendations.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Groups.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Groups.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Holland.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Holland.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Job_Recommendations.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/JobRecommendations.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Member.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Member.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/MissionsTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Holland.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/MissionProgress.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/MissionProgress.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Missions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/Missions.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/RecommendationInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/RecommendationInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/UserMissions.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/whatwillyoube/whatwillyoube_backend/domain/FriendId.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -96,27 +102,29 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.Build backend.executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.WhatWillYouBeBackendApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/jpa-entity-mapping&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;E:/project/what-will-you-be/backend&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.Build backend.executor": "Run",
+    "Gradle.Download Sources.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.WhatWillYouBeBackendApplication.executor": "Run",
+    "git-widget-placeholder": "refactor/jpa-mapping",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "E:/project/what-will-you-be/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="com.example.whatwillyoube.whatwillyoube_backend.domain" />
@@ -154,7 +162,16 @@
       <workItem from="1750762798578" duration="6936000" />
       <workItem from="1750838941522" duration="39000" />
       <workItem from="1750846662582" duration="6772000" />
-      <workItem from="1750902364027" duration="15476000" />
+      <workItem from="1750902364027" duration="16082000" />
+      <workItem from="1750992968600" duration="241000" />
+      <workItem from="1750994511753" duration="1478000" />
+      <workItem from="1751001716608" duration="400000" />
+      <workItem from="1751002832818" duration="965000" />
+      <workItem from="1751084750486" duration="8000" />
+      <workItem from="1751121273486" duration="1937000" />
+      <workItem from="1751176739817" duration="146000" />
+      <workItem from="1751347245140" duration="9266000" />
+      <workItem from="1751363643144" duration="2153000" />
     </task>
     <servers />
   </component>

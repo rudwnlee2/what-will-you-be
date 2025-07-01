@@ -1,10 +1,16 @@
 package com.example.whatwillyoube.whatwillyoube_backend.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Table(name = "recommendation_info")
 public class RecommendationInfo {
 
     @Id
@@ -33,7 +39,7 @@ public class RecommendationInfo {
     private LocalDateTime lastModifiedDate;
 
     @MapsId //fk = pk 로 사용하려고
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 

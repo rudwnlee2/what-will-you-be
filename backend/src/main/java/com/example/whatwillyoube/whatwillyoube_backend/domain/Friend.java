@@ -43,5 +43,4 @@ public class Friend {
     @JoinColumn(name = "to_member_id", insertable = false, updatable = false)
     private Member toMember;
 
-
 }
