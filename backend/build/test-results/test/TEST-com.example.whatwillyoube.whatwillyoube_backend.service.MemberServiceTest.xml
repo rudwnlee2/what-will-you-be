@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="회원가입/로그인 테스트" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-07-02T10:42:44.766Z" hostname="KJLEE" time="0.9">
+  <properties/>
+  <testcase name="회원가입 후 로그인 → JWT 토큰 발급" classname="com.example.whatwillyoube.whatwillyoube_backend.service.MemberServiceTest" time="0.9"/>
+  <system-out><![CDATA[19:42:40.019 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.example.whatwillyoube.whatwillyoube_backend.service.MemberServiceTest]: MemberServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+19:42:40.158 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.example.whatwillyoube.whatwillyoube_backend.WhatWillYouBeBackendApplication for test class com.example.whatwillyoube.whatwillyoube_backend.service.MemberServiceTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.0)
+
+2025-07-02T19:42:40.677+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] c.e.w.w.service.MemberServiceTest        : Starting MemberServiceTest using Java 17.0.12 with PID 15340 (started by 이경주 in E:\project\what-will-you-be\backend)
+2025-07-02T19:42:40.679+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] c.e.w.w.service.MemberServiceTest        : No active profile set, falling back to 1 default profile: "default"
+2025-07-02T19:42:41.421+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-07-02T19:42:41.493+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 59 ms. Found 1 JPA repository interface.
+2025-07-02T19:42:42.062+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-07-02T19:42:42.107+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.15.Final
+2025-07-02T19:42:42.147+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-07-02T19:42:42.498+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-07-02T19:42:42.530+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-07-02T19:42:42.707+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@144440f5
+2025-07-02T19:42:42.711+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-07-02T19:42:42.760+09:00  WARN 15340 --- [What Will You Be Backend] [    Test worker] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-07-02T19:42:42.762+09:00  WARN 15340 --- [What Will You Be Backend] [    Test worker] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-07-02T19:42:42.785+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-07-02T19:42:43.660+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-07-02T19:42:43.707+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-07-02T19:42:44.064+09:00  WARN 15340 --- [What Will You Be Backend] [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-07-02T19:42:44.104+09:00  WARN 15340 --- [What Will You Be Backend] [    Test worker] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 41407c17-5032-4e3d-aec0-ab731598d76c
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2025-07-02T19:42:44.114+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2025-07-02T19:42:44.745+09:00  INFO 15340 --- [What Will You Be Backend] [    Test worker] c.e.w.w.service.MemberServiceTest        : Started MemberServiceTest in 4.432 seconds (process running for 5.645)
+Hibernate: 
+    /* <criteria> */ select
+        m1_0.id,
+        m1_0.birth,
+        m1_0.created_date,
+        m1_0.email,
+        m1_0.gender,
+        m1_0.last_modified_date,
+        m1_0.login_id,
+        m1_0.password,
+        m1_0.phone,
+        m1_0.school 
+    from
+        members m1_0
+Hibernate: 
+    /* insert for
+        com.example.whatwillyoube.whatwillyoube_backend.domain.Member */insert 
+    into
+        members (birth, created_date, email, gender, last_modified_date, login_id, password, phone, school) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    /* <criteria> */ select
+        m1_0.id,
+        m1_0.birth,
+        m1_0.created_date,
+        m1_0.email,
+        m1_0.gender,
+        m1_0.last_modified_date,
+        m1_0.login_id,
+        m1_0.password,
+        m1_0.phone,
+        m1_0.school 
+    from
+        members m1_0 
+    where
+        m1_0.login_id=?
+발급된 토큰: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWF0IjoxNzUxNDUyOTY1LCJleHAiOjE3NTE0NTQ3NjV9.A4FiIQ5szZVrt8e-Nm0JuX6trGQxFfLdPCd4yIueh6g
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
