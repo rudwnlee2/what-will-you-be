@@ -1,14 +1,11 @@
 package com.example.whatwillyoube.whatwillyoube_backend.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
+@Setter
 @Entity
 @Table(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -44,5 +41,18 @@ public class Member {
 
     @Column(nullable = false)
     private LocalDateTime lastModifiedDate;
+
+    public Member(String loginId, String password, String email,
+                  LocalDateTime birth, Gender gender, String phone, String school) {
+        this.loginId = loginId;
+        this.password = password;
+        this.email = email;
+        this.birth = birth;
+        this.gender = gender;
+        this.phone = phone;
+        this.school = school;
+        this.createdDate = LocalDateTime.now();
+        this.lastModifiedDate = LocalDateTime.now();
+    }
 
 }
