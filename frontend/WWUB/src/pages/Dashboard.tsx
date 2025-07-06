@@ -4,7 +4,7 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="py-10 text-center">
       <h2 className="text-4xl font-bold text-gray-800 mb-6">Your Personal Dashboard</h2>
-      <p className="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
+      <p className="text-lg text-gray-700 leading-relaxed ">
         This is where your personalized journey unfolds. Here, you'll find your progress, recommended learning paths, and tools to track your development.
       </p>
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">

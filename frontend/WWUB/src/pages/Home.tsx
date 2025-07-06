@@ -2,9 +2,9 @@ import React from 'react';
 
 const HomePage: React.FC = () => {
   return (
-    <div className="text-center py-10">
+    <div className="text-center py-10 ">
       <h2 className="text-4xl font-bold text-gray-800 mb-6">Welcome to WWUB!</h2>
-      <p className="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
+      <p className="text-lg text-gray-700 leading-relaxed max-w-2xl ">
         Discover your potential and embark on a journey of continuous learning and personal development.
         We provide tools and resources to help you explore various paths and grow into the best version of yourself.
       </p>
