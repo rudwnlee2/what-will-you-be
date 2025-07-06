@@ -1,3 +1,7 @@
+# Node modules
+node_modules/
+.env
+
 # Logs
 logs
 *.log
@@ -22,3 +26,30 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE specific files (Backend) - 이 부분에 아래 내용들이 추가될 수 있습니다.
+/backend/.idea/  # IntelliJ IDEA
+/backend/*.iml   # IntelliJ IDEA module files
+/backend/*.ipr
+/backend/*.iws
+
+# Build artifacts for Java/Gradle/Maven projects (Backend)
+/backend/.gradle/ # 이 부분이 중요!
+/backend/build/   # 이 부분이 중요!
+/backend/out/
+/backend/target/ # Maven 프로젝트인 경우
+/backend/*.jar
+/backend/*.war
+/backend/*.ear
+/backend/bin/
+/backend/gen/
+/backend/classes/
+/backend/test-results/
+/backend/tmp/
+
+# Front-end build output
+/frontend/WWUB/dist/ # Vite 빌드 아웃풋 (WWUB 프로젝트 안에 dist 폴더가 있다면)
