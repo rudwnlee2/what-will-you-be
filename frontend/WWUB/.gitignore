@@ -53,3 +53,6 @@ Thumbs.db
 
 # Front-end build output
 /frontend/WWUB/dist/ # Vite 빌드 아웃풋 (WWUB 프로젝트 안에 dist 폴더가 있다면)
+
+# 백엔드 프로젝트 관련
+/backend/
