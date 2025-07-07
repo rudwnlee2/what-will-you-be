@@ -1,0 +1,7 @@
+# Node modules
+# 모든 node_modules 무시. 만약 하위 폴더에 node_modules가 있다면 이 규칙이 적용됨
+node_modules/
+.env
+
+# Frontend build output
+frontend/WWUB/dist/
