@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom"; // React Router DOM 사용 시 필요
+import { Link, Outlet } from 'react-router-dom'; // React Router DOM 사용 시 필요
 
 function App() {
   return (
@@ -10,9 +10,7 @@ function App() {
             What Will You Be?
           </span>
         </h1>
-        <p className="mt-4 text-xl text-gray-600">
-          A Journey of Discovery and Growth
-        </p>
+        <p className="mt-4 text-xl text-gray-600">A Journey of Discovery and Growth</p>
       </header>
 
       {/* 네비게이션 섹션 (React Router DOM 사용 예시) */}
@@ -44,10 +42,7 @@ function App() {
 
       {/* 푸터 섹션 */}
       <footer className="mt-12 text-center text-gray-500 text-sm">
-        <p>
-          &copy; {new Date().getFullYear()} What Will You Be? All rights
-          reserved.
-        </p>
+        <p>&copy; {new Date().getFullYear()} What Will You Be? All rights reserved.</p>
         <p className="mt-2">Built with React, TypeScript, and Tailwind CSS.</p>
       </footer>
     </div>

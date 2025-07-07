@@ -1,15 +1,15 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import App from "./App.tsx";
-import HomePage from "./pages/Home.tsx"; // Import Home page
-import AboutPage from "./pages/About.tsx"; // Import About page
-import DashboardPage from "./pages/Dashboard.tsx"; // Import Dashboard page
-import "./index.css"; // Tailwind CSS 지시문이 포함된 전역 CSS 파일
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import App from './App.tsx';
+import HomePage from './pages/Home.tsx'; // Import Home page
+import AboutPage from './pages/About.tsx'; // Import About page
+import DashboardPage from './pages/Dashboard.tsx'; // Import Dashboard page
+import './index.css'; // Tailwind CSS 지시문이 포함된 전역 CSS 파일
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <App />, // App 컴포넌트가 공통 레이아웃 역할을 함
     children: [
       {
@@ -17,11 +17,11 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "about",
+        path: 'about',
         element: <AboutPage />,
       },
       {
-        path: "dashboard",
+        path: 'dashboard',
         element: <DashboardPage />,
       },
       // 향후 다른 라우트들을 여기에 추가할 수 있습니다.
@@ -29,7 +29,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <RouterProvider router={router} />
   </React.StrictMode>,
