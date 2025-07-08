@@ -5,12 +5,12 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/what_will_you_be?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
-    username: root
-    password: 1234
+    username: root # 원래 root
+    password: 1234 # 개인의 root 비밀번호 입력
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
