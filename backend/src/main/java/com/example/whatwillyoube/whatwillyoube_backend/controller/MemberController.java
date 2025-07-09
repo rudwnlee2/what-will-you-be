@@ -4,15 +4,13 @@ import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberResponseDto;
 import com.example.whatwillyoube.whatwillyoube_backend.service.MemberService;
 import com.example.whatwillyoube.whatwillyoube_backend.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -48,6 +46,18 @@ public class MemberController {
         response.addHeader("Authorization", token);
 
         return ResponseEntity.ok("로그인 성공");
+    }
+
+    @GetMapping("/myPage") // GET 요청
+    public ResponseEntity<MemberResponseDto> myPage(HttpServletRequest request) { // (1)
+
+        // (2) 경비원(인터셉터)이 붙여준 'memberId'라는 이름의 임시 출입증을 request에서 꺼냅니다.
+        Long memberId = (Long) request.getAttribute("memberId");
+
+        // (3) 이제 이 memberId는 100% 신뢰할 수 있는 값이므로, 마음껏 사용합니다.
+        MemberResponseDto responseDto = memberService.getMember(memberId);
+
+        return ResponseEntity.ok(responseDto);
     }
 
 }

@@ -46,5 +46,12 @@ public class MemberService {
         return jwtUtil.generateToken(member.getId());
     }
 
+    public MemberResponseDto getMember(Long id) {
+        Member  member = memberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+
+        return MemberResponseDto.from(member);
+    }
+
 
 }
