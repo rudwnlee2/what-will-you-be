@@ -5,12 +5,11 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Setter
 @Entity
 @Table(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Member {
+public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,6 +19,9 @@ public class Member {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private String name;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -36,23 +38,17 @@ public class Member {
     @Column(nullable = false)
     private String school;
 
-    @Column(nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(nullable = false)
-    private LocalDateTime lastModifiedDate;
-
-    public Member(String loginId, String password, String email,
-                  LocalDateTime birth, Gender gender, String phone, String school) {
+    @Builder
+    public Member(String loginId, String password, String name, String email, LocalDateTime birth, Gender gender, String phone, String school) {
         this.loginId = loginId;
         this.password = password;
+        this.name = name;
         this.email = email;
         this.birth = birth;
         this.gender = gender;
         this.phone = phone;
         this.school = school;
-        this.createdDate = LocalDateTime.now();
-        this.lastModifiedDate = LocalDateTime.now();
+
     }
 
 }
