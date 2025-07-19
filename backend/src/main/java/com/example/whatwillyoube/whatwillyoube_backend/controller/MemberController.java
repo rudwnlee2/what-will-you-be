@@ -60,4 +60,20 @@ public class MemberController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PatchMapping("/updateMyPage") // HTTP Method: PATCH, URL: /api/members/myPage
+    public ResponseEntity<MemberResponseDto> updateMyPage(
+            HttpServletRequest request,
+            @Valid @RequestBody MemberRequestDto memberRequestDto) {
+
+        // 1. myPage 조회와 똑같이, 인터셉터로부터 신뢰할 수 있는 memberId를 받습니다.
+        Long memberId = (Long) request.getAttribute("memberId");
+
+        // 2. 서비스 계층에 memberId와 수정할 데이터를 모두 전달합니다.
+        MemberResponseDto responseDto = memberService.updateMember(memberId, memberRequestDto);
+
+        // 3. 성공적으로 수정되었음을 알리는 응답을 반환합니다.
+        return ResponseEntity.ok(responseDto);
+    }
+
 }
+
