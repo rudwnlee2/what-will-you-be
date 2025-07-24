@@ -69,5 +69,12 @@ public class MemberService {
         return MemberResponseDto.from(member);
     }
 
+    public void deleteMember(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다. (ID: " + id + ")"));
+
+        memberRepository.delete(member);
+    }
+
 
 }

@@ -75,5 +75,13 @@ public class MemberController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @DeleteMapping
+    public ResponseEntity<Void> deleteMember(HttpServletRequest request) {
+        Long memberId = (Long) request.getAttribute("memberId");
+        memberService.deleteMember(memberId);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }
 
