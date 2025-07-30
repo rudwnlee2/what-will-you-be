@@ -54,8 +54,8 @@ public class RecommendationInfoService {
     public RecommendationInfoResponseDto getRecommendationInfo(Long memberId) {
         // ID로 RecommendationInfo를 찾고, 존재하면 DTO로 변환하여 반환
         return recommendationInfoRepository.findById(memberId)
-                .map(RecommendationInfoResponseDto::new) // .map(info -> new RecommendationInfoResponseDto(info)) 와 동일
-                .orElse(null); // 정보가 없으면 null 반환
+                .map(RecommendationInfoResponseDto::new) // 정보가 있으면 이 생성자가 호출됨
+                .orElse(new RecommendationInfoResponseDto()); // 정보가 없으면 빈 DTO를 생성하는 생성자가 호출됨
     }
 
 }

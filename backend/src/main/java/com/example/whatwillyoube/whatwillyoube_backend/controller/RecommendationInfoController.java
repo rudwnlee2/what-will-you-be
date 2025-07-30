@@ -4,6 +4,7 @@ import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoReq
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoResponseDto;
 import com.example.whatwillyoube.whatwillyoube_backend.service.RecommendationInfoService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,17 +21,13 @@ public class RecommendationInfoController {
         Long memberId = (Long) request.getAttribute("memberId");
         RecommendationInfoResponseDto responseDto = recommendationInfoService.getRecommendationInfo(memberId);
 
-        if (responseDto == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         return ResponseEntity.ok(responseDto);
     }
 
     @PutMapping
     public ResponseEntity<RecommendationInfoResponseDto> createOrUpdateMyRecommendationInfo(
             HttpServletRequest request,
-            @RequestBody RecommendationInfoRequestDto requestDto) {
+            @Valid @RequestBody RecommendationInfoRequestDto requestDto) {
 
         Long memberId = (Long) request.getAttribute("memberId");
 

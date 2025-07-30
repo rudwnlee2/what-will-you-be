@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -32,7 +33,7 @@ public class MemberRequestDto {
     private String email;
 
     @NotNull(message = "생년월일을 입력해주세요.")
-    private LocalDateTime birth;
+    private LocalDate birth;
 
     @NotNull(message = "성별을 선택해주세요.")
     private Gender gender;

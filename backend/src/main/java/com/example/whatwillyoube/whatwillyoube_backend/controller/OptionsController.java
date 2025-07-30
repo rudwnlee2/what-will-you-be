@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//나중에 캐싱 고려
 @RestController
 @RequestMapping("/api/options")
 public class OptionsController {

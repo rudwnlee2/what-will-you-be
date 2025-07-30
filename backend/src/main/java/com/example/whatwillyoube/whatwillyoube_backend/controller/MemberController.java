@@ -1,5 +1,6 @@
 package com.example.whatwillyoube.whatwillyoube_backend.controller;
 
+import com.example.whatwillyoube.whatwillyoube_backend.dto.LoginRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberResponseDto;
 import com.example.whatwillyoube.whatwillyoube_backend.service.MemberService;
@@ -20,7 +21,6 @@ import java.util.Map;
 public class MemberController {
 
     private final MemberService memberService;
-    private final JwtUtil jwtUtil; // 로그인 응답 헤더에 토큰을 담기 위해 주
 
     @PostMapping("/signup")
     public ResponseEntity<MemberResponseDto> signUp(@Valid @RequestBody MemberRequestDto memberRequestDto) {
@@ -34,21 +34,15 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> loginRequest, HttpServletResponse response) {
-        // Map을 통해 loginId와 password를 받습니다.
-        String loginId = loginRequest.get("loginId");
-        String password = loginRequest.get("password");
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDto loginRequest, HttpServletResponse response) {
 
-        String token = memberService.login(loginId, password);
+        String token = memberService.login(loginRequest.getLoginId(), loginRequest.getPassword());
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
 
-        // JWT를 응답 헤더(Authorization)에 추가합니다.
-        // "Authorization"은 표준 HTTP 헤더 이름이므로 직접 문자열로 사용해도 안전합니다.
-        response.addHeader("Authorization", token);
-
-        return ResponseEntity.ok("로그인 성공");
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/myPage") // GET 요청
+    @GetMapping("/me") // GET 요청
     public ResponseEntity<MemberResponseDto> myPage(HttpServletRequest request) { // (1)
 
         // (2) 경비원(인터셉터)이 붙여준 'memberId'라는 이름의 임시 출입증을 request에서 꺼냅니다.
@@ -60,7 +54,7 @@ public class MemberController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @PatchMapping("/updateMyPage") // HTTP Method: PATCH, URL: /api/members/myPage
+    @PatchMapping("/me") // HTTP Method: PATCH, URL: /api/members/myPage
     public ResponseEntity<MemberResponseDto> updateMyPage(
             HttpServletRequest request,
             @Valid @RequestBody MemberRequestDto memberRequestDto) {
@@ -75,7 +69,7 @@ public class MemberController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/me")
     public ResponseEntity<Void> deleteMember(HttpServletRequest request) {
         Long memberId = (Long) request.getAttribute("memberId");
         memberService.deleteMember(memberId);

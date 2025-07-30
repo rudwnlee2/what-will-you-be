@@ -11,6 +11,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+
     // 비밀키 (실무에선 환경변수나 yml로 관리)
     private final String secretKey = "mySuperSecretKey1234567890!@#$%^";
     private final long expiration = 1000 * 60 * 30; // 30분

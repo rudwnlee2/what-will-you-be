@@ -9,7 +9,6 @@ import lombok.Getter;
 @Getter
 public class RecommendationInfoResponseDto {
 
-    private final Long memberId;
     private final String dream;
     private final String dreamReason;
     private final String interest;
@@ -21,7 +20,6 @@ public class RecommendationInfoResponseDto {
 
     // Entity -> DTO 변환 생성자
     public RecommendationInfoResponseDto(RecommendationInfo entity) {
-        this.memberId = entity.getMemberId();
         this.dream = entity.getDream();
         this.dreamReason = entity.getDreamReason();
         this.interest = entity.getInterest();
@@ -31,4 +29,20 @@ public class RecommendationInfoResponseDto {
         this.favoriteSubject = entity.getFavoriteSubject();
         this.holland = entity.getHolland();
     }
+
+    // 2. 수정된 기본 생성자: 정보가 없을 때 사용
+    public RecommendationInfoResponseDto() {
+        // String 필드들은 빈 문자열로 초기화
+        this.dream = "";
+        this.dreamReason = "";
+        this.interest = "";
+        this.hobby = "";
+        this.favoriteSubject = "";
+
+        // ENUM 필드들은 null로 초기화
+        this.holland = null;
+        this.mbti = null;
+        this.jobValue = null;
+    }
+
 }
