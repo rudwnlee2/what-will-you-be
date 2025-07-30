@@ -2,10 +2,10 @@
 module.exports = {
   // ... (darkMode, content 등 기존 설정)
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}', // src 폴더를 사용한다면 추가
+    './pages/**/*.{html,js,ts,jsx,tsx}',
+    './components/**/*.{html,js,ts,jsx,tsx}',
+    './app/**/*.{html,js,ts,jsx,tsx}',
+    './src/**/*.{html,js,ts,jsx,tsx}', // src 폴더를 사용한다면 추가
   ],
   theme: {
     container: {
