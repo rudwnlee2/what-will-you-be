@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -29,7 +30,7 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
     private String email;
 
     @Column(nullable = false)
-    private LocalDateTime birth;
+    private LocalDate birth;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -41,7 +42,7 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
     private String school;
 
     @Builder
-    public Member(String loginId, String password, String name, String email, LocalDateTime birth, Gender gender, String phone, String school) {
+    public Member(String loginId, String password, String name, String email, LocalDate birth, Gender gender, String phone, String school) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;

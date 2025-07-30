@@ -8,15 +8,18 @@ import com.example.whatwillyoube.whatwillyoube_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    @Transactional
     public MemberResponseDto signUp(MemberRequestDto memberRequestDto) {
 
         // ID 및 이메일 중복 검사 (필요 시 추가)
@@ -53,6 +56,7 @@ public class MemberService {
         return MemberResponseDto.from(member);
     }
 
+    @Transactional
     public MemberResponseDto updateMember(Long id, MemberRequestDto memberRequestDto) {
 
         // 'id'(PK)로 회원을 정확하고 안전하게 찾습니다.
@@ -62,13 +66,10 @@ public class MemberService {
         // 엔티티의 update 메서드를 호출하여 정보 변경
         member.update(memberRequestDto, passwordEncoder);
 
-        Member updateMember = memberRepository.save(member);
-
-        // @Transactional 어노테이션 덕분에 save()를 호출하지 않아도
-        // 메서드가 끝날 때 변경 사항이 자동으로 DB에 반영됩니다.
         return MemberResponseDto.from(member);
     }
 
+    @Transactional
     public void deleteMember(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다. (ID: " + id + ")"));
