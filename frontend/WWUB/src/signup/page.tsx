@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
 
 export default function SignupPage() {
@@ -249,7 +249,7 @@ export default function SignupPage() {
 
         <div className="mt-8 text-center text-sm text-gray-600">
           이미 계정이 있으신가요?{' '}
-          <Link href="/login" className="font-medium text-blue-600 hover:underline">
+          <Link to="/login" className="font-medium text-blue-600 hover:underline">
             로그인하기
           </Link>
         </div>

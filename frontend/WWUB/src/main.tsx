@@ -3,8 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, Users, Target, ArrowRight } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
+
+import { Link } from 'react-router-dom';
 
 export default function CareerLandingPage() {
   const steps = [
@@ -33,31 +33,25 @@ export default function CareerLandingPage() {
           <div className="flex justify-between items-center h-20">
             {' '}
             {/* Increased height for more space */}
-            <Link href="/" className="flex items-center">
-              <Image
-                src="/images/wwub-logo.png"
-                alt="WWUB Logo"
-                width={150} // Made logo larger
-                height={50}
-                className="h-12 w-auto" // Adjust size with Tailwind classes
-              />
+            <Link to="/" className="flex items-center">
+              <img src="/image/WWUB 로고.png" alt="WWUB 로고" width="100" height="50" />
             </Link>
             <nav className="hidden md:flex space-x-8">
-              <Link href="#" className="text-gray-600 hover:text-gray-900 font-medium">
+              <Link to="#" className="text-gray-600 hover:text-gray-900 font-medium">
                 진로 탐색하기
               </Link>
-              <Link href="#" className="text-gray-600 hover:text-gray-900 font-medium">
+              <Link to="#" className="text-gray-600 hover:text-gray-900 font-medium">
                 서비스 소개
               </Link>
-              <Link href="#" className="text-gray-600 hover:text-gray-900 font-medium">
+              <Link to="#" className="text-gray-600 hover:text-gray-900 font-medium">
                 커뮤니티
               </Link>
-              <Link href="#" className="text-gray-600 hover:text-gray-900 font-medium">
+              <Link to="#" className="text-gray-600 hover:text-gray-900 font-medium">
                 문의하기
               </Link>
             </nav>
             <div className="flex items-center space-x-4">
-              <Link href="/login">
+              <Link to="/login">
                 <Button
                   variant="ghost"
                   className="font-medium bg-transparent text-gray-700 hover:bg-gray-50"
@@ -65,7 +59,7 @@ export default function CareerLandingPage() {
                   로그인
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link to="/signup">
                 <Button
                   className="font-medium px-6 py-3 rounded-lg text-white
                              bg-gradient-to-r from-blue-500 to-purple-600

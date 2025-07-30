@@ -1,14 +1,4 @@
 {
   "files": [],
-  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
-
-  "compilerOptions": {
-    // ... 다른 옵션들은 그대로 두세요 ...
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-    // ... 다른 옵션들은 그대로 두세요 ...
-  }
-  // ... "include", "exclude" 등 ...
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }

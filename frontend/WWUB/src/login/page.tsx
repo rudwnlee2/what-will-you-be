@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 
 export default function LoginPage() {
   return (
@@ -47,7 +47,7 @@ export default function LoginPage() {
                 로그인 상태 유지
               </Label>
             </div>
-            <Link href="#" className="font-medium text-blue-600 hover:underline">
+            <Link to="#" className="font-medium text-blue-600 hover:underline">
               비밀번호를 잊으셨나요?
             </Link>
           </div>
@@ -109,7 +109,7 @@ export default function LoginPage() {
 
         <div className="mt-8 text-center text-sm text-gray-600">
           아직 계정이 없으신가요?{' '}
-          <Link href="/signup" className="font-medium text-blue-600 hover:underline">
+          <Link to="/signup" className="font-medium text-blue-600 hover:underline">
             회원가입하기
           </Link>
         </div>
