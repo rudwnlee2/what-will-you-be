@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class GptapiConfig(AppConfig):
+class RecommendAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'gptapi'
+    name = 'recommend_app'
