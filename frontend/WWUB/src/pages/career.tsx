@@ -104,7 +104,7 @@ export default function CareerFormPage() {
     alert('진로 정보 제출 완료!');
   };
 
-  const getFilteredCareerValues = (currentSelection: string) => {
+  /* const getFilteredCareerValues = (currentSelection: string) => {
     return careerValueOptions.filter(
       (value) =>
         value !== formData.careerValue1 &&
@@ -112,7 +112,7 @@ export default function CareerFormPage() {
         value !== formData.careerValue3 &&
         value !== currentSelection,
     );
-  };
+  };*/
 
   const renderStepContent = () => {
     switch (currentStep) {

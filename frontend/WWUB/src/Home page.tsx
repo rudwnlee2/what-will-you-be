@@ -34,7 +34,7 @@ export default function CareerLandingPage() {
             {' '}
             {/* Increased height for more space */}
             <Link to="/" className="flex items-center">
-              <img src="/image/WWUB 로고.png" alt="WWUB 로고" width="100" height="50" />
+              <img src="public\images/WWUB 로고.png" alt="WWUB 로고" width="170" height="120`" />
             </Link>
             <nav className="hidden md:flex space-x-8">
               <Link to="#" className="text-gray-600 hover:text-gray-900 font-medium">
