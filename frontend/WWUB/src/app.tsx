@@ -1,18 +1,21 @@
-// src/App.tsx
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import CareerLandingPage from './main'; // 1. CareerLandingPage 컴포넌트를 불러옵니다.
+import CareerLandingPage from './Home page'; // 메인 랜딩 페이지
+import CareerFormPage from './pages/career'; // 진로 탐색 폼 페이지
+import LoginPage from './pages/login'; // 로그인 페이지
+import SignupPage from './pages/signup'; // 회원가입 페이지
 import './App.css';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 2. 메인 경로('/')에 CareerLandingPage를 연결합니다. */}
-        <Route path="/maim" element={<CareerLandingPage />} />
+        {/* 기본 경로('/')에 CareerLandingPage를 연결합니다. */}
+        <Route path="/" element={<CareerLandingPage />} />
 
-        {/* 나중에 다른 페이지(로그인, 회원가입 등)를 만들면 여기에 추가합니다. */}
-        {/* 예: <Route path="/login" element={<LoginPage />} /> */}
+        {/* 각 페이지 컴포넌트에 대한 경로를 설정합니다. */}
+        <Route path="/career" element={<CareerFormPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
       </Routes>
     </BrowserRouter>
   );
