@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+// 1. 사용하지 않는 Link를 import에서 제거합니다.
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,8 +17,6 @@ import {
 import { AlertTriangle } from 'lucide-react';
 import api from '@/lib/api';
 
-// 1. formData의 타입을 명확하게 정의합니다.
-// 이렇게 하면 TypeScript가 formData 객체의 구조를 정확히 알 수 있습니다.
 const initialFormData = {
   username: '',
   name: '',
@@ -32,13 +31,11 @@ const initialFormData = {
 };
 type SignupFormData = typeof initialFormData;
 
-// API 호출 함수들
 const fetchGenders = async (): Promise<string[]> => {
   const { data } = await api.get('/api/options/genders');
   return data;
 };
 
-// 2. mutation 함수의 파라미터 타입을 명확하게 지정합니다.
 const signupUser = async (userData: Omit<SignupFormData, 'confirmPassword' | 'agreeToTerms'>) => {
   const { data } = await api.post('/api/members/signup', userData);
   return data;
@@ -49,7 +46,6 @@ export default function SignupPage() {
   const [formData, setFormData] = useState(initialFormData);
   const [passwordMismatch, setPasswordMismatch] = useState(false);
 
-  // 3. useQuery에 타입을 명시하여 genderOptions의 타입을 string[] | undefined로 만듭니다.
   const { data: genderOptions, isLoading: isGendersLoading } = useQuery<string[]>({
     queryKey: ['genders'],
     queryFn: fetchGenders,
@@ -68,7 +64,6 @@ export default function SignupPage() {
     },
   });
 
-  // 4. handleInputChange의 field 타입을 keyof SignupFormData로 지정하여 안정성을 높입니다.
   const handleInputChange = (field: keyof SignupFormData, value: string | boolean) => {
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };
@@ -88,8 +83,8 @@ export default function SignupPage() {
       alert('입력 정보를 다시 확인해주세요.');
       return;
     }
-    // 5. 타입이 명확하므로, confirmPassword와 agreeToTerms를 안전하게 제외할 수 있습니다.
-    const { confirmPassword, agreeToTerms, ...payload } = formData;
+    // 2. 사용하지 않는 변수 앞에 밑줄(_)을 붙여 ESLint 경고를 비활성화합니다.
+    const { confirmPassword: _confirmPassword, agreeToTerms: _agreeToTerms, ...payload } = formData;
     signupMutation.mutate(payload);
   };
 
