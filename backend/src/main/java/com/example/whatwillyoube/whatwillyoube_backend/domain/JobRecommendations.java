@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "job_recommendations")
-public class JobRecommendations {
+public class JobRecommendations extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,9 +49,6 @@ public class JobRecommendations {
 
     @Column(nullable = false)
     private String reason;
-
-    @Column(nullable = false)
-    private LocalDateTime createdDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
