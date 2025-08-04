@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-// 1. 사용하지 않는 Link를 import에서 제거합니다.
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -83,8 +82,7 @@ export default function SignupPage() {
       alert('입력 정보를 다시 확인해주세요.');
       return;
     }
-    // 2. 사용하지 않는 변수 앞에 밑줄(_)을 붙여 ESLint 경고를 비활성화합니다.
-    const { confirmPassword: _confirmPassword, agreeToTerms: _agreeToTerms, ...payload } = formData;
+    const { confirmPassword: _pc, agreeToTerms: _at, ...payload } = formData;
     signupMutation.mutate(payload);
   };
 
@@ -93,7 +91,46 @@ export default function SignupPage() {
       <div className="w-full max-w-lg bg-white rounded-lg shadow-xl p-8">
         <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">회원가입</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* ... 다른 입력 필드들 ... */}
+          {/* Username */}
+          <div>
+            <Label htmlFor="username">아이디</Label>
+            <Input
+              id="username"
+              type="text"
+              value={formData.username}
+              onChange={(e) => handleInputChange('username', e.target.value)}
+            />
+          </div>
+          {/* Name */}
+          <div>
+            <Label htmlFor="name">이름</Label>
+            <Input
+              id="name"
+              type="text"
+              value={formData.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+            />
+          </div>
+          {/* Email */}
+          <div>
+            <Label htmlFor="email">이메일</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
+            />
+          </div>
+          {/* Password */}
+          <div>
+            <Label htmlFor="password">비밀번호</Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => handleInputChange('password', e.target.value)}
+            />
+          </div>
           {/* Confirm Password */}
           <div className="relative">
             <Label htmlFor="confirmPassword">비밀번호 확인</Label>
@@ -111,9 +148,20 @@ export default function SignupPage() {
               </div>
             )}
           </div>
+          {/* Birth Date */}
+          <div>
+            <Label htmlFor="birthDate">생년월일</Label>
+            <Input
+              id="birthDate"
+              type="text"
+              placeholder="YYYY-MM-DD"
+              value={formData.birthDate}
+              onChange={(e) => handleInputChange('birthDate', e.target.value)}
+            />
+          </div>
           {/* Gender Select */}
           <div>
-            <Label className="text-gray-700 font-medium mb-2 block">성별</Label>
+            <Label>성별</Label>
             <Select
               onValueChange={(value) => handleInputChange('gender', value)}
               value={formData.gender}
@@ -131,7 +179,40 @@ export default function SignupPage() {
               </SelectContent>
             </Select>
           </div>
-          {/* ... 나머지 필드들 ... */}
+          {/* Phone */}
+          <div>
+            <Label htmlFor="phone">전화번호</Label>
+            <Input
+              id="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+            />
+          </div>
+          {/* School */}
+          <div>
+            <Label htmlFor="school">학교</Label>
+            <Input
+              id="school"
+              type="text"
+              value={formData.school}
+              onChange={(e) => handleInputChange('school', e.target.value)}
+            />
+          </div>
+          {/* Terms Agreement */}
+          <div className="flex items-center">
+            <input
+              id="agreeToTerms"
+              type="checkbox"
+              checked={formData.agreeToTerms}
+              onChange={(e) => handleInputChange('agreeToTerms', e.target.checked)}
+              className="h-4 w-4"
+            />
+            <Label htmlFor="agreeToTerms" className="ml-2">
+              개인정보 수집 및 이용에 동의합니다
+            </Label>
+          </div>
+          {/* Submit Button */}
           <Button
             type="submit"
             disabled={!formData.agreeToTerms || passwordMismatch || signupMutation.isPending}
