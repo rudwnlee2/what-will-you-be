@@ -2,6 +2,7 @@ package com.example.whatwillyoube.whatwillyoube_backend.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -52,6 +53,25 @@ public class JobRecommendations extends BaseTimeEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Member Member;
+    private Member member;
+
+    @Builder
+    public JobRecommendations(String jobName, String jobSum, String way, String major, 
+                             String certificate, String pay, String jobProspect, 
+                             String knowledge, String jobEnvironment, String jobValues, 
+                             String reason, Member member) {
+        this.jobName = jobName;
+        this.jobSum = jobSum;
+        this.way = way;
+        this.major = major;
+        this.certificate = certificate;
+        this.pay = pay;
+        this.jobProspect = jobProspect;
+        this.knowledge = knowledge;
+        this.jobEnvironment = jobEnvironment;
+        this.jobValues = jobValues;
+        this.reason = reason;
+        this.member = member;
+    }
 
 }
