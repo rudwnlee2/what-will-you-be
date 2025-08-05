@@ -40,7 +40,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults()) // ◀◀◀ 수정: 위에서 만든 CORS 설정을 적용
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .formLogin(form -> form.disable()) // 기본 로그인 폼 비활성화
                 .httpBasic(basic -> basic.disable()) // 기본 브라우저 인증 팝업 비활성화
