@@ -168,7 +168,7 @@ export default function SignupPage() {
               disabled={isGendersLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder={isGendersLoading ? '로딩 중...' : '성별을 선택하세요'} />
+                <SelectValue placeholder={'성별을 선택하세요'} />
               </SelectTrigger>
               <SelectContent>
                 {genderOptions?.map((gender) => (
