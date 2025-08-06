@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,10 +30,10 @@ const initialFormData = {
 };
 type SignupFormData = typeof initialFormData;
 
-const fetchGenders = async (): Promise<string[]> => {
-  const { data } = await api.get('/api/options/genders');
-  return data;
-};
+const genderOptions = [
+  { value: 'MALE', label: '남성' },
+  { value: 'FEMALE', label: '여성' },
+];
 
 const signupUser = async (userData: Omit<SignupFormData, 'confirmPassword' | 'agreeToTerms'>) => {
   const { data } = await api.post('/api/members/signup', userData);
@@ -44,12 +44,7 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState(initialFormData);
   const [passwordMismatch, setPasswordMismatch] = useState(false);
-
-  const { data: genderOptions, isLoading: isGendersLoading } = useQuery<string[]>({
-    queryKey: ['genders'],
-    queryFn: fetchGenders,
-    staleTime: 5 * 60 * 1000,
-  });
+  const [formErrors, setFormErrors] = useState<Partial<Record<keyof SignupFormData, string>>>({});
 
   const signupMutation = useMutation({
     mutationFn: signupUser,
@@ -74,6 +69,23 @@ export default function SignupPage() {
       }
       return newData;
     });
+    if (formErrors[field]) {
+      setFormErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors: Partial<Record<keyof SignupFormData, string>> = {};
+    if (!formData.username) errors.username = '아이디를 입력해주세요.';
+    if (!formData.email.includes('@')) errors.email = '올바른 이메일 형식이 아닙니다.';
+    if (formData.password.length < 8) errors.password = '비밀번호는 8자 이상이어야 합니다.';
+    if (passwordMismatch) errors.confirmPassword = '비밀번호가 일치하지 않습니다.';
+    if (!formData.gender) errors.gender = '성별을 선택해주세요.';
+    if (!formData.agreeToTerms) errors.agreeToTerms = '약관에 동의해주세요.';
+
+    setFormErrors(errors);
+    // Object.keys(errors).length가 0이면 에러가 없는 것이므로 true 반환
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -165,19 +177,20 @@ export default function SignupPage() {
             <Select
               onValueChange={(value) => handleInputChange('gender', value)}
               value={formData.gender}
-              disabled={isGendersLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder={'성별을 선택하세요'} />
+                <SelectValue placeholder="성별을 선택하세요" />
               </SelectTrigger>
               <SelectContent>
-                {genderOptions?.map((gender) => (
-                  <SelectItem key={gender} value={gender}>
-                    {gender === 'MALE' ? '남성' : '여성'}
+                {/* 4. 프론트엔드에 직접 정의한 데이터 사용 */}
+                {genderOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {formErrors.gender && <p className="text-red-500 text-xs mt-1">{formErrors.gender}</p>}
           </div>
           {/* Phone */}
           <div>
@@ -216,9 +229,9 @@ export default function SignupPage() {
           <Button
             type="submit"
             disabled={!formData.agreeToTerms || passwordMismatch || signupMutation.isPending}
-            className="w-full py-3"
+            className="w-full py-3 text-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 rounded-lg"
           >
-            {signupMutation.isPending ? '가입 처리 중...' : '회원가입 완료'}
+            {signupMutation.isPending ? '가입 처리 중...' : '회원가입'}
           </Button>
         </form>
       </div>
