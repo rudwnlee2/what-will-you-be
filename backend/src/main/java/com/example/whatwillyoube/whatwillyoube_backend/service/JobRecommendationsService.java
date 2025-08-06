@@ -1,0 +1,62 @@
+package com.example.whatwillyoube.whatwillyoube_backend.service;
+
+import com.example.whatwillyoube.whatwillyoube_backend.domain.JobRecommendations;
+import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
+import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsListDto;
+import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.repository.JobRecommendationsRepository;
+import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class JobRecommendationsService {
+
+    private final JobRecommendationsRepository jobRecommendationsRepository;
+    private final MemberRepository memberRepository;
+
+    public List<JobRecommendationsListDto> getJobRecommendationsList(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+
+        List<JobRecommendations> recommendations = jobRecommendationsRepository.findByMember(member);
+
+        return recommendations.stream()
+                .map(JobRecommendationsListDto::fromEntity)
+                .toList();
+    }
+
+    public JobRecommendationsResponseDto getJobRecommendationDetail(Long memberId, Long recommendationId) {
+        JobRecommendations recommendation = jobRecommendationsRepository.findById(recommendationId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 추천 정보입니다."));
+
+        // 2. (중요) 해당 추천 기록이 요청한 회원의 것인지 권한 확인
+        if (!recommendation.getMember().getId().equals(memberId)) {
+            throw new RuntimeException("해당 추천 정보를 조회할 권한이 없습니다.");
+        }
+
+        // 3. Entity -> DTO로 변환하여 반환
+        return JobRecommendationsResponseDto.fromEntity(recommendation); // DTO 변환 메서드 호출 (예시)
+    }
+
+    public void deleteJobRecommendation(Long memberId, Long recommendationId) {
+
+        // 1. 추천 기록 조회
+        JobRecommendations recommendation = jobRecommendationsRepository.findById(recommendationId)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 추천 정보입니다."));
+
+        // 2. (중요) 해당 추천 기록이 요청한 회원의 것인지 권한 확인
+        if (!recommendation.getMember().getId().equals(memberId)) {
+            throw new RuntimeException("해당 추천 정보를 삭제할 권한이 없습니다.");
+        }
+
+        // 3. 레코드 삭제
+        jobRecommendationsRepository.delete(recommendation);
+
+    }
+
+
+}
