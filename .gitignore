@@ -40,3 +40,7 @@ out/    # 일반적인 IDE 컴파일 출력 폴더
 
 # Nginx config
 /nginx/nginx.conf # Nginx 설정 파일 (만약 Nginx 폴더가 있다면)
+
+# recommender/.gitignore
+venv/
+.env
