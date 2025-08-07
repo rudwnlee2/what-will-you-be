@@ -105,47 +105,72 @@ export default function SignupPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Username */}
           <div>
-            <Label htmlFor="username">아이디</Label>
-            <Input
-              id="username"
-              type="text"
-              value={formData.username}
-              onChange={(e) => handleInputChange('username', e.target.value)}
-            />
+            <Label htmlFor="username" className="text-gray-700 font-medium mb-2 block">
+              아이디
+            </Label>
+            <div className="flex space-x-2">
+              <Input
+                id="username"
+                type="text"
+                placeholder="아이디를 입력하세요"
+                value={formData.username}
+                onChange={(e) => handleInputChange('username', e.target.value)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+
+              <Button
+                type="button"
+                onClick={handleUsernameCheck}
+                variant="outline"
+                className="px-4 py-2 whitespace-nowrap bg-transparent"
+              ></Button>
+            </div>
           </div>
+
           {/* Name */}
           <div>
-            <Label htmlFor="name">이름</Label>
+            <Label htmlFor="name" className="text-gray-700 font-medium mb-2 block">
+              이름
+            </Label>
             <Input
               id="name"
               type="text"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           {/* Email */}
           <div>
-            <Label htmlFor="email">이메일</Label>
+            <Label htmlFor="email" className="text-gray-700 font-medium mb-2 block">
+              이메일
+            </Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           {/* Password */}
           <div>
-            <Label htmlFor="password">비밀번호</Label>
+            <Label htmlFor="password" className="text-gray-700 font-medium mb-2 block">
+              비밀번호
+            </Label>
             <Input
               id="password"
               type="password"
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           {/* Confirm Password */}
           <div className="relative">
-            <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+            <Label htmlFor="confirmPassword" className="text-gray-700 font-medium mb-2 block">
+              비밀번호 확인
+            </Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -162,23 +187,26 @@ export default function SignupPage() {
           </div>
           {/* Birth Date */}
           <div>
-            <Label htmlFor="birthDate">생년월일</Label>
+            <Label htmlFor="birthDate" className="text-gray-700 font-medium mb-2 block">
+              생년월일
+            </Label>
             <Input
               id="birthDate"
               type="text"
               placeholder="YYYY-MM-DD"
               value={formData.birthDate}
               onChange={(e) => handleInputChange('birthDate', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           {/* Gender Select */}
           <div>
-            <Label>성별</Label>
+            <Label className="text-gray-700 font-medium mb-2 block">성별</Label>
             <Select
               onValueChange={(value) => handleInputChange('gender', value)}
               value={formData.gender}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                 <SelectValue placeholder="성별을 선택하세요" />
               </SelectTrigger>
               <SelectContent>
@@ -194,22 +222,28 @@ export default function SignupPage() {
           </div>
           {/* Phone */}
           <div>
-            <Label htmlFor="phone">전화번호</Label>
+            <Label htmlFor="phone" className="text-gray-700 font-medium mb-2 block">
+              전화번호
+            </Label>
             <Input
               id="phone"
               type="tel"
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           {/* School */}
           <div>
-            <Label htmlFor="school">학교</Label>
+            <Label htmlFor="school" className="text-gray-700 font-medium mb-2 block">
+              학교
+            </Label>
             <Input
               id="school"
               type="text"
               value={formData.school}
               onChange={(e) => handleInputChange('school', e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           {/* Terms Agreement */}
