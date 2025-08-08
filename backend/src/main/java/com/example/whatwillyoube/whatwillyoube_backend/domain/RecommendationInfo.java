@@ -1,7 +1,9 @@
 package com.example.whatwillyoube.whatwillyoube_backend.domain;
 
+import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoRequestDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "recommendation_info")
-public class RecommendationInfo {
+public class RecommendationInfo extends BaseTimeEntity{
 
     @Id
     private Long memberId;
@@ -32,15 +34,35 @@ public class RecommendationInfo {
     @Enumerated(EnumType.STRING)
     private Holland holland;
 
-    @Column(nullable = false)
-    private LocalDateTime createdDate;
-
-    @Column(nullable = false)
-    private LocalDateTime lastModifiedDate;
-
     @MapsId //fk = pk 로 사용하려고
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Builder
+    public RecommendationInfo(Member member, String dream, String dreamReason, String interest,
+                              JobValue jobValue, MBTI mbti, String hobby,
+                              String favoriteSubject, Holland holland) {
+        this.member = member;
+        this.dream = dream;
+        this.dreamReason = dreamReason;
+        this.interest = interest;
+        this.jobValue = jobValue;
+        this.mbti = mbti;
+        this.hobby = hobby;
+        this.favoriteSubject = favoriteSubject;
+        this.holland = holland;
+    }
+
+    public void update(RecommendationInfoRequestDto requestDto) {
+        this.dream = requestDto.getDream();
+        this.dreamReason = requestDto.getDreamReason();
+        this.interest = requestDto.getInterest();
+        this.jobValue = requestDto.getJobValue();
+        this.mbti = requestDto.getMbti();
+        this.hobby = requestDto.getHobby();
+        this.favoriteSubject = requestDto.getFavoriteSubject();
+        this.holland = requestDto.getHolland();
+    }
 
 }

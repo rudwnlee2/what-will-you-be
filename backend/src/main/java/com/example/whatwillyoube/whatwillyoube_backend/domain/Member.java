@@ -1,8 +1,11 @@
 package com.example.whatwillyoube.whatwillyoube_backend.domain;
 
+import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,7 +30,7 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
     private String email;
 
     @Column(nullable = false)
-    private LocalDateTime birth;
+    private LocalDate birth;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -39,7 +42,7 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
     private String school;
 
     @Builder
-    public Member(String loginId, String password, String name, String email, LocalDateTime birth, Gender gender, String phone, String school) {
+    public Member(String loginId, String password, String name, String email, LocalDate birth, Gender gender, String phone, String school) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
@@ -49,6 +52,32 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
         this.phone = phone;
         this.school = school;
 
+    }
+
+    public void update(MemberRequestDto requestDto, PasswordEncoder passwordEncoder) {
+        // 비밀번호는 값이 존재할 때만 변경
+        if (requestDto.getPassword() != null && !requestDto.getPassword().isBlank()) {
+            this.password = passwordEncoder.encode(requestDto.getPassword());
+        }
+        // DTO의 각 필드가 null이 아닐 경우에만 기존 엔티티의 값을 변경
+        if (requestDto.getName() != null) {
+            this.name = requestDto.getName();
+        }
+        if (requestDto.getEmail() != null) {
+            this.email = requestDto.getEmail();
+        }
+        if (requestDto.getBirth() != null) {
+            this.birth = requestDto.getBirth();
+        }
+        if (requestDto.getGender() != null) {
+            this.gender = requestDto.getGender();
+        }
+        if (requestDto.getPhone() != null) {
+            this.phone = requestDto.getPhone();
+        }
+        if (requestDto.getSchool() != null) {
+            this.school = requestDto.getSchool();
+        }
     }
 
 }

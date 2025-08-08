@@ -1,36 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import App from './App.tsx';
-import HomePage from './pages/Home.tsx'; // Import Home page
-import AboutPage from './pages/About.tsx'; // Import About page
-import DashboardPage from './pages/Dashboard.tsx'; // Import Dashboard page
-import './index.css'; // Tailwind CSS 지시문이 포함된 전역 CSS 파일
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import App from './App'; // 1. 앱의 시작점이 되는 App.tsx를 import 합니다.
+import './index.css';
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <App />, // App 컴포넌트가 공통 레이아웃 역할을 함
-    children: [
-      {
-        index: true, // 부모 라우트의 기본 자식 ( '/' 경로에 해당)
-        element: <HomePage />,
-      },
-      {
-        path: 'about',
-        element: <AboutPage />,
-      },
-      {
-        path: 'dashboard',
-        element: <DashboardPage />,
-      },
-      // 향후 다른 라우트들을 여기에 추가할 수 있습니다.
-    ],
-  },
-]);
+// 2. TanStack Query의 두뇌 역할을 하는 QueryClient 인스턴스를 생성합니다.
+const queryClient = new QueryClient();
 
+// 3. HTML의 'root' 요소에 React 앱을 렌더링합니다.
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    {/* 4. QueryClientProvider로 App 컴포넌트를 감싸서 앱 전체에서 Query를 사용할 수 있게 합니다. */}
+    <QueryClientProvider client={queryClient}>
+      {/* 5. App 컴포넌트를 렌더링합니다. 이 안에 라우터와 모든 페이지가 들어있습니다. */}
+      <App />
+
+      {/* 6. 개발자 도구를 추가합니다. */}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </React.StrictMode>,
 );

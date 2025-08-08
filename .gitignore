@@ -41,6 +41,7 @@ out/    # 일반적인 IDE 컴파일 출력 폴더
 # Nginx config
 /nginx/nginx.conf # Nginx 설정 파일 (만약 Nginx 폴더가 있다면)
 
+<<<<<<< HEAD
 # --- ✅ Python 백엔드 무시 추가 ---
 # Python bytecode & cache
 **/__pycache__/
@@ -48,3 +49,8 @@ out/    # 일반적인 IDE 컴파일 출력 폴더
 
 # Python SQLite DB
 **/*.sqlite3
+=======
+# recommender/.gitignore
+venv/
+.env
+>>>>>>> 4e722645972c435879a98969d4f0172b79d5693e
