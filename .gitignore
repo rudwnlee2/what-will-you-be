@@ -46,12 +46,5 @@ out/    # 일반적인 IDE 컴파일 출력 폴더
 **/__pycache__/
 **/*.py[cod]
 
-# Python virtual environments
-venv/
-**/venv/
-
-# Python env files
-**/.env
-
 # Python SQLite DB
 **/*.sqlite3
