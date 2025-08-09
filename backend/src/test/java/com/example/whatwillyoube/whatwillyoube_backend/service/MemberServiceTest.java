@@ -216,4 +216,27 @@ class MemberServiceTest {
             () -> memberService.deleteMember(999L));
         assertTrue(exception.getMessage().contains("존재하지 않는 회원입니다."));
     }
+
+    @Test
+    @DisplayName("로그인 아이디 존재 확인 - 존재하는 경우")
+    void isLoginIdExists_True() {
+        // given
+        memberService.signUp(validMemberDto);
+
+        // when
+        boolean exists = memberService.isLoginIdExists("testuser");
+
+        // then
+        assertTrue(exists);
+    }
+
+    @Test
+    @DisplayName("로그인 아이디 존재 확인 - 존재하지 않는 경우")
+    void isLoginIdExists_False() {
+        // when
+        boolean exists = memberService.isLoginIdExists("nonexistent");
+
+        // then
+        assertFalse(exists);
+    }
 }
