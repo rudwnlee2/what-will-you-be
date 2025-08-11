@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor // @RequestBody로 들어온 JSON을 객체로 변환하려면 기본 생성자가 필요!
+@Builder
 public class MemberRequestDto {
 
     @NotBlank(message = "아이디를 입력해주세요.")
@@ -43,6 +45,19 @@ public class MemberRequestDto {
 
     @NotBlank(message = "학교 이름을 입력해주세요.")
     private String school;
+
+    // Builder를 위한 생성자
+    public MemberRequestDto(String loginId, String password, String name, String email, 
+                           LocalDate birth, Gender gender, String phone, String school) {
+        this.loginId = loginId;
+        this.password = password;
+        this.name = name;
+        this.email = email;
+        this.birth = birth;
+        this.gender = gender;
+        this.phone = phone;
+        this.school = school;
+    }
 
     //DTO를 Member 엔티티로 변환하는 메서드
     public Member toEntity(PasswordEncoder passwordEncoder) {

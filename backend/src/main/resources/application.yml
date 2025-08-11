@@ -5,8 +5,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/what_will_you_be?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
-    username: root # 원래 root
-    password: 1234 # 개인의 root 비밀번호 입력
+    username: root
+    password: 19192022
 
   jpa:
     hibernate:
