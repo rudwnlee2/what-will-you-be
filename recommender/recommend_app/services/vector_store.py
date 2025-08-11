@@ -28,8 +28,6 @@ def load_faiss_index_and_metadata():
 
     return index, metadata_list
 
-index, metadata_list = load_faiss_index_and_metadata()
-
 # 유사도 검색
 def similarity_search(index, vector, k=3): # 벡터DB, 임베딩된 사용자text, 검색 개수
  # 리스트면 numpy 배열로 변환, float32 타입 보장
@@ -49,13 +47,6 @@ def similarity_search(index, vector, k=3): # 벡터DB, 임베딩된 사용자tex
     D, I = index.search(query_vector, k)
     return D, I # 거리, 검색된 인덱스
 
-embedding_dim = 1536
-temp_vector = np.random.rand(embedding_dim).astype('float32')
-
-D, I = similarity_search(index, temp_vector)
-print(D)
-print(I)
-
 def connect_metadata(matadatas, I):
     recommend_results = []
     for idx in I[0]:
@@ -63,8 +54,6 @@ def connect_metadata(matadatas, I):
             recommend_results.append(metadata_list[idx]), type(metadata_list[idx])
     return recommend_results
 
-recommend_results = connect_metadata(metadata_list, I)
-print(recommend_results[0])
 
 # 추천항목 정리
 def build_recommendation_entries(indices, metadata):
@@ -88,7 +77,5 @@ def build_recommendation_entries(indices, metadata):
         }
         recommendations.append(job_entry)
     return recommendations
-
-recommendations = build_recommendation_entries(I, metadata_list)
 
 # def get_recommendation_reason(user_text, recommendations):
