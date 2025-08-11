@@ -48,3 +48,14 @@ out/    # 일반적인 IDE 컴파일 출력 폴더
 
 # Python SQLite DB
 **/*.sqlite3
+
+# --- ✅ Python 백엔드 무시 규칙 ---
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+
+# SQLite DB
+*.sqlite3
+
+# (선택) 환경 변수 파일
+.env
