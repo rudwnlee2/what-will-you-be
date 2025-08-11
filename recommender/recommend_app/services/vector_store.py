@@ -1,6 +1,5 @@
 # 필요 import 파일 모음
 import os
-import pandas as pd
 import faiss
 import numpy as np
 import json
