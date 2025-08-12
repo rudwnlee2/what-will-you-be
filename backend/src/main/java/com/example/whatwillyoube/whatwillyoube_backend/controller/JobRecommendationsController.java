@@ -3,6 +3,7 @@ package com.example.whatwillyoube.whatwillyoube_backend.controller;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsListDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsResponseDto;
 import com.example.whatwillyoube.whatwillyoube_backend.service.JobRecommendationsService;
+import com.example.whatwillyoube.whatwillyoube_backend.service.RecommendationService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,18 @@ import java.util.List;
 public class JobRecommendationsController {
 
     private final JobRecommendationsService jobRecommendationsService;
+    private final RecommendationService recommendationService;
+
+    /**
+     * 직업 추천 생성 API (Python API 호출)
+     */
+    @PostMapping
+    public ResponseEntity<List<JobRecommendationsResponseDto>> createJobRecommendations(HttpServletRequest request) {
+        Long memberId = (Long) request.getAttribute("memberId");
+        List<JobRecommendationsResponseDto> responseDtoList = recommendationService.generateJobRecommendations(memberId);
+
+        return ResponseEntity.ok(responseDtoList);
+    }
 
     @GetMapping
     public ResponseEntity<List<JobRecommendationsListDto>> getMyRecommendationsList(HttpServletRequest request) {

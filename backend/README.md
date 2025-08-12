@@ -10,9 +10,10 @@
 - 회원가입 / 로그인 (JWT 인증)
 - 개인 프로필 관리
 - 직업 추천 정보 입력 및 관리
+- **직업 추천 API (Python API 연동 완료)**
+- 직업 추천 결과 저장 및 조회
 - 친구 관계 관리
 - 개인/그룹 미션 시스템
-- 직업 추천 API (LLM 연동 예정)
 
 ## 🛠 기술 스택
 
@@ -22,6 +23,7 @@
 - **JPA (Hibernate)**
 - **MySQL 8.0**
 - **JWT (JSON Web Token)**
+- **RestClient** (Python API 연동)
 - **Gradle**
 
 ## 📊 데이터베이스 ERD
@@ -37,6 +39,7 @@
 - Java 17 이상
 - MySQL 8.0
 - Gradle
+- Python API 서버 (http://127.0.0.1:8000)
 
 ### 설치 및 실행
 
@@ -73,6 +76,7 @@
 
 ### 회원 관리
 - `POST /api/members/signup` - 회원가입
+- `GET /api/members/check-loginid/{loginId}` - 아이디 중복 확인
 - `POST /api/members/login` - 로그인
 - `GET /api/members/me` - 내 정보 조회
 - `PATCH /api/members/me` - 내 정보 수정
@@ -81,6 +85,12 @@
 ### 추천 정보 관리
 - `GET /api/recommendation-info` - 추천 정보 조회
 - `PUT /api/recommendation-info` - 추천 정보 등록/수정
+
+### 직업 추천
+- `POST /api/job-recommendations` - 직업 추천 생성 (Python API 연동)
+- `GET /api/job-recommendations` - 내 직업 추천 목록 조회
+- `GET /api/job-recommendations/{recommendationId}` - 직업 추천 상세 조회
+- `DELETE /api/job-recommendations/{recommendationId}` - 직업 추천 삭제
 
 ### 옵션 조회
 - `GET /api/options/genders` - 성별 옵션 조회
@@ -100,6 +110,7 @@ JWT 토큰 기반 인증을 사용합니다.
 ### 보호된 엔드포인트
 - `/api/members/me` (GET, PATCH, DELETE)
 - `/api/recommendation-info` (GET, PUT)
+- `/api/job-recommendations` (POST, GET, DELETE)
 
 ## 🏗 프로젝트 구조
 
@@ -125,6 +136,12 @@ src/main/java/com/example/whatwillyoube/whatwillyoube_backend/
 - 꿈과 꿈을 갖게 된 이유
 - 관심사, 취미, 좋아하는 과목
 - MBTI, 홀랜드 유형, 직업 가치관
+
+### 직업 추천 (JobRecommendations)
+- 직업명, 직업 요약, 진로 방법
+- 관련 전공, 필요 자격증, 예상 연봉
+- 직업 전망, 필요 지식, 근무 환경
+- 직업 가치관, 추천 이유
 
 ### 미션 시스템
 - **Missions** (추상 클래스)
@@ -165,13 +182,35 @@ spring:
 ./gradlew test
 ```
 
+## 🐍 Python API 연동
+
+직업 추천 기능은 별도의 Python API 서버와 연동됩니다.
+
+### Python API 요구사항
+- **URL**: `http://127.0.0.1:8000/api/recommend/`
+- **Method**: POST
+- **Content-Type**: application/json
+
+### 요청 데이터 구조
+```json
+{
+  "dream": "소프트웨어 개발자",
+  "interest": "프로그래밍, 기술",
+  "jobValue": "STABILITY",
+  "mbti": "INTJ",
+  "hobby": "코딩, 독서",
+  "favoriteSubject": "수학, 과학",
+  "holland": "INVESTIGATIVE"
+}
+```
+
 ## 📝 향후 계획
 
-- [ ] LLM 연동을 통한 직업 추천 API 구현
+- [x] ~~LLM 연동을 통한 직업 추천 API 구현~~ ✅ 완료
+- [x] ~~직업 추천 결과 저장 및 조회~~ ✅ 완료
 - [ ] 그룹 미션 기능 완성
 - [ ] 친구 시스템 API 구현
 - [ ] 미션 진행 상황 관리 API
-- [ ] 직업 추천 결과 저장 및 조회
 
 ## 🤝 기여하기
 

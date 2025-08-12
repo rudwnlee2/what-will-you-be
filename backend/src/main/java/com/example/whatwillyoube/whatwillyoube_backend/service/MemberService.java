@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -75,6 +77,10 @@ public class MemberService {
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다. (ID: " + id + ")"));
 
         memberRepository.delete(member);
+    }
+
+    public boolean isLoginIdExists(String loginId) {
+        return memberRepository.findByLoginId(loginId).isPresent();
     }
 
 
