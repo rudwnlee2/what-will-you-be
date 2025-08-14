@@ -77,7 +77,7 @@ public class MemberController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/check-loginid/{loginId}")
+    @GetMapping("/check-username/{loginId}")
     public ResponseEntity<Map<String, Boolean>> checkLoginIdDuplicate(@PathVariable String loginId) {
         boolean exists = memberService.isLoginIdExists(loginId);
         return ResponseEntity.ok(Map.of("exists", exists));

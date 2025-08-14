@@ -35,6 +35,13 @@ const genderOptions = [
   { value: 'FEMALE', label: '여성' },
 ];
 
+// --- API 호출 함수들 ---
+// 1. 아이디 중복 확인 API 호출 함수 (새로 추가)
+const checkUsername = async (userID: string) => {
+  const { data } = await api.get(`/api/members/check-username/${userID}`);
+  return data;
+};
+
 const signupUser = async (userData: Omit<SignupFormData, 'confirmPassword' | 'agreeToTerms'>) => {
   const { data } = await api.post('/api/members/signup', userData);
   return data;
@@ -45,6 +52,21 @@ export default function SignupPage() {
   const [formData, setFormData] = useState(initialFormData);
   const [passwordMismatch, setPasswordMismatch] = useState(false);
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof SignupFormData, string>>>({});
+  const [usernameCheck, setUsernameCheck] = useState({ status: 'idle', message: '' }); // idle, checking, success, error
+
+  const checkUsernameMutation = useMutation({
+    mutationFn: checkUsername,
+    onSuccess: (data) => {
+      if (data.exists) {
+        setUsernameCheck({ status: 'error', message: '이미 사용 중인 아이디입니다.' });
+      } else {
+        setUsernameCheck({ status: 'success', message: '사용 가능한 아이디입니다.' });
+      }
+    },
+    onError: () => {
+      setUsernameCheck({ status: 'error', message: '중복 확인 중 오류가 발생했습니다.' });
+    },
+  });
 
   const signupMutation = useMutation({
     mutationFn: signupUser,
@@ -61,6 +83,9 @@ export default function SignupPage() {
   const handleInputChange = (field: keyof SignupFormData, value: string | boolean) => {
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };
+      if (field === 'username') {
+        setUsernameCheck({ status: 'idle', message: '' });
+      }
       if (field === 'password' || field === 'confirmPassword') {
         const newPassword = field === 'password' ? (value as string) : newData.password;
         const newConfirmPassword =
@@ -74,9 +99,18 @@ export default function SignupPage() {
     }
   };
 
+  const handleUsernameCheck = () => {
+    if (!formData.username) {
+      alert('아이디를 먼저 입력해주세요.');
+      return;
+    }
+    checkUsernameMutation.mutate(formData.username);
+  };
+
   const validateForm = () => {
     const errors: Partial<Record<keyof SignupFormData, string>> = {};
     if (!formData.username) errors.username = '아이디를 입력해주세요.';
+    if (usernameCheck.status !== 'success') errors.username = '아이디 중복 확인을 해주세요.';
     if (!formData.email.includes('@')) errors.email = '올바른 이메일 형식이 아닙니다.';
     if (formData.password.length < 8) errors.password = '비밀번호는 8자 이상이어야 합니다.';
     if (passwordMismatch) errors.confirmPassword = '비밀번호가 일치하지 않습니다.';
@@ -90,8 +124,8 @@ export default function SignupPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordMismatch || !formData.agreeToTerms) {
-      alert('입력 정보를 다시 확인해주세요.');
+    if (!validateForm()) {
+      alert('입력 내용을 다시 확인해주세요.');
       return;
     }
     const { confirmPassword: _pc, agreeToTerms: _at, ...payload } = formData;
@@ -99,8 +133,8 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-purple-50 p-4">
-      <div className="w-full max-w-lg bg-white rounded-lg shadow-xl p-8">
+    <div className="min-h-screen flex items-center justify-center bg-purple-50 p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-lg bg-white rounded-lg shadow-xl p-8 sm:p-10">
         <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">회원가입</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Username */}
@@ -123,8 +157,22 @@ export default function SignupPage() {
                 onClick={handleUsernameCheck}
                 variant="outline"
                 className="px-4 py-2 whitespace-nowrap bg-transparent"
-              ></Button>
+                disabled={checkUsernameMutation.isPending}
+              >
+                {checkUsernameMutation.isPending ? '확인 중...' : '중복확인'}
+              </Button>
             </div>
+            {/* 중복 확인 결과 메시지 */}
+            {usernameCheck.message && (
+              <p
+                className={`text-xs mt-1 ${usernameCheck.status === 'success' ? 'text-green-600' : 'text-red-500'}`}
+              >
+                {usernameCheck.message}
+              </p>
+            )}
+            {formErrors.username && (
+              <p className="text-red-500 text-xs mt-1">{formErrors.username}</p>
+            )}
           </div>
 
           {/* Name */}
