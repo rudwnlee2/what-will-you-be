@@ -37,9 +37,8 @@ const genderOptions = [
 
 // --- API 호출 함수들 ---
 // 1. 아이디 중복 확인 API 호출 함수 (새로 추가)
-const checkUsername = async (username: string) => {
-  // API 명세서에 따라 GET 요청으로 변경하고, 쿼리 파라미터로 username을 전달합니다.
-  const { data } = await api.get(`/api/members/check-username`, { params: { username } });
+const checkUsername = async (userID: string) => {
+  const { data } = await api.get(`/api/members/check-username/${userID}`);
   return data;
 };
 
@@ -58,10 +57,10 @@ export default function SignupPage() {
   const checkUsernameMutation = useMutation({
     mutationFn: checkUsername,
     onSuccess: (data) => {
-      if (data.isAvailable) {
-        setUsernameCheck({ status: 'success', message: '사용 가능한 아이디입니다.' });
-      } else {
+      if (data.exists) {
         setUsernameCheck({ status: 'error', message: '이미 사용 중인 아이디입니다.' });
+      } else {
+        setUsernameCheck({ status: 'success', message: '사용 가능한 아이디입니다.' });
       }
     },
     onError: () => {
