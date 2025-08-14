@@ -1,60 +1,41 @@
 # recommend_app/utils/response.py
 from typing import Any, Dict, List
-from rest_framework.exceptions import ValidationError
-from recommend_app.serializers.user_input import (
-    RecommendationResponseSerializer,
-    JobRecommendationSerializer,
+from ..serializers.recommend_output import (
+    JobItemSerializer,
+    JobListResponseSerializer,
 )
 
-def _validate_recommendations(raw_recs: Any) -> List[Dict[str, str]]:
+def to_camelcase_payload(snake_result: Dict[str, Any], member_id: int) -> Dict[str, Any]:
     """
-    recommendations 항목이 리스트인지 확인하고,
-    각 아이템을 JobRecommendationSerializer로 검증/정제한다.
+    snake_case 내부 결과(dict) -> Java가 기대하는 camelCase 직업 객체로 변환
     """
-    if raw_recs is None:
-        # view에서 404로 처리하도록 빈 리스트 반환
-        return []
-
-    if not isinstance(raw_recs, list):
-        raise ValueError("recommendations 형식이 올바르지 않습니다. (list 아님)")
-
-    validated: List[Dict[str, str]] = []
-    for i, item in enumerate(raw_recs):
-        s = JobRecommendationSerializer(data=item)
-        try:
-            s.is_valid(raise_exception=True)
-        except ValidationError as ve:
-            # 어떤 인덱스에서 깨졌는지 메시지를 보강
-            raise ValidationError({f"recommendations[{i}]": ve.detail})
-        validated.append(s.validated_data)
-    return validated
-
-
-def build_recommend_response(result: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    내부 추천 결과(dict) -> 최종 응답 스키마로 정제 + DRF 검증.
-    - result 예시:
-      {
-        "recommendations": [{"job": "...", "reason": "..."} * 3],
-        "gpt_message": "..."
-      }
-    유효하지 않으면 ValueError/ValidationError 발생.
-    """
-    if not isinstance(result, dict):
-        raise ValueError("내부 추천 결과가 올바르지 않습니다. (dict 아님)")
-
-    # 필수 키 존재 확인
-    if "gpt_message" not in result:
-        raise ValueError("gpt_message가 누락되었습니다.")
-
-    # recommendations 상세 검증
-    recs = _validate_recommendations(result.get("recommendations"))
-    data = {
-        "recommendations": recs,
-        "gpt_message": result.get("gpt_message"),
+    return {
+        "jobName":       snake_result.get("job_name", ""),
+        "jobSum":        snake_result.get("job_sum", ""),
+        "way":           snake_result.get("way", ""),
+        "major":         snake_result.get("major", ""),
+        "certificate":   snake_result.get("certificate", ""),
+        "pay":           snake_result.get("pay", ""),
+        "jobProspect":   snake_result.get("job_prospect", ""),
+        "knowledge":     snake_result.get("knowledge", ""),
+        "jobEnvironment":snake_result.get("job_environment", ""),
+        "jobValues":     snake_result.get("job_values", ""),
+        "reason":        snake_result.get("reason", ""),
+        "member_id":     member_id,
     }
 
-    # 최종 응답 스키마 검증(필드 타입/필수값 보장)
-    s = RecommendationResponseSerializer(data=data)
+def build_list_response(snake_items: List[Dict[str, Any]], member_id: int, gpt_message: str = "") -> Dict[str, Any]:
+    """
+    내부 리스트 결과 -> 최종 응답(bulk)으로 변환 + 스키마 검증
+    """
+    items = [to_camelcase_payload(item, member_id) for item in (snake_items or [])]
+
+    payload = {
+        "recommendations": items,     # 직업 객체 배열 (camelCase)
+        "gptMessage": gpt_message or ""
+    }
+
+    # 최종 응답 스키마 검증 (타입/필드 보장)
+    s = JobListResponseSerializer(data=payload)
     s.is_valid(raise_exception=True)
     return s.validated_data

@@ -4,15 +4,7 @@ from rest_framework import serializers
 
 # 📥 Java → Python: 요청용 Serializer
 class RecommendationRequestSerializer(serializers.Serializer):
-    dream = serializers.CharField()
-    mbti = serializers.CharField()
-    interest = serializers.CharField()
-
-# 📤 Python → Java: 응답용 Serializer
-class JobRecommendationSerializer(serializers.Serializer):
-    job = serializers.CharField()
-    reason = serializers.CharField()
-
-class RecommendationResponseSerializer(serializers.Serializer):
-    recommendations = JobRecommendationSerializer(many=True)
-    gpt_message = serializers.CharField()
+    dream = serializers.CharField(required=False, allow_blank=True, default="")
+    mbti = serializers.CharField(required=False, allow_blank=True, default="")
+    interest = serializers.CharField(required=False, allow_blank=True, default="")
+    member_id = serializers.IntegerField()  # ✅ Java에서 넘어오는 사용자 ID (필수)
