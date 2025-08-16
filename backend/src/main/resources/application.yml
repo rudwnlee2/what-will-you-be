@@ -23,3 +23,10 @@ spring:
     level:
       org.hibernate.SQL: debug
       org.hibernate.type: trace
+
+  jwt:
+    secret:
+      #키값 수정 필요
+      key: mySuperSecretKey1234567890!@#$%^
+    token:
+      expiration: 1800000 # 30분 (1000ms * 60 * 30)
