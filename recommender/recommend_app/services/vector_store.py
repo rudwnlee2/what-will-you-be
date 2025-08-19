@@ -4,7 +4,11 @@ import faiss
 import numpy as np
 import json
 from openai import OpenAI
-
+# from config.config import OPENAI_API_KEY # 경로 오류로 잠시 주석처리함
+OPENAI_API_KEY = "key" # 오류 방지용
+client = OpenAI(api_key=OPENAI_API_KEY)
+# =============
+# recommender/data 폴더에서 파일 불러오기
 def load_faiss_index_and_metadata():
     # 현재 recommendJob.py 파일의 절대 경로
     cur_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,6 +32,26 @@ def load_faiss_index_and_metadata():
 
     return index, metadata_list
 
+
+# json 문자열을 입력받아 dict 형식으로 변환
+def json_to_dict(user_info_json):
+    data = json.loads(user_info_json)
+    return data
+
+# 딕셔너리의 value들을 이어붙이는 함수
+def concat_dict_values(d: dict, sep: str = " "):
+    return sep.join(str(v) for v in d.values() if v is not None)
+
+def get_embedding(text: str, model="text-embedding-3-small"):
+    response = client.embeddings.create(
+        input=text,
+        model=model
+    )
+    return response.data[0].embedding
+# 1. "text-embedding-ada-002"
+# 2. "text-embedding-3-small"
+
+
 # 유사도 검색
 def similarity_search(index, vector, k=3): # 벡터DB, 임베딩된 사용자text, 검색 개수
  # 리스트면 numpy 배열로 변환, float32 타입 보장
@@ -47,7 +71,9 @@ def similarity_search(index, vector, k=3): # 벡터DB, 임베딩된 사용자tex
     D, I = index.search(query_vector, k)
     return D, I # 거리, 검색된 인덱스
 
-def connect_metadata(matadatas, I):
+
+# 인덱스 값에 맞는 메타데이터 연결
+def connect_metadata(metadata_list, I):
     recommend_results = []
     for idx in I[0]:
         if idx != -1:
@@ -56,12 +82,13 @@ def connect_metadata(matadatas, I):
 
 
 # 추천항목 정리
-def build_recommendation_entries(indices, metadata):
+def build_recommendation_entries(I, metadata_list):
     recommendations = []
-    for idx in indices[0]:
+    for idx in I[0]:
+        print(idx)
         if idx == -1:
             continue
-        rec = metadata[idx]
+        rec = metadata_list[idx]
 
         job_entry = {
             "jobName": rec.get("jobName", ""),
@@ -78,4 +105,66 @@ def build_recommendation_entries(indices, metadata):
         recommendations.append(job_entry)
     return recommendations
 
-# def get_recommendation_reason(user_text, recommendations):
+# =============
+# 추천 이유 생성
+def get_recommendation_reason(user_text, recommendations):
+    client = OpenAI(api_key=OPENAI_API_KEY)
+    ressons = []
+    for i in range(0, len(recommendations)):
+        job_name = recommendations[i]['jobName']
+        job_summary  = ', '.join(f"{k}: {v}" for k, v in recommendations[i].items())
+
+        system_msg = "너는 직업 추천 전문가야."
+        user_msg = (
+            f"사용자 설명: {user_text}\n"
+            f"추천 직업: {job_name}\n"
+            f"직업 요약: {job_summary}\n"
+            "이 직업을 추천한 이유를 1~2문장으로 설명해줘.(예시: 창의성과 소통 능력이 요구되며, 다양한 사람들과 협업하는 것을 즐기는 사용자 성향과 일치합니다)"
+        )
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_msg}
+            ],
+            max_tokens=150,
+            temperature=0.5, # 0~1, 값이 낮을수록 보수적이고 예측 가능한 문장 생성
+        )
+        ressons.append(response.choices[0].message.content.strip())
+    return ressons # 추천이유 3개 담은 리스트
+
+
+# 추천결과 리스트 안의 딕셔너리에 추천이유 추가하기
+def add_reasons_to_recommendations(recommendations, reasons):
+    for rec, reason in zip(recommendations, reasons):
+        rec["reason"] = reason
+    return recommendations
+
+
+# 추천 함수. recommendation.py에서 vector_store를 임포트하여 이 함수만 호출할 수 있으면 됨.
+def get_recommend(user_info):
+    # user_info가 dict일 경우 (이미 JSON 파싱 완료 상태)
+    if isinstance(user_info, dict):
+        user_text = concat_dict_values(user_info)
+    # user_info가 문자열(json)일 경우
+    elif isinstance(user_info, str):
+        user_text = concat_dict_values(json_to_dict(user_info))
+
+    # 벡터DB 인덱스, 메타데이터 불러오기
+    index, metadata_list = load_faiss_index_and_metadata()
+
+    # 임베딩 및 유사도 검색
+    user_vector = get_embedding(user_text)
+    D, I = similarity_search(index, user_vector)
+
+    # 메타데이터 3개를 dict 리스트에 저장
+    recommend_results = connect_metadata(metadata_list, I)
+    # 추천 이유 추가할 메타데이터 리스트들
+    recommendations = build_recommendation_entries(I, metadata_list)
+    # 추천 이유 리스트 생성
+    ressons = get_recommendation_reason(user_text, recommendations)
+    # 추천결과리스트[i]에 추천이유[i] 추가
+    data: dict = add_reasons_to_recommendations(recommendations, ressons)
+
+    return data
