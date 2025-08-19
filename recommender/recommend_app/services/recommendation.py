@@ -1,5 +1,7 @@
 # recommend_app/services/recommendation.py
+import vector_store
 
+# vector_store.get_recommend(user_input)
 def generate_recommendation(user_input):
     """
     user_input: {
