@@ -49,8 +49,24 @@ out/    # 일반적인 IDE 컴파일 출력 폴더
 
 # Python SQLite DB
 **/*.sqlite3
+<<<<<<< HEAD
 =======
 # recommender/.gitignore
 venv/
 .env
 >>>>>>> 4e722645972c435879a98969d4f0172b79d5693e
+=======
+
+# --- ✅ Python 백엔드 무시 규칙 ---
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+
+# SQLite DB
+*.sqlite3
+
+# (선택) 환경 변수 파일
+.env
+
+__pycache__/
+*.pyc
