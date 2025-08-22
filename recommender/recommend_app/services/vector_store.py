@@ -9,7 +9,7 @@ OPENAI_API_KEY = "key" # 오류 방지용
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # =============
-# recommender/data 폴더에서 파일 불러오기. 테스트용으로 프로젝트 내에서 불러오게 함.
+# recommender/data 폴더에서 파일 불러오기
 def load_faiss_index_and_metadata():
     # 현재 recommendJob.py 파일의 절대 경로
     cur_dir = os.path.dirname(os.path.abspath(__file__))
@@ -54,7 +54,7 @@ def get_embedding(text: str, model="text-embedding-3-small"):
 
 # 유사도 검색
 def similarity_search(index, vector, k=3): # 벡터DB, 임베딩된 사용자text, 검색 개수
-    # 리스트면 numpy 배열로 변환, float32 타입 보장
+ # 리스트면 numpy 배열로 변환, float32 타입 보장
     if not isinstance(vector, np.ndarray):
         query_vector = np.array(vector, dtype=np.float32)
     else:
@@ -170,8 +170,7 @@ def get_overall_reason(user_text, recommendations):
 
 
 # 추천 함수. recommendation.py에서 vector_store를 임포트하여 이 함수만 호출할 수 있으면 됨.
-# 이름 generate_recommendation()로 변경할 수 있음
-def get_recommendation(user_info):
+def get_recommend(user_info):
     # user_info가 dict일 경우 (이미 JSON 파싱 완료 상태)
     if isinstance(user_info, dict):
         user_text = concat_dict_values(user_info)
