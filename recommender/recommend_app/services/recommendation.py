@@ -1,63 +1,7 @@
+import vector_store as vs
 def generate_recommendation(user_input: dict) -> dict:
-    """
-    user_input 예:
-    {
-        "dream": "...",
-        "mbti": "...",
-        "interest": "...",
-        "member_id": 42
-    }
-
-    반환:
-    {
-        "recommendations": [ {직업1}, {직업2}, {직업3} ],
-        "gpt_message": "요약 코멘트"
-    }
-    내부 dict는 snake_case로 작성, 뷰에서 camelCase 변환
-    """
-    jobs = [
-        {
-            "job_name": "광고기획자",
-            "job_sum": "창의적인 아이디어로 상품이나 서비스의 광고 전략을 기획하고 실행합니다.",
-            "way": "공채, 특채, 인턴 등을 통해 광고 대행사나 기업의 마케팅 부서로 입사합니다.",
-            "major": "광고홍보학과, 신문방송학과, 경영학과, 심리학과 등",
-            "certificate": "사회조사분석사, 컴퓨터활용능력 등",
-            "pay": "초봉 3,500만원 ~ 4,500만원 수준",
-            "job_prospect": "온라인 및 모바일 광고 시장 성장으로 수요가 꾸준할 것으로 전망됩니다.",
-            "knowledge": "마케팅, 커뮤니케이션, 데이터 분석, 최신 트렌드에 대한 이해",
-            "job_environment": "다양한 팀과 협업하며, 빠른 의사결정과 창의적인 문제 해결이 요구됩니다.",
-            "job_values": "창의성, 성취감, 타인에 대한 영향력, 지적 추구",
-            "reason": "창의성과 소통 능력이 요구되며, 다양한 사람들과 협업하는 것을 즐기는 사용자 성향과 일치합니다."
-        },
-        {
-            "job_name": "상담사",
-            "job_sum": "개인이나 단체의 고민과 문제를 상담하여 해결 방향을 제시합니다.",
-            "way": "관련 학위 취득 후 상담센터, 학교, 기업 등에서 활동",
-            "major": "심리학과, 사회복지학과 등",
-            "certificate": "청소년상담사, 임상심리사 등",
-            "pay": "초봉 3,000만원 ~ 4,000만원 수준",
-            "job_prospect": "정신건강과 복지 수요 증가로 꾸준한 수요가 예상됩니다.",
-            "knowledge": "심리학, 상담기법, 의사소통 능력",
-            "job_environment": "조용한 상담실 환경, 다양한 사람과의 대면",
-            "job_values": "타인에 대한 봉사, 안정성, 대인관계",
-            "reason": "타인의 이야기를 잘 듣고 공감하는 성향이 강한 사용자와 잘 맞습니다."
-        },
-        {
-            "job_name": "강사",
-            "job_sum": "지식과 기술을 교육하고 전달하는 역할을 합니다.",
-            "way": "교육기관, 학원, 온라인 강의 플랫폼 등에서 활동",
-            "major": "교육학과, 전공 관련 학과",
-            "certificate": "교원자격증, 해당 분야 전문자격",
-            "pay": "초봉 2,800만원 ~ 4,000만원 수준",
-            "job_prospect": "평생교육과 온라인 교육의 확산으로 기회 증가",
-            "knowledge": "교육학, 발표능력, 커뮤니케이션",
-            "job_environment": "강의실, 온라인 플랫폼",
-            "job_values": "지적 추구, 자율성, 성취감",
-            "reason": "지식을 전달하고 소통하는 것을 즐기는 사용자와 잘 맞습니다."
-        }
-    ]
-
-    return {
-        "recommendations": jobs,
-        "gpt_message": "당신의 성향에는 광고기획자, 상담사, 강사와 같은 직업이 잘 어울립니다!"
-    }
+    return vs.get_recommend(user_input)
+# return {
+#     "recommendations": jobs # 직업정보 딕셔너리가 들어있는 리스트,
+#     "gpt_message": gpt_message # str
+# }
