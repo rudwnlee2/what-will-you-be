@@ -9,7 +9,7 @@ OPENAI_API_KEY = "key" # 오류 방지용
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # =============
-# recommender/data 폴더에서 파일 불러오기
+# recommender/data 폴더에서 파일 불러오기. 테스트용으로 프로젝트 내에서 불러오게 함.
 def load_faiss_index_and_metadata():
     # 현재 recommendJob.py 파일의 절대 경로
     cur_dir = os.path.dirname(os.path.abspath(__file__))
@@ -21,8 +21,6 @@ def load_faiss_index_and_metadata():
     # 파일 경로 설정
     faiss_index_path = os.path.join(data_dir, "vectorDB_index.faiss")
     metadata_path = os.path.join(data_dir, "metadata.json")
-    print(faiss_index_path)
-    print(metadata_path)
 
     # 메타데이터 로드
     with open(metadata_path, 'r', encoding='utf-8') as f:
@@ -44,6 +42,7 @@ def concat_dict_values(d: dict, sep: str = " "):
     return sep.join(str(v) for v in d.values() if v is not None)
 
 def get_embedding(text: str, model="text-embedding-3-small"):
+    client = OpenAI(api_key=OPENAI_API_KEY)
     response = client.embeddings.create(
         input=text,
         model=model
@@ -82,11 +81,10 @@ def connect_metadata(metadata_list, I):
     return recommend_results
 
 
-# 추천항목 정리
+# 추천항목 정리, "recommendations"의 일부
 def build_recommendation_entries(I, metadata_list):
     recommendations = []
     for idx in I[0]:
-        print(idx)
         if idx == -1:
             continue
         rec = metadata_list[idx]
@@ -107,7 +105,7 @@ def build_recommendation_entries(I, metadata_list):
     return recommendations
 
 # =============
-# 추천 이유 생성
+# 추천 이유 생성, "recommendations"의 일부
 def get_recommendation_reason(user_text, recommendations):
     client = OpenAI(api_key=OPENAI_API_KEY)
     ressons = []
@@ -142,9 +140,38 @@ def add_reasons_to_recommendations(recommendations, reasons):
         rec["reason"] = reason
     return recommendations
 
+# 추천한 3가지 직업에 대한 전반적인 추천이유, "gpt_message"
+def get_overall_reason(user_text, recommendations):
+    client = OpenAI(api_key=OPENAI_API_KEY)
+
+    job_summary  = '; '.join(
+        ', '.join(f"{k}: {v}" for k, v in rec.items())
+        for rec in recommendations
+    )
+
+    system_msg = "너는 직업 추천 전문가야."
+    user_msg = (
+        f"사용자 설명: {user_text}\n"
+        f"직업 요약: {job_summary}\n"
+        "이 직업 3가지 추천한 이유를 1문장으로 설명해줘(예시: <직업이름1>,<직업이름2>,<직업이름3>은 당신의 ~한 성향과 잘 어울립니다!)"
+    )
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": user_msg}
+        ],
+        max_tokens=150,
+        temperature=0.5, # 0~1, 값이 낮을수록 보수적이고 예측 가능한 문장 생성
+    )
+    overall_reason = response.choices[0].message.content.strip()
+    return overall_reason # 전반적인 추천 이유 문자열
+
 
 # 추천 함수. recommendation.py에서 vector_store를 임포트하여 이 함수만 호출할 수 있으면 됨.
-def get_recommend(user_info):
+# 이름 generate_recommendation()로 변경할 수 있음
+def get_recommendation(user_info):
     # user_info가 dict일 경우 (이미 JSON 파싱 완료 상태)
     if isinstance(user_info, dict):
         user_text = concat_dict_values(user_info)
@@ -166,6 +193,10 @@ def get_recommend(user_info):
     # 추천 이유 리스트 생성
     ressons = get_recommendation_reason(user_text, recommendations)
     # 추천결과리스트[i]에 추천이유[i] 추가
-    data: dict = add_reasons_to_recommendations(recommendations, ressons)
+    jobs: dict = add_reasons_to_recommendations(recommendations, ressons)
+    gpt_message = get_overall_reason(user_text, recommendations)
 
-    return data
+    return {
+        "recommendations": jobs,
+        "gpt_message": gpt_message
+    }
