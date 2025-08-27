@@ -1,6 +1,7 @@
 package com.example.whatwillyoube.whatwillyoube_backend.security;
 
 import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,15 +9,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+@Getter
 public class UserDetailsImpl implements UserDetails {
     private final Member member;
 
     public UserDetailsImpl(Member member) {
         this.member = member;
-    }
-
-    public Member getMember() {
-        return member;
     }
 
     // 사용자에게 부여된 권한을 반환. 지금은 권한이 없으므로 기본 역할을 부여
