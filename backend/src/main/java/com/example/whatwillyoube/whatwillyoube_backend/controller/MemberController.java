@@ -6,7 +6,6 @@ import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberResponseDto;
 import com.example.whatwillyoube.whatwillyoube_backend.security.UserDetailsImpl;
 import com.example.whatwillyoube.whatwillyoube_backend.service.MemberService;
 import com.example.whatwillyoube.whatwillyoube_backend.util.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
