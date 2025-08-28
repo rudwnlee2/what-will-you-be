@@ -65,8 +65,10 @@ public class SecurityConfig {
 
         //1. URL별 인가(Authorization) 설정
         http.authorizeHttpRequests(auth -> auth
-                // '/api/members/**' 경로의 요청은 모두 허용 (회원가입, 로그인 등)
-                .requestMatchers("/api/members/**").permitAll()
+                // 회원가입, 로그인, 아이디 중복 확인은 인증 없이 허용
+                .requestMatchers("/api/members/signup", "/api/members/login", "/api/members/check-loginid/**").permitAll()
+                // 옵션 조회는 인증 없이 허용
+                .requestMatchers("/api/options/**").permitAll()
                 // 그 외의 모든 요청은 인증된 사용자만 접근 가능
                 .anyRequest().authenticated()
         );
