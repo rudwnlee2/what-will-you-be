@@ -1,41 +1,36 @@
 # recommend_app/utils/response.py
 from typing import Any, Dict, List
-from ..serializers.recommend_output import (
-    JobItemSerializer,
-    JobListResponseSerializer,
-)
 
-def to_camelcase_payload(snake_result: Dict[str, Any], member_id: int) -> Dict[str, Any]:
-    """
-    snake_case 내부 결과(dict) -> Java가 기대하는 camelCase 직업 객체로 변환
-    """
-    return {
-        "jobName":       snake_result.get("job_name", ""),
-        "jobSum":        snake_result.get("job_sum", ""),
-        "way":           snake_result.get("way", ""),
-        "major":         snake_result.get("major", ""),
-        "certificate":   snake_result.get("certificate", ""),
-        "pay":           snake_result.get("pay", ""),
-        "jobProspect":   snake_result.get("job_prospect", ""),
-        "knowledge":     snake_result.get("knowledge", ""),
-        "jobEnvironment":snake_result.get("job_environment", ""),
-        "jobValues":     snake_result.get("job_values", ""),
-        "reason":        snake_result.get("reason", ""),
-        "member_id":     member_id,
+# 이번 버전은 별도의 Serializer 검증 없이, snake/camel 혼재 입력을 받아
+# camelCase로 표준화해서 payload를 만들어 줍니다.
+
+_SNAKE_TO_CAMEL = {
+    "job_name": "jobName",
+    "job_sum": "jobSum",
+    "job_prospect": "jobProspect",
+    "job_environment": "jobEnvironment",
+    "job_values": "jobValues",
+    # 동일 키: way, major, certificate, pay, knowledge, reason
+}
+
+def _to_camel_item(item: Dict[str, Any]) -> Dict[str, Any]:
+    """추천 항목을 camelCase로 정규화 (이미 camel이면 그대로 통과)"""
+    if "jobName" in item:
+        return item  # 이미 camelCase 결과(엔진)라면 그대로
+    out: Dict[str, Any] = {}
+    for k, v in item.items():
+        out[_SNAKE_TO_CAMEL.get(k, k)] = v
+    return out
+
+def build_list_response(items: List[Dict[str, Any]],
+                        member_id: int | None = None,
+                        gpt_message: str = "") -> Dict[str, Any]:
+    """추천 리스트를 camelCase + meta로 묶어 최종 응답 생성"""
+    camel_items = [_to_camel_item(it) for it in (items or [])]
+    payload: Dict[str, Any] = {
+        "recommendations": camel_items,     # 직업 객체 배열 (camelCase)
+        "gpt_message": gpt_message or "",
     }
-
-def build_list_response(snake_items: List[Dict[str, Any]], member_id: int, gpt_message: str = "") -> Dict[str, Any]:
-    """
-    내부 리스트 결과 -> 최종 응답(bulk)으로 변환 + 스키마 검증
-    """
-    items = [to_camelcase_payload(item, member_id) for item in (snake_items or [])]
-
-    payload = {
-        "recommendations": items,     # 직업 객체 배열 (camelCase)
-        "gptMessage": gpt_message or ""
-    }
-
-    # 최종 응답 스키마 검증 (타입/필드 보장)
-    s = JobListResponseSerializer(data=payload)
-    s.is_valid(raise_exception=True)
-    return s.validated_data
+    if member_id is not None:
+        payload["meta"] = {"memberId": member_id}
+    return payload
