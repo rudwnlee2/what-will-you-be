@@ -1,21 +1,28 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import CareerLandingPage from './Home page'; // 메인 랜딩 페이지
-import CareerFormPage from './pages/career'; // 진로 탐색 폼 페이지
-import LoginPage from './pages/login'; // 로그인 페이지
-import SignupPage from './pages/signup'; // 회원가입 페이지
+import CareerLandingPage from './pages/Homepage';
+import CareerFormPage from './app/career-form/career-form_page';
+import LoginPage from './app/login/login_pages';
+import SignupPage from './app/signup/signup_page';
+import ResultsPage from './pages/results';
+import JobDetailPage from './pages/job-detail';
+import AboutPage from './app/about/about_page';
+import CommunityPage from './app/community/community_page';
+import ContactPage from './app/contact/contact_page';
 import './App.css';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 기본 경로('/')에 CareerLandingPage를 연결합니다. */}
         <Route path="/" element={<CareerLandingPage />} />
-
-        {/* 각 페이지 컴포넌트에 대한 경로를 설정합니다. */}
-        <Route path="/career" element={<CareerFormPage />} />
+        <Route path="/career-form" element={<CareerFormPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/results" element={<ResultsPage />} />
+        <Route path="/job-detail/:id" element={<JobDetailPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/contact" element={<ContactPage />} />
       </Routes>
     </BrowserRouter>
   );
