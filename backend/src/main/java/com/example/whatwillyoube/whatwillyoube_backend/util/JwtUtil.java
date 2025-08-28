@@ -1,54 +1,85 @@
 package com.example.whatwillyoube.whatwillyoube_backend.util;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
+    // Header KEY 값
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
-    // 비밀키 (실무에선 환경변수나 yml로 관리)
-    private final String secretKey = "mySuperSecretKey1234567890!@#$%^";
-    private final long expiration = 1000 * 60 * 30; // 30분
+    // Token 식별자
+    public static final String BEARER_PREFIX = "Bearer ";
 
-    //토큰 생성: id를 subject에 담는다
-    public String generateToken(Long memberId) {
-        return Jwts.builder()
-                .setSubject(memberId.toString()) // id를 문자열로 넣음
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
-                .compact();
+    @Value("${jwt.secret.key}")
+    private String secretKey;
+    @Value("${jwt.token.expiration}")
+    private long tokenExpiration;
+
+    // 사용할 암호화 알고리즘
+    private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+    // 암호화/복호화에 사용할 Key 객체
+    private Key key;
+
+    @PostConstruct
+    public void init() {
+        byte[] bytes = Base64.getDecoder().decode(secretKey);
+        key = Keys.hmacShaKeyFor(bytes);
     }
 
-    //토큰에서 memberId 추출
-    public Long extractMemberId(String token) {
-        return Long.parseLong(
-                Jwts.parserBuilder()
-                        .setSigningKey(secretKey.getBytes())
-                        .build()
-                        .parseClaimsJws(token)
-                        .getBody()
-                        .getSubject()
-        );
+    //토큰 생성
+    public String createToken(String email) { // <-- 파라미터 이름 변경
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + tokenExpiration);
+
+        return BEARER_PREFIX +
+                Jwts.builder()
+                        .setSubject(email) // <-- 사용자 식별값(email) 저장
+                        .setIssuedAt(now)
+                        .setExpiration(expirationDate)
+                        .signWith(key, signatureAlgorithm)
+                        .compact();
     }
 
-    //토큰 유효성 검사 (서명, 만료 확인)
+    // HTTP Header 에서 JWT 가져오기
+    public String getTokenFromHeader(HttpServletRequest request) {
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
+
+    // JWT 검증
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(secretKey.getBytes())
-                    .build()
-                    .parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
-        } catch (JwtException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
+
+    // JWT 에서 사용자 정보 가져오기
+    public Claims getUserInfoFromToken(String token) {
+        try {
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
 }

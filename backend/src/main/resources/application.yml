@@ -6,11 +6,11 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/what_will_you_be?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
     username: root
-    password: 19192022
+    password: 1234
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -23,3 +23,13 @@ spring:
     level:
       org.hibernate.SQL: debug
       org.hibernate.type: trace
+
+jwt:
+  secret:
+    key: bXlTdXBlclNlY3JldEtleTEyMzQ1Njc4OTAhQCMkJV4=
+  token:
+    expiration: 1800000 # 30분 (1000ms * 60 * 30)
+
+api:
+  python:
+    url: http://127.0.0.1:8000

@@ -8,11 +8,13 @@ import com.example.whatwillyoube.whatwillyoube_backend.repository.JobRecommendat
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class JobRecommendationsService {
 
     private final JobRecommendationsRepository jobRecommendationsRepository;
@@ -42,6 +44,7 @@ public class JobRecommendationsService {
         return JobRecommendationsResponseDto.fromEntity(recommendation); // DTO 변환 메서드 호출 (예시)
     }
 
+    @Transactional
     public void deleteJobRecommendation(Long memberId, Long recommendationId) {
 
         // 1. 추천 기록 조회
