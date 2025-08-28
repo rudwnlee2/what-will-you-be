@@ -14,6 +14,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RecommendationInfoService {
 
     private final RecommendationInfoRepository recommendationInfoRepository;
