@@ -29,3 +29,7 @@ jwt:
     key: bXlTdXBlclNlY3JldEtleTEyMzQ1Njc4OTAhQCMkJV4=
   token:
     expiration: 1800000 # 30분 (1000ms * 60 * 30)
+
+api:
+  python:
+    url: http://127.0.0.1:8000
