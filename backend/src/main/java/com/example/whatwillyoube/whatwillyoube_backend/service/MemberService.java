@@ -10,8 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -48,7 +46,7 @@ public class MemberService {
             throw new RuntimeException("비밀번호가 틀렸습니다.");
         }
 
-        return jwtUtil.generateToken(member.getId());
+        return jwtUtil.createToken(member.getEmail());
     }
 
     public MemberResponseDto getMember(Long id) {

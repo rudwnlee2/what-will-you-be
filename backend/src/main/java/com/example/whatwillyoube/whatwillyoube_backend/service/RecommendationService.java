@@ -10,6 +10,7 @@ import com.example.whatwillyoube.whatwillyoube_backend.repository.JobRecommendat
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.RecommendationInfoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,9 @@ public class RecommendationService {
     private final RecommendationInfoRepository recommendationInfoRepository;
     private final MemberRepository memberRepository;
     private final RestClient restClient;
+    
+    @Value("${api.python.url}")
+    private String pythonApiBaseUrl;
 
     //프론트에서 요청 들어오면 디비에서 추처에 필요한 정보(RecommendationInfoRepository) 조회 후 파이썬 전달
     public List<JobRecommendationsResponseDto> generateJobRecommendations(Long memberId) {
@@ -47,7 +51,7 @@ public class RecommendationService {
                 recommendationInfo.getHolland().name()
         );
 
-        String pythonApiUrl = "http://127.0.0.1:8000/api/recommend/";
+        String pythonApiUrl = pythonApiBaseUrl + "/api/recommend/";
 
         ResponseEntity<PythonApiResponseDto> responseEntity;
         try {

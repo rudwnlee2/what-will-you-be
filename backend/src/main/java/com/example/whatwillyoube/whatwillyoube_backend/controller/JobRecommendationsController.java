@@ -2,11 +2,12 @@ package com.example.whatwillyoube.whatwillyoube_backend.controller;
 
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsListDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.security.UserDetailsImpl;
 import com.example.whatwillyoube.whatwillyoube_backend.service.JobRecommendationsService;
 import com.example.whatwillyoube.whatwillyoube_backend.service.RecommendationService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,16 +24,16 @@ public class JobRecommendationsController {
      * 직업 추천 생성 API (Python API 호출)
      */
     @PostMapping
-    public ResponseEntity<List<JobRecommendationsResponseDto>> createJobRecommendations(HttpServletRequest request) {
-        Long memberId = (Long) request.getAttribute("memberId");
+    public ResponseEntity<List<JobRecommendationsResponseDto>> createJobRecommendations(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long memberId = userDetails.getMember().getId();
         List<JobRecommendationsResponseDto> responseDtoList = recommendationService.generateJobRecommendations(memberId);
 
         return ResponseEntity.ok(responseDtoList);
     }
 
     @GetMapping
-    public ResponseEntity<List<JobRecommendationsListDto>> getMyRecommendationsList(HttpServletRequest request) {
-        Long memberId = (Long) request.getAttribute("memberId");
+    public ResponseEntity<List<JobRecommendationsListDto>> getMyRecommendationsList(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long memberId = userDetails.getMember().getId();
         List<JobRecommendationsListDto> responseDtoList = jobRecommendationsService.getJobRecommendationsList(memberId);
 
         return ResponseEntity.ok(responseDtoList);
@@ -44,10 +45,10 @@ public class JobRecommendationsController {
      */
     @GetMapping("/{recommendationId}")
     public ResponseEntity<JobRecommendationsResponseDto> getDetailRecommendation(
-            HttpServletRequest request,
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable Long recommendationId) { // URL 경로의 {recommendationId} 값을 파라미터로 받습니다.
 
-        Long memberId = (Long) request.getAttribute("memberId");
+        Long memberId = userDetails.getMember().getId();
 
         JobRecommendationsResponseDto responseDto = jobRecommendationsService.getJobRecommendationDetail(memberId, recommendationId);
 
@@ -60,10 +61,10 @@ public class JobRecommendationsController {
      */
     @DeleteMapping("/{recommendationId}")
     public ResponseEntity<Void> deleteJobRecommendation(
-            HttpServletRequest request,
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable Long recommendationId) { // URL 경로의 {recommendationId} 값을 파라미터로 받습니다.
 
-        Long memberId = (Long) request.getAttribute("memberId");
+        Long memberId = userDetails.getMember().getId();
 
         jobRecommendationsService.deleteJobRecommendation(memberId, recommendationId);
 

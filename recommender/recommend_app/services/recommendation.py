@@ -1,27 +1,29 @@
-# recommend_app/services/recommendation.py
+# recommender/recommend_app/services/recommendation.py
+from __future__ import annotations
+from typing import Dict, Any
 
-def generate_recommendation(user_input):
-    """
-    user_input: {
-        'dream': "...",
-        'mbti': "...",
-        'interest': "..."
-    }
+# 상대 임포트로 동일 폴더(services) 모듈 불러오기
+from . import vector_store as vs
+# (선택) GPT 직접 호출이 필요하면 사용
+# from .engine import ask_gpt
 
-    return: {
-        "recommendations": [  # 직업 3개 리스트
-            {"job": "기획자", "reason": "창의적이고 기획력 있음"},
-            {"job": "상담사", "reason": "사람들과 잘 소통함"},
-            {"job": "강사", "reason": "지식 전달과 소통을 즐김"}
-        ],
-        "gpt_message": "당신의 성향에는 기획자, 상담사, 강사와 같은 직업이 잘 어울립니다!"
-    }
+
+def generate_recommendation(user_input: Dict[str, Any]) -> Dict[str, Any]:
     """
+    vector_store.get_recommend()를 호출해 결과를 표준 형태로 반환.
+    반환 스키마(뷰에서 기대):
+      {
+        "recommendations": [ { jobName, jobSum, ..., reason }, ... ],
+        "gpt_message": "..."   # 또는 gptMessage로 들어오면 통일해서 gpt_message로 리턴
+      }
+    """
+    result = vs.get_recommend(user_input)
+
+    # 키 정규화: gpt_message / gptMessage 섞여 들어올 수 있음
+    recs = result.get("recommendations") or []
+    gpt_msg = result.get("gpt_message") or result.get("gptMessage") or ""
+
     return {
-        "recommendations": [
-            {"job": "기획자", "reason": "창의적이고 기획력 있음"},
-            {"job": "상담사", "reason": "사람들과 잘 소통함"},
-            {"job": "강사", "reason": "지식 전달과 소통을 즐김"}
-        ],
-        "gpt_message": "당신의 성향에는 기획자, 상담사, 강사와 같은 직업이 잘 어울립니다!"
+        "recommendations": recs,
+        "gpt_message": gpt_msg,
     }

@@ -6,8 +6,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    # ✅ settings 모듈 경로를 프로젝트 구조에 맞게 수정
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
