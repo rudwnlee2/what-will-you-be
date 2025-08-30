@@ -12,6 +12,7 @@ import java.util.List;
 public class PythonApiResponseDto {
 
     private List<RecommendedJobDetail> recommendedJobs;
+    private Long memberId;
 
     @Getter
     @NoArgsConstructor
