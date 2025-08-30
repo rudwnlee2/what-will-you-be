@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PythonApiRequestDto {
+    private Long memberId;
     private String dream;
     private String interest;
     private String jobValue;

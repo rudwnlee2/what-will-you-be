@@ -42,6 +42,7 @@ public class RecommendationService {
                 .orElseThrow(() -> new IllegalArgumentException("추천 정보를 찾을 수 없습니다. memberId: " + memberId));
 
         PythonApiRequestDto pythonRequest = new PythonApiRequestDto(
+                memberId,
                 recommendationInfo.getDream(),
                 recommendationInfo.getInterest(),
                 recommendationInfo.getJobValue().name(),
