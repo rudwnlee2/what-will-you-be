@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,16 +97,17 @@ class JobRecommendationsServiceTest {
         jobRecommendationsRepository.save(additionalRecommendation);
 
         // when
-        List<JobRecommendationsListDto> result = jobRecommendationsService
-                .getJobRecommendationsList(testMember.getId());
+        Page<JobRecommendationsListDto> result = jobRecommendationsService
+                .getJobRecommendationsList(testMember.getId(), 0, 10);
 
         // then
         assertNotNull(result);
-        assertEquals(2, result.size());
+        assertEquals(2, result.getTotalElements());
+        assertEquals(2, result.getContent().size());
         
-        boolean foundSoftwareDeveloper = result.stream()
+        boolean foundSoftwareDeveloper = result.getContent().stream()
                 .anyMatch(dto -> "소프트웨어 개발자".equals(dto.getJobName()));
-        boolean foundDataScientist = result.stream()
+        boolean foundDataScientist = result.getContent().stream()
                 .anyMatch(dto -> "데이터 사이언티스트".equals(dto.getJobName()));
         
         assertTrue(foundSoftwareDeveloper);
@@ -117,7 +119,7 @@ class JobRecommendationsServiceTest {
     void getJobRecommendationsList_MemberNotFound() {
         // when & then
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> jobRecommendationsService.getJobRecommendationsList(999L));
+                () -> jobRecommendationsService.getJobRecommendationsList(999L, 0, 10));
         assertEquals("존재하지 않는 회원입니다.", exception.getMessage());
     }
 
@@ -125,12 +127,13 @@ class JobRecommendationsServiceTest {
     @DisplayName("직업 추천이 없는 회원의 목록 조회")
     void getJobRecommendationsList_EmptyList() {
         // when
-        List<JobRecommendationsListDto> result = jobRecommendationsService
-                .getJobRecommendationsList(otherMember.getId());
+        Page<JobRecommendationsListDto> result = jobRecommendationsService
+                .getJobRecommendationsList(otherMember.getId(), 0, 10);
 
         // then
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(0, result.getTotalElements());
     }
 
     @Test
@@ -206,17 +209,99 @@ class JobRecommendationsServiceTest {
         jobRecommendationsRepository.save(additionalRecommendation);
 
         // 삭제 전 목록 확인
-        List<JobRecommendationsListDto> beforeDelete = jobRecommendationsService
-                .getJobRecommendationsList(testMember.getId());
-        assertEquals(2, beforeDelete.size());
+        Page<JobRecommendationsListDto> beforeDelete = jobRecommendationsService
+                .getJobRecommendationsList(testMember.getId(), 0, 10);
+        assertEquals(2, beforeDelete.getTotalElements());
 
         // when - 하나 삭제
         jobRecommendationsService.deleteJobRecommendation(testMember.getId(), testRecommendation.getId());
 
         // then - 삭제 후 목록 확인
-        List<JobRecommendationsListDto> afterDelete = jobRecommendationsService
-                .getJobRecommendationsList(testMember.getId());
-        assertEquals(1, afterDelete.size());
-        assertEquals("데이터 사이언티스트", afterDelete.get(0).getJobName());
+        Page<JobRecommendationsListDto> afterDelete = jobRecommendationsService
+                .getJobRecommendationsList(testMember.getId(), 0, 10);
+        assertEquals(1, afterDelete.getTotalElements());
+        assertEquals("데이터 사이언티스트", afterDelete.getContent().get(0).getJobName());
+    }
+
+    @Test
+    @DisplayName("페이징 기능 테스트 - 첫 번째 페이지")
+    void getJobRecommendationsList_Paging_FirstPage() {
+        // given - 5개의 추천 정보 생성
+        for (int i = 1; i <= 5; i++) {
+            JobRecommendations recommendation = createJobRecommendation(testMember, "직업" + i, "직업 설명" + i);
+            jobRecommendationsRepository.save(recommendation);
+        }
+
+        // when - 페이지 크기 3으로 첫 번째 페이지 조회
+        Page<JobRecommendationsListDto> result = jobRecommendationsService
+                .getJobRecommendationsList(testMember.getId(), 0, 3);
+
+        // then
+        assertNotNull(result);
+        assertEquals(6, result.getTotalElements()); // 기존 1개 + 새로 추가한 5개
+        assertEquals(3, result.getContent().size());
+        assertEquals(2, result.getTotalPages());
+        assertTrue(result.isFirst());
+        assertFalse(result.isLast());
+    }
+
+    @Test
+    @DisplayName("페이징 기능 테스트 - 두 번째 페이지")
+    void getJobRecommendationsList_Paging_SecondPage() {
+        // given - 5개의 추천 정보 생성
+        for (int i = 1; i <= 5; i++) {
+            JobRecommendations recommendation = createJobRecommendation(testMember, "직업" + i, "직업 설명" + i);
+            jobRecommendationsRepository.save(recommendation);
+        }
+
+        // when - 페이지 크기 3으로 두 번째 페이지 조회
+        Page<JobRecommendationsListDto> result = jobRecommendationsService
+                .getJobRecommendationsList(testMember.getId(), 1, 3);
+
+        // then
+        assertNotNull(result);
+        assertEquals(6, result.getTotalElements());
+        assertEquals(3, result.getContent().size());
+        assertEquals(2, result.getTotalPages());
+        assertFalse(result.isFirst());
+        assertTrue(result.isLast());
+    }
+
+    @Test
+    @DisplayName("페이징 기능 테스트 - 빈 페이지")
+    void getJobRecommendationsList_Paging_EmptyPage() {
+        // when - 존재하지 않는 페이지 조회
+        Page<JobRecommendationsListDto> result = jobRecommendationsService
+                .getJobRecommendationsList(testMember.getId(), 5, 10);
+
+        // then
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements()); // 기존 1개
+        assertTrue(result.getContent().isEmpty());
+        assertEquals(1, result.getTotalPages());
+    }
+
+    @Test
+    @DisplayName("페이징 기능 테스트 - 정렬 확인 (최신순)")
+    void getJobRecommendationsList_Paging_OrderByCreatedDateDesc() throws InterruptedException {
+        // given - 시간 간격을 두고 추천 정보 생성
+        JobRecommendations first = createJobRecommendation(testMember, "첫번째 직업", "첫번째 설명");
+        jobRecommendationsRepository.save(first);
+        
+        Thread.sleep(100); // 시간 차이를 위한 대기
+        
+        JobRecommendations second = createJobRecommendation(testMember, "두번째 직업", "두번째 설명");
+        jobRecommendationsRepository.save(second);
+
+        // when
+        Page<JobRecommendationsListDto> result = jobRecommendationsService
+                .getJobRecommendationsList(testMember.getId(), 0, 10);
+
+        // then - 최신순으로 정렬되어야 함
+        assertNotNull(result);
+        assertEquals(3, result.getTotalElements()); // 기존 1개 + 새로 추가한 2개
+        
+        List<JobRecommendationsListDto> content = result.getContent();
+        assertEquals("두번째 직업", content.get(0).getJobName()); // 가장 최근 것이 첫 번째
     }
 }
