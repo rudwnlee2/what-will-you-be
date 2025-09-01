@@ -13,6 +13,7 @@
 - ✅ **직업 추천 API (Python API 연동 완료)**
 - ✅ 직업 추천 결과 저장 및 조회
 - ✅ 옵션 조회 API (성별, MBTI, 홀랜드, 직업가치관)
+- ✅ **테스트 코드 작성 완료** (Service Layer)
 - 🚧 친구 관계 관리 (도메인 설계 완료)
 - 🚧 개인/그룹 미션 시스템 (도메인 설계 완료)
 
@@ -201,7 +202,7 @@ src/main/java/com/example/whatwillyoube/whatwillyoube_backend/
 ## 🔧 개발 환경 설정
 
 ### JPA 설정
-- **DDL 모드**: `validate` (운영 환경 안전)
+- **DDL 모드**: `create` (개발 환경)
 - **SQL 로깅**: 활성화 (개발용)
 - **데이터베이스**: MySQL 8.0 Dialect
 
@@ -209,31 +210,53 @@ src/main/java/com/example/whatwillyoube/whatwillyoube_backend/
 spring:
   jpa:
     hibernate:
-      ddl-auto: validate  # 운영: validate, 개발: update
+      ddl-auto: create  # 개발: create, 운영: validate
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         use_sql_comments: true
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
 ```
 
 ### 로깅 레벨
 ```yaml
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.type: trace
+spring:
+  logging:
+    level:
+      org.hibernate.SQL: debug
+      org.hibernate.type: trace
 ```
 
 ### 개발 시 주의사항
 - Python API 서버가 `http://127.0.0.1:8000`에서 실행 중이어야 함
 - JWT 시크릿 키는 Base64 인코딩된 값 사용
-- 데이터베이스 스키마는 수동으로 관리 (validate 모드)
+- 개발 환경에서는 DDL auto-create 모드 사용 (스키마 자동 생성)
+- 테스트 실행 시 @Transactional로 데이터 롤백 처리
 
 ## 🧪 테스트
 
+### 테스트 구조
+- **Service Layer 테스트**: 비즈니스 로직 검증
+- **통합 테스트**: @SpringBootTest 사용
+- **트랜잭션 롤백**: @Transactional로 테스트 격리
+
+### 테스트 파일
+- `MemberServiceTest.java` - 회원 관리 서비스 테스트
+- `JobRecommendationsServiceTest.java` - 직업 추천 서비스 테스트
+- `RecommendationInfoServiceTest.java` - 추천 정보 서비스 테스트
+
+### 테스트 실행
 ```bash
+# 전체 테스트 실행
 ./gradlew test
+
+# 특정 테스트 클래스 실행
+./gradlew test --tests JobRecommendationsServiceTest
+
+# 테스트 결과 리포트 확인
+./gradlew test --info
 ```
 
 ## 🐍 Python API 연동
@@ -300,6 +323,8 @@ logging:
 - 추천 결과 저장/조회/삭제
 - 옵션 조회 API
 - 완전한 도메인 모델 설계
+- **Service Layer 테스트 코드 작성**
+- **통합 테스트 환경 구축**
 
 ### 🚧 진행 예정
 - [ ] 친구 시스템 API 구현
@@ -312,14 +337,17 @@ logging:
 ### 🔧 기술 개선 계획
 - [ ] 예외 처리 표준화
 - [ ] API 문서 자동화 (Swagger)
-- [ ] 테스트 코드 작성
+- [x] **Service Layer 테스트 코드 작성**
+- [ ] Controller Layer 테스트 코드 작성
 - [ ] 로깅 시스템 개선
 - [ ] 성능 최적화
+- [ ] 테스트 커버리지 향상
 
 ## 🚀 배포 및 운영
 
 ### 환경별 설정
-- **개발**: `ddl-auto: update`, SQL 로깅 활성화
+- **개발**: `ddl-auto: create`, SQL 로깅 활성화
+- **테스트**: `@Transactional` 롤백, 인메모리 DB 권장
 - **운영**: `ddl-auto: validate`, 로깅 최소화
 
 ### 필수 환경 변수
@@ -337,10 +365,16 @@ PYTHON_API_URL=http://127.0.0.1:8000
 # 전체 테스트 실행
 ./gradlew test
 
-# 빌드
+# 테스트 리포트 생성
+./gradlew test jacocoTestReport
+
+# 빌드 (테스트 포함)
 ./gradlew build
 
-# 실행
+# 테스트 없이 빌드
+./gradlew build -x test
+
+# 애플리케이션 실행
 ./gradlew bootRun
 ```
 
