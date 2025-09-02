@@ -10,6 +10,6 @@ export interface RecommendationInfo {
   interestsAndHobbies: string;
   mbti: string; // 예: "INFP"
   hollandType: string; // 예: "Social"
-  favoriteSubjects: string[]; // 예: ["국어", "과학"]
+  favoriteSubjects: string; // 예: ["국어", "과학"]
   workValues: string; // 예: "Stability"
 }
