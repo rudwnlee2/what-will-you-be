@@ -1,45 +1,59 @@
+// src/api/members.ts
+
 import axiosInstance from './axiosInstance';
+import type { LoginData, SignUpData, UpdateProfileData, UserProfile } from '../types/user.types';
 
-// API 요청/응답에 대한 타입은 src/types 폴더에서 관리하는 것이 좋습니다.
-// 예: import type { LoginData, SignUpData, UserProfile } from '../types/user.types';
-
-import type { LoginData, SignUpData, UserProfile } from '../types/user.types.ts';
-
-// POST /api/members/login - 로그인
-export const login = async (loginData: LoginData /* LoginData */) => {
-  const response = await axiosInstance.post('/api/members/login', loginData);
-  // 서버로부터 받은 데이터(예: { accessToken: '...' })를 반환합니다.
+/**
+ * 1. 회원가입
+ * POST /api/members/signup
+ */
+export const signup = async (data: SignUpData): Promise<UserProfile> => {
+  const response = await axiosInstance.post('/api/members/signup', data);
   return response.data;
 };
 
-// POST /api/members/signup - 회원가입
-export const signup = async (signupData: SignUpData /* SignUpData */) => {
-  const response = await axiosInstance.post('/api/members/signup', signupData);
-  return response.data;
+/**
+ * 2. 로그인
+ * POST /api/members/login
+ * 응답 body는 비어있지만, 헤더에 토큰이 담겨 오므로 response 객체 전체를 반환합니다.
+ */
+export const login = async (data: LoginData) => {
+  const response = await axiosInstance.post('/api/members/login', data);
+  // 컴포넌트에서 response.headers['authorization']으로 토큰을 추출할 수 있습니다.
+  return response;
 };
 
-// GET /api/members/check-loginid/{loginId} - 아이디 중복 확인
-export const checkLoginId = async (loginId: string) => {
+/**
+ * 3. 아이디 중복 확인
+ * GET /api/members/check-loginid/{loginId}
+ */
+export const checkLoginId = async (loginId: string): Promise<{ exists: boolean }> => {
   const response = await axiosInstance.get(`/api/members/check-loginid/${loginId}`);
   return response.data;
 };
 
-// GET /api/members/me - 내 정보 조회
+/**
+ * 4. 내 정보 조회
+ * GET /api/members/me
+ */
 export const getMyProfile = async (): Promise<UserProfile> => {
-  const response = await axiosInstance.get('/api/members/me' /*, UserProfile */);
+  const response = await axiosInstance.get('/api/members/me');
   return response.data;
 };
 
-// PATCH /api/members/me - 내 정보 수정
-export const updateMyProfile = async (
-  profileData: Partial<UserProfile> /* Partial<UserProfile> */,
-) => {
-  const response = await axiosInstance.patch('/api/members/me', profileData);
+/**
+ * 5. 내 정보 수정
+ * PATCH /api/members/me
+ */
+export const updateMyProfile = async (data: UpdateProfileData): Promise<UserProfile> => {
+  const response = await axiosInstance.patch('/api/members/me', data);
   return response.data;
 };
 
-// DELETE /api/members/me - 회원 탈퇴
-export const deleteMyAccount = async () => {
-  const response = await axiosInstance.delete('/api/members/me');
-  return response.data;
+/**
+ * 6. 회원 탈퇴
+ * DELETE /api/members/me
+ */
+export const deleteMyAccount = async (): Promise<void> => {
+  await axiosInstance.delete('/api/members/me');
 };
