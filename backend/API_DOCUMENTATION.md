@@ -303,6 +303,81 @@ DELETE /api/job-recommendations/{recommendationId}
 
 ---
 
+## 🐍 Python AI API 연동
+
+직업 추천 생성 시 내부적으로 Python AI 서버와 통신합니다.
+
+### Python API 엔드포인트
+```http
+POST http://127.0.0.1:8000/api/recommend/
+```
+
+### 요청 데이터 (Java → Python)
+```json
+{
+  "memberId": 1,
+  "dream": "소프트웨어 개발자",
+  "interest": "프로그래밍, 인공지능",
+  "jobValue": "CREATIVITY",
+  "mbti": "INTJ",
+  "hobby": "코딩, 독서",
+  "favoriteSubject": "수학, 과학",
+  "holland": "INVESTIGATIVE"
+}
+```
+
+### 응답 데이터 (Python → Java)
+```json
+{
+  "memberId": 1,
+  "recommendedJobs": [
+    {
+      "jobName": "백엔드 개발자",
+      "jobSum": "서버 시스템과 데이터베이스를 설계하고 개발하는 직업",
+      "way": "대학에서 컴퓨터공학 전공 후 실무 경험 쌓기",
+      "major": "컴퓨터공학, 소프트웨어공학",
+      "certificate": "정보처리기사, AWS 자격증",
+      "pay": "4000-8000만원",
+      "jobProspect": "매우 좋음",
+      "knowledge": "Java, Spring, 데이터베이스",
+      "jobEnvironment": "사무실, 재택근무 가능",
+      "jobValues": "창조성, 안정성",
+      "reason": "INTJ 성향과 프로그래밍 관심사가 잘 맞음"
+    },
+    {
+      "jobName": "데이터 사이언티스트",
+      "jobSum": "데이터를 분석하여 비즈니스 인사이트를 도출하는 직업",
+      "way": "통계학이나 컴퓨터공학 전공 후 데이터 분석 경험 쌓기",
+      "major": "통계학, 컴퓨터공학, 수학",
+      "certificate": "ADsP, 빅데이터분석기사",
+      "pay": "5000-9000만원",
+      "jobProspect": "매우 좋음",
+      "knowledge": "Python, R, 머신러닝, 통계",
+      "jobEnvironment": "사무실, 연구소",
+      "jobValues": "창조성, 성취감",
+      "reason": "탐구형 성향과 수학 관심사가 데이터 분석에 적합"
+    }
+  ]
+}
+```
+
+### 처리 흐름
+1. 사용자가 `POST /api/job-recommendations` 호출
+2. Java 서버가 사용자의 RecommendationInfo 조회
+3. RecommendationInfo를 PythonApiRequestDto로 변환
+4. Python AI 서버에 HTTP 요청 전송
+5. Python 서버에서 AI 추천 결과 반환 (PythonApiResponseDto)
+6. 추천 결과를 JobRecommendations 엔티티로 변환하여 DB 저장
+7. 클라이언트에 JobRecommendationsResponseDto 형태로 응답
+
+### 연동 요구사항
+- **Python 서버 실행**: `http://127.0.0.1:8000`에서 실행 중이어야 함
+- **사전 조건**: 사용자의 추천 정보가 미리 등록되어 있어야 함
+- **타임아웃**: 30초 (RestClient 기본값)
+- **에러 처리**: Python 서버 응답 실패 시 적절한 에러 메시지 반환
+
+---
+
 ## ⚙️ 옵션 조회 API
 
 ### 1. 성별 옵션 조회
