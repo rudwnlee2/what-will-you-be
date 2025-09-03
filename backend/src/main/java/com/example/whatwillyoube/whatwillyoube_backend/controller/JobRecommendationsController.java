@@ -6,6 +6,7 @@ import com.example.whatwillyoube.whatwillyoube_backend.security.UserDetailsImpl;
 import com.example.whatwillyoube.whatwillyoube_backend.service.JobRecommendationsService;
 import com.example.whatwillyoube.whatwillyoube_backend.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -31,10 +32,20 @@ public class JobRecommendationsController {
         return ResponseEntity.ok(responseDtoList);
     }
 
+    /**
+     * 직업 추천 리스트 조회 API
+     * @param userDetails
+     * @param page
+     * @param size
+     * @return
+     */
     @GetMapping
-    public ResponseEntity<List<JobRecommendationsListDto>> getMyRecommendationsList(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<Page<JobRecommendationsListDto>> getMyRecommendationsList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                                    @RequestParam(value = "page", defaultValue = "0") int page,
+                                                                                    @RequestParam(value = "size", defaultValue = "12") int size) {
+
         Long memberId = userDetails.getMember().getId();
-        List<JobRecommendationsListDto> responseDtoList = jobRecommendationsService.getJobRecommendationsList(memberId);
+        Page<JobRecommendationsListDto> responseDtoList = jobRecommendationsService.getJobRecommendationsList(memberId, page, size);
 
         return ResponseEntity.ok(responseDtoList);
     }
