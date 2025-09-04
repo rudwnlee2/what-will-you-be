@@ -8,7 +8,7 @@
 export interface JobRecommendationDetail {
   recommendationId: number;
   jobName: string;
-  recommendedAt: string;
+  createdDate: string;
   jobSummary: string;
   reason: string;
   relatedMajors: string;
@@ -28,7 +28,7 @@ export interface JobRecommendationDetail {
 export interface JobRecommendationListItem {
   recommendationId: number;
   jobName: string;
-  recommendedAt: string;
+  createdDate: string;
 }
 
 /**
