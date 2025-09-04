@@ -5,6 +5,8 @@ from typing import List, Dict, Any
 
 from django.conf import settings
 from openai import OpenAI
+import json
+import re
 
 # ─────────────────────────────────────────────────────────────────────
 # 책임 1: OpenAI 클라이언트 초기화
@@ -70,3 +72,64 @@ def get_overall_reason(user_text: str, recommendations: List[Dict[str, Any]]) ->
         " (예시: <직업1>, <직업2>, <직업3>은 당신의 ~한 성향과 잘 어울립니다!)"
     )
     return _chat_once(system_msg, user_msg)
+
+# ─────────────────────────────────────────────────────────────────────
+# 책임 5: RAG - 직업 정보를 사용자 입력 내용에 최적화하여 요약
+# ─────────────────────────────────────────────────────────────────────
+def get_reconstruct_job_info(user_text: str, recommendations: List[Dict[str, Any]], model: str = "gpt-4o-mini",
+        temperature: float = 0.7, max_tokens: int = 600) -> List[Dict[str, Any]]:
+
+    reconstructs: List[Dict[str, Any]] = []
+
+    # 직업 한 개씩 요약
+    for rec in recommendations:
+        rec_json = json.dumps(rec, ensure_ascii=False)
+
+        system_msg = (
+            "너는 중학생과 고등학생을 대상으로 일하는 직업 추천 전문가다."
+            "항상 JSON만 반환해야 하며, 불필요한 설명은 포함하지 마라."
+            "포함해야 하는 키: {jobName, jobSum, way, major, certificate, pay, jobProspect, knowledge, jobEnvironment, jobValues}."
+            "jobName은 원본 그대로 두고, 나머지 모든 필드는 사용자의 관심사에 맞게 1~2문장으로 요약하거나 재작성해야 한다."
+            "JSON 외의 다른 텍스트는 절대 포함하지 마라."
+        )
+
+
+        user_msg = (
+            f"사용자 정보: {user_text}\n\n"
+            f"추천 직업 정보:\n{rec_json}\n\n"
+            "위의 정보를 바탕으로 JSON을 생성하라."
+            "사용자와 잘 맞는 직업 정보와,"
+            "사용자의 특성을 생각했을 때 특히 알아야 할 직업의 특성 정보를 포함하라."
+        )
+
+        response = _chat_once(system_msg, user_msg, model, temperature, max_tokens)
+
+        # JSON만 안전하게 추출 후 파싱
+        clean_response = extract_json_from_gpt(response)
+        try:
+            parsed = json.loads(clean_response)
+            reconstructs.append(parsed)
+
+        except json.JSONDecodeError:
+            # 실패하면 원본 직업 정보를 그대로 추가
+            reconstructs.append(rec)
+
+    return reconstructs
+
+# ─────────────────────────────────────────────────────────────────────
+# 책임 5-1: get_reconstruct_job_info() 안에서 gpt 답변 중 json만 추출하는 함수
+# ─────────────────────────────────────────────────────────────────────
+def extract_json_from_gpt(response: str):
+    try:
+        # 먼저 응답 전체가 JSON일 경우 바로 파싱
+        return json.loads(response)
+    except json.JSONDecodeError:
+        # 정규식으로 JSON 블록만 추출 (비탐욕 모드)
+        match = re.search(r"\{.*?\}|\[.*?\]", response, re.DOTALL)
+        if match:
+            block = match.group(0)
+            try:
+                return json.loads(block)
+            except json.JSONDecodeError:
+                return block  # 파싱 실패 시 문자열 그대로
+        return response
