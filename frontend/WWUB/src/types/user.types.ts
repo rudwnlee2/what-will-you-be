@@ -1,5 +1,16 @@
 // src/types/user.types.ts
 
+// 날짜 문자열을 위한 브랜드 타입
+/**
+ * "YYYY-MM-DD" 형식의 날짜 문자열을 위한 타입
+ */
+export type DateString = string & { readonly brand: 'DateString' };
+
+/**
+ * "YYYY-MM-DDTHH:mm:ss" 형식의 날짜-시간 문자열을 위한 타입
+ */
+export type DateTimeString = string & { readonly brand: 'DateTimeString' };
+
 /**
  * 회원가입 시 서버로 보내는 데이터 타입
  * POST /api/members/signup
@@ -9,7 +20,7 @@ export interface SignUpData {
   password: string;
   name: string;
   email: string;
-  birth: string; // "YYYY-MM-DD"
+  birth: DateString; // "YYYY-MM-DD"
   gender: 'MALE' | 'FEMALE';
   phone: string;
   school: string;
@@ -32,11 +43,11 @@ export interface UserProfile {
   loginId: string;
   name: string;
   email: string;
-  birth: string;
+  birth: DateString;
   gender: 'MALE' | 'FEMALE';
   phone: string;
   school: string;
-  createdDate: string; // ISO 8601 형식의 날짜 문자열
+  createdDate: DateTimeString; // ISO 8601 형식의 날짜 문자열
 }
 
 /**

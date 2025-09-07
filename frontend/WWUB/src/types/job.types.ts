@@ -1,4 +1,5 @@
 // src/types/job.types.ts
+import type { DateTimeString } from './user.types';
 
 /**
  * 직업 추천 상세 정보 타입
@@ -8,7 +9,7 @@
 export interface JobRecommendationDetail {
   recommendationId: number;
   jobName: string;
-  createdDate: string;
+  recommendedAt: DateTimeString;
   jobSummary: string;
   reason: string;
   relatedMajors: string;
@@ -28,7 +29,8 @@ export interface JobRecommendationDetail {
 export interface JobRecommendationListItem {
   recommendationId: number;
   jobName: string;
-  createdDate: string;
+  reason: string;
+  createdDate: DateTimeString;
 }
 
 /**
