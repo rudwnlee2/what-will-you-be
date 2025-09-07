@@ -11,6 +11,7 @@ import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberReposito
 import com.example.whatwillyoube.whatwillyoube_backend.repository.RecommendationInfoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,11 +54,12 @@ public class RecommendationService {
         );
 
         String pythonApiUrl = pythonApiBaseUrl + "/api/recommend/";
-
         ResponseEntity<PythonApiResponseDto> responseEntity;
         try {
             responseEntity = restClient.post()
                     .uri(pythonApiUrl)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
                     .body(pythonRequest)
                     .retrieve()
                     .toEntity(PythonApiResponseDto.class);
@@ -66,6 +68,7 @@ public class RecommendationService {
         }
 
         PythonApiResponseDto apiResponse = responseEntity.getBody();
+
         if (apiResponse == null || apiResponse.getRecommendedJobs() == null || apiResponse.getRecommendedJobs().isEmpty()) {
             throw new IllegalStateException("Python API로부터 유효한 추천 응답을 받지 못했습니다.");
         }

@@ -5,9 +5,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from django.http import JsonResponse
 import logging
 
 from .serializers.user_input import RecommendationRequestSerializer
+from .serializers.recommend_output import RecommendationResponseSerializer
 from .services.recommendation import generate_recommendation
 
 logger = logging.getLogger(__name__)
@@ -26,11 +28,19 @@ def _to_camel_item(item: Dict) -> Dict:
 class RecommendAPIView(APIView):
     def post(self, request):
         try:
+            # 요청 데이터 로그 출력
+            print(f"📝 수신 데이터: {request.data}")
+            print(f"📝 Content-Type: {request.content_type}")
+            
             # 1) 입력 검증
             req = RecommendationRequestSerializer(data=request.data)
             req.is_valid(raise_exception=True)
+            # views.py의 post 메소드 안
             input_data: Dict = req.validated_data
+            # validated_data에는 "member_id" (snake_case) 키만 존재합니다.
             member_id = input_data.get("member_id")
+            
+            print(f"✅ 검증된 데이터: {input_data}")
 
             # 2) 추천 생성
             result = generate_recommendation(input_data)
@@ -44,12 +54,15 @@ class RecommendAPIView(APIView):
             if not items:
                 return Response({"error": "추천 결과가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
-            # 4) 응답
+            # 4) 응답 - 디버깅용 로그 추가
             payload = {
-                "recommendations": items,
-                "gptMessage": gpt_msg,      # 자바와 camelCase 통일
-                "meta": {"memberId": member_id},
+                "recommendedJobs": items,   # Java가 기대하는 필드명
+                "memberId": member_id,      # Java DTO 구조에 맞춤
             }
+            
+            print(f"📤 전송 데이터: {payload}")
+            print(f"📤 전송 Content-Type: application/json")
+
             return Response(payload, status=status.HTTP_200_OK)
 
         except ValidationError as ve:

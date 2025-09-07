@@ -24,18 +24,29 @@ repositories {
 }
 
 dependencies {
+	// Spring Boot 기본 스타터
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	implementation 'commons-io:commons-io:2.11.0' // 최신 버전으로 변경 가능
+
+	// Lombok (보일러플레이트 코드 자동 생성)
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// MySQL 데이터베이스 드라이버
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// 테스트용 라이브러리
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// JJWT (JSON Web Token) 라이브러리
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON 직렬화 지원
-	implementation 'org.springframework.boot:spring-boot-starter-security' //스프링 시큐리티
-	implementation 'org.springframework.boot:spring-boot-starter-validation' //검증
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 
 tasks.named('test') {
