@@ -3,61 +3,95 @@
 import SiteHeader from '@/components/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useEffect, useMemo, useState } from 'react';
-import {
-  getAllMissionsWithType,
-  updateMissionStatus,
-  updateFriendMissionStatus,
-  deleteMission,
-  deleteFriendMission,
-  type AllMissionTypes,
-} from '@/api/mission';
-import { isLoggedIn } from '@/api/auth';
+import Pagination from '@/components/pagination';
+import { useEffect, useState } from 'react';
+import { isLoggedIn } from '@/lib/auth-client';
 import { CheckCircle, Trash2, Users, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+interface Mission {
+  id: string;
+  type: 'individual' | 'friend';
+  careerName: string;
+  title: string;
+  content: string;
+  status: 'progress' | 'completed';
+  createdAt: string;
+  completedAt?: string | null;
+  friendName?: string;
+}
+
+interface PaginationInfo {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
 export default function MissionsPage() {
   const router = useRouter();
-  const [missions, setMissions] = useState<AllMissionTypes[]>([]);
+  const [missions, setMissions] = useState<Mission[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [selectedMissionType, setSelectedMissionType] = useState<'individual' | 'friend'>(
     'individual',
   );
   const [selectedStatusTab, setSelectedStatusTab] = useState<'progress' | 'completed'>('progress');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const fetchMissions = async (page: number, type: string, status: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `/api/missions?page=${page}&limit=10&type=${type}&status=${status}`,
+      );
+      const result = await response.json();
+      setMissions(result.data);
+      setPagination(result.pagination);
+    } catch (error) {
+      console.error('Failed to fetch missions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isLoggedIn()) {
       router.replace('/login');
       return;
     }
-    setMissions(getAllMissionsWithType());
-  }, [router]);
+    setCurrentPage(1); // Reset to first page when filters change
+    fetchMissions(1, selectedMissionType, selectedStatusTab);
+  }, [router, selectedMissionType, selectedStatusTab]);
 
-  const completeMission = (mission: AllMissionTypes) => {
-    if (mission.type === 'individual') {
-      updateMissionStatus(mission.id, 'completed');
-    } else {
-      updateFriendMissionStatus(mission.id, 'completed');
+  useEffect(() => {
+    if (isLoggedIn()) {
+      fetchMissions(currentPage, selectedMissionType, selectedStatusTab);
     }
-    setMissions(getAllMissionsWithType());
+  }, [currentPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
-  const handleDeleteMission = (mission: AllMissionTypes) => {
-    if (mission.type === 'individual') {
-      deleteMission(mission.id);
-    } else {
-      deleteFriendMission(mission.id);
-    }
-    setMissions(getAllMissionsWithType());
+  const completeMission = async (missionId: string) => {
+    // TODO: Implement API call to complete mission
+    console.log('Complete mission:', missionId);
+    // Refresh data after completion
+    fetchMissions(currentPage, selectedMissionType, selectedStatusTab);
+  };
+
+  const handleDeleteMission = async (missionId: string) => {
+    // TODO: Implement API call to delete mission
+    console.log('Delete mission:', missionId);
     setShowDeleteConfirm(null);
+    // Refresh data after deletion
+    fetchMissions(currentPage, selectedMissionType, selectedStatusTab);
   };
-
-  const filteredMissions = useMemo(() => {
-    return missions.filter(
-      (mission) => mission.type === selectedMissionType && mission.status === selectedStatusTab,
-    );
-  }, [missions, selectedMissionType, selectedStatusTab]);
 
   const missionToDelete = missions.find((m) => m.id === showDeleteConfirm);
 
@@ -67,7 +101,20 @@ export default function MissionsPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <Card className="bg-white shadow">
           <CardContent className="p-6 sm:p-8">
-            <h1 className="text-2xl font-bold mb-6">미션 목록</h1>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold">미션 목록</h1>
+              {pagination && (
+                <div className="text-sm text-gray-600">
+                  총 {pagination.totalItems}개 중{' '}
+                  {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}-
+                  {Math.min(
+                    pagination.currentPage * pagination.itemsPerPage,
+                    pagination.totalItems,
+                  )}
+                  개
+                </div>
+              )}
+            </div>
 
             {/* Mission Type Tabs */}
             <div className="flex gap-2 mb-4">
@@ -115,7 +162,12 @@ export default function MissionsPage() {
               </Button>
             </div>
 
-            {filteredMissions.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-gray-600 mt-4">로딩 중...</p>
+              </div>
+            ) : missions.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-600 mb-4">
                   {selectedMissionType === 'individual'
@@ -145,68 +197,80 @@ export default function MissionsPage() {
                 )}
               </div>
             ) : (
-              <div className="space-y-4">
-                {filteredMissions.map((mission) => (
-                  <Card key={mission.id} className="bg-gray-50">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className="text-sm text-gray-600">{mission.careerName}</div>
-                            {mission.type === 'friend' && (
-                              <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                                <Users className="w-3 h-3" />
-                                {mission.friendName}
-                              </div>
+              <>
+                <div className="space-y-4">
+                  {missions.map((mission) => (
+                    <Card key={mission.id} className="bg-gray-50">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="text-sm text-gray-600">{mission.careerName}</div>
+                              {mission.type === 'friend' && (
+                                <div className="flex items-center gap-1 text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                                  <Users className="w-3 h-3" />
+                                  {mission.friendName}
+                                </div>
+                              )}
+                            </div>
+                            <h4 className="font-semibold text-lg">{mission.title}</h4>
+                          </div>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              mission.status === 'completed'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-orange-100 text-orange-800'
+                            }`}
+                          >
+                            {mission.status === 'completed' ? '완료' : '진행 중'}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 mb-4">{mission.content}</p>
+                        <div className="text-sm text-gray-500 mb-4">
+                          <div className="flex items-center gap-4">
+                            <span>생성일: {new Date(mission.createdAt).toLocaleDateString()}</span>
+                            {mission.completedAt && (
+                              <span>
+                                완료일: {new Date(mission.completedAt).toLocaleDateString()}
+                              </span>
                             )}
                           </div>
-                          <h4 className="font-semibold text-lg">{mission.title}</h4>
                         </div>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            mission.status === 'completed'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-orange-100 text-orange-800'
-                          }`}
-                        >
-                          {mission.status === 'completed' ? '완료' : '진행 중'}
-                        </span>
-                      </div>
-                      <p className="text-gray-700 mb-4">{mission.content}</p>
-                      <div className="text-sm text-gray-500 mb-4">
-                        <div className="flex items-center gap-4">
-                          <span>생성일: {new Date(mission.createdAt).toLocaleDateString()}</span>
-                          {mission.completedAt && (
-                            <span>
-                              완료일: {new Date(mission.completedAt).toLocaleDateString()}
-                            </span>
+                        <div className="flex gap-2">
+                          {mission.status === 'progress' && (
+                            <Button
+                              onClick={() => completeMission(mission.id)}
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              완료
+                            </Button>
                           )}
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        {mission.status === 'progress' && (
                           <Button
-                            onClick={() => completeMission(mission)}
+                            onClick={() => setShowDeleteConfirm(mission.id)}
                             size="sm"
-                            className="bg-green-600 hover:bg-green-700"
+                            variant="destructive"
                           >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            완료
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            삭제
                           </Button>
-                        )}
-                        <Button
-                          onClick={() => setShowDeleteConfirm(mission.id)}
-                          size="sm"
-                          variant="destructive"
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          삭제
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {pagination && pagination.totalPages > 1 && (
+                  <div className="mt-8">
+                    <Pagination
+                      currentPage={pagination.currentPage}
+                      totalPages={pagination.totalPages}
+                      onPageChange={handlePageChange}
+                    />
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
@@ -220,7 +284,10 @@ export default function MissionsPage() {
                 <Button variant="outline" onClick={() => setShowDeleteConfirm(null)}>
                   아니오
                 </Button>
-                <Button variant="destructive" onClick={() => handleDeleteMission(missionToDelete)}>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteMission(missionToDelete.id)}
+                >
                   예
                 </Button>
               </div>
