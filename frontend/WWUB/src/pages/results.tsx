@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import SiteHeader from '@/components/site-header';
+import SiteHeader from '../components/layout/site-header';
 import { useJobRecommendation } from '../hooks/useJobRecommendation';
 import { useAuth } from '../hooks/useAuth';
 
@@ -41,10 +41,8 @@ export default function ResultsPage() {
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
                 추천 결과를 찾을 수 없습니다
               </h1>
-              <p className="text-gray-600 mb-6">
-                먼저 진로 탐색 폼을 작성해주세요.
-              </p>
-              <Button 
+              <p className="text-gray-600 mb-6">먼저 진로 탐색 폼을 작성해주세요.</p>
+              <Button
                 onClick={() => navigate('/career-form')}
                 className="bg-blue-600 text-white hover:bg-blue-700"
               >
@@ -66,11 +64,14 @@ export default function ResultsPage() {
             <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
               나에게 추천하는 직업
             </h1>
-            
+
             <div className="grid gap-6">
               {recommendationsList.map((job) => (
-                <Card key={job.recommendationId} className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                      onClick={() => navigate(`/job-detail/${job.recommendationId}`)}>
+                <Card
+                  key={job.recommendationId}
+                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/job-detail/${job.recommendationId}`)}
+                >
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900 mb-2">{job.jobName}</h3>
@@ -85,19 +86,16 @@ export default function ResultsPage() {
                 </Card>
               ))}
             </div>
-            
+
             <div className="mt-8 text-center">
               <p className="text-gray-600 mb-4">
                 더 정확한 추천을 위해 정보를 업데이트하거나 새로운 분석을 받아보세요.
               </p>
               <div className="space-x-4">
-                <Button 
-                  onClick={() => navigate('/career-form')}
-                  variant="outline"
-                >
+                <Button onClick={() => navigate('/career-form')} variant="outline">
                   새로운 추천 받기
                 </Button>
-                <Button 
+                <Button
                   onClick={() => navigate('/')}
                   className="bg-blue-600 text-white hover:bg-blue-700"
                 >

@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, Users, Target, ArrowRight } from 'lucide-react';
-import SiteHeader from '@/components/site-header';
+import SiteHeader from '../components/layout/site-header';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-export default function CareerLandingPage() {
+export default function Homepage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const steps = [

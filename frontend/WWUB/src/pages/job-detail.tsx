@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import SiteHeader from '@/components/site-header';
+import SiteHeader from '../components/layout/site-header';
 import { useJobRecommendationDetail } from '../hooks/useJobRecommendation';
 
 export default function JobDetailPage() {
@@ -33,9 +33,7 @@ export default function JobDetailPage() {
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
                 직업 정보를 찾을 수 없습니다
               </h1>
-              <Button onClick={() => navigate('/results')}>
-                목록으로 돌아가기
-              </Button>
+              <Button onClick={() => navigate('/results')}>목록으로 돌아가기</Button>
             </CardContent>
           </Card>
         </main>
@@ -52,11 +50,7 @@ export default function JobDetailPage() {
         <Card className="bg-white shadow-xl">
           <CardContent className="p-8">
             <div className="mb-6">
-              <Button 
-                onClick={() => navigate('/results')} 
-                variant="outline" 
-                className="mb-4"
-              >
+              <Button onClick={() => navigate('/results')} variant="outline" className="mb-4">
                 ← 목록으로 돌아가기
               </Button>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.jobName}</h1>
@@ -128,9 +122,7 @@ export default function JobDetailPage() {
                 <Button onClick={() => navigate('/results')} variant="outline">
                   다른 추천 보기
                 </Button>
-                <Button onClick={() => navigate('/career-form')}>
-                  새로운 추천 받기
-                </Button>
+                <Button onClick={() => navigate('/career-form')}>새로운 추천 받기</Button>
               </div>
             </div>
           </CardContent>
