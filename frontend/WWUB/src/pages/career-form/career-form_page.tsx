@@ -1,7 +1,7 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SiteHeader from '@/components/site-header';
+import SiteHeader from '@/components/layout/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,7 +17,12 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '../../hooks/useAuth';
 import { useRecommendation } from '../../hooks/useRecommendation';
 import { useJobRecommendation } from '../../hooks/useJobRecommendation';
-import { MBTI_OPTIONS, HOLLAND_OPTIONS, JOB_VALUE_OPTIONS, SUBJECT_OPTIONS } from '../../constants/options';
+import {
+  MBTI_OPTIONS,
+  HOLLAND_OPTIONS,
+  JOB_VALUE_OPTIONS,
+  SUBJECT_OPTIONS,
+} from '../../constants/options';
 import { RecommendationInfoRequest, MBTI, Holland, JobValue } from '../../types/api';
 
 export default function CareerFormSinglePage() {
@@ -25,7 +30,7 @@ export default function CareerFormSinglePage() {
   const { isAuthenticated } = useAuth();
   const { updateRecommendation, isUpdating } = useRecommendation();
   const { createRecommendations, isCreating } = useJobRecommendation();
-  
+
   const [form, setForm] = useState<{
     dream: string;
     dreamReason: string;
@@ -51,15 +56,13 @@ export default function CareerFormSinglePage() {
   }, [isAuthenticated, navigate]);
 
   const handleSubjectChange = (subject: string, checked: boolean) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      favoriteSubjects: checked 
+      favoriteSubjects: checked
         ? [...prev.favoriteSubjects, subject]
-        : prev.favoriteSubjects.filter(s => s !== subject)
+        : prev.favoriteSubjects.filter((s) => s !== subject),
     }));
   };
-
-
 
   const isComplete = useMemo(() => {
     return (
@@ -72,8 +75,6 @@ export default function CareerFormSinglePage() {
       form.jobValue
     );
   }, [form]);
-
-
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,12 +101,12 @@ export default function CareerFormSinglePage() {
           },
           onError: (error) => {
             alert('직업 추천 생성 중 오류가 발생했습니다: ' + error.message);
-          }
+          },
         });
       },
       onError: (error) => {
         alert('진로 정보 저장 중 오류가 발생했습니다: ' + error.message);
-      }
+      },
     });
   };
 
@@ -122,128 +123,73 @@ export default function CareerFormSinglePage() {
               아래 항목을 한 번에 입력하면, 나에게 맞는 직업을 추천해드려요
             </p>
 
-
-              <form onSubmit={submit} className="space-y-8">
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1">
-                    <Label htmlFor="futureDream" className="font-semibold">
-                      장래희망
-                    </Label>
-                    <p className="text-sm text-gray-500 mt-1">당신의 목표를 자유롭게 적어주세요</p>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Textarea
-                      id="futureDream"
-                      placeholder="당신의 장래희망을 자유롭게 적어주세요"
-                      rows={4}
-                      value={form.dream}
-                      onChange={(e) => setForm((p) => ({ ...p, dream: e.target.value }))}
-                    />
-                  </div>
+            <form onSubmit={submit} className="space-y-8">
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
+                  <Label htmlFor="futureDream" className="font-semibold">
+                    장래희망
+                  </Label>
+                  <p className="text-sm text-gray-500 mt-1">당신의 목표를 자유롭게 적어주세요</p>
                 </div>
-
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1">
-                    <Label htmlFor="dreamReason" className="font-semibold">
-                      장래희망을 선택한 이유
-                    </Label>
-                    <p className="text-sm text-gray-500 mt-1">선택하신 이유를 알려주세요</p>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Textarea
-                      id="dreamReason"
-                      placeholder="왜 이 직업을 선택하셨나요?"
-                      rows={4}
-                      value={form.dreamReason}
-                      onChange={(e) => setForm((p) => ({ ...p, dreamReason: e.target.value }))}
-                    />
-                  </div>
+                <div className="md:col-span-2">
+                  <Textarea
+                    id="futureDream"
+                    placeholder="당신의 장래희망을 자유롭게 적어주세요"
+                    rows={4}
+                    value={form.dream}
+                    onChange={(e) => setForm((p) => ({ ...p, dream: e.target.value }))}
+                  />
                 </div>
+              </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1">
-                    <Label htmlFor="interests" className="font-semibold">
-                      관심사와 취미
-                    </Label>
-                    <p className="text-sm text-gray-500 mt-1">관심 있는 활동, 즐겨하는 취미</p>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Textarea
-                      id="interests"
-                      placeholder="관심 있는 활동, 즐겨하는 취미를 자유롭게 입력해주세요"
-                      rows={4}
-                      value={form.interest}
-                      onChange={(e) => setForm((p) => ({ ...p, interest: e.target.value }))}
-                    />
-                  </div>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
+                  <Label htmlFor="dreamReason" className="font-semibold">
+                    장래희망을 선택한 이유
+                  </Label>
+                  <p className="text-sm text-gray-500 mt-1">선택하신 이유를 알려주세요</p>
                 </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="font-semibold">MBTI 유형</Label>
-                    <Select
-                      value={form.mbti}
-                      onValueChange={(v) => setForm((p) => ({ ...p, mbti: v as MBTI }))}
-                    >
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="MBTI 유형을 선택하세요" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {MBTI_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="font-semibold">홀란드 유형</Label>
-                    <Select
-                      value={form.holland}
-                      onValueChange={(v) => setForm((p) => ({ ...p, holland: v as Holland }))}
-                    >
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="홀란드 유형을 선택하세요" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {HOLLAND_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="md:col-span-2">
+                  <Textarea
+                    id="dreamReason"
+                    placeholder="왜 이 직업을 선택하셨나요?"
+                    rows={4}
+                    value={form.dreamReason}
+                    onChange={(e) => setForm((p) => ({ ...p, dreamReason: e.target.value }))}
+                  />
                 </div>
+              </div>
 
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
+                  <Label htmlFor="interests" className="font-semibold">
+                    관심사와 취미
+                  </Label>
+                  <p className="text-sm text-gray-500 mt-1">관심 있는 활동, 즐겨하는 취미</p>
+                </div>
+                <div className="md:col-span-2">
+                  <Textarea
+                    id="interests"
+                    placeholder="관심 있는 활동, 즐겨하는 취미를 자유롭게 입력해주세요"
+                    rows={4}
+                    value={form.interest}
+                    onChange={(e) => setForm((p) => ({ ...p, interest: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <Label className="font-semibold">좋아하는 과목 (복수 선택 가능)</Label>
-                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {SUBJECT_OPTIONS.map((subject) => (
-                      <div key={subject} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={subject}
-                          checked={form.favoriteSubjects.includes(subject)}
-                          onCheckedChange={(checked) => handleSubjectChange(subject, checked as boolean)}
-                        />
-                        <Label htmlFor={subject}>{subject}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="font-semibold">직업 가치관</Label>
+                  <Label className="font-semibold">MBTI 유형</Label>
                   <Select
-                    value={form.jobValue}
-                    onValueChange={(v) => setForm((p) => ({ ...p, jobValue: v as JobValue }))}
+                    value={form.mbti}
+                    onValueChange={(v) => setForm((p) => ({ ...p, mbti: v as MBTI }))}
                   >
                     <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="가장 중요한 가치관을 선택하세요" />
+                      <SelectValue placeholder="MBTI 유형을 선택하세요" />
                     </SelectTrigger>
                     <SelectContent>
-                      {JOB_VALUE_OPTIONS.map((option) => (
+                      {MBTI_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
@@ -251,17 +197,73 @@ export default function CareerFormSinglePage() {
                     </SelectContent>
                   </Select>
                 </div>
-
-                <div className="flex justify-end">
-                  <Button
-                    type="submit"
-                    disabled={!isComplete || isUpdating || isCreating}
-                    className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700"
+                <div>
+                  <Label className="font-semibold">홀란드 유형</Label>
+                  <Select
+                    value={form.holland}
+                    onValueChange={(v) => setForm((p) => ({ ...p, holland: v as Holland }))}
                   >
-                    {isUpdating || isCreating ? '제출 중...' : '제출하기'}
-                  </Button>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="홀란드 유형을 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {HOLLAND_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </form>
+              </div>
+
+              <div>
+                <Label className="font-semibold">좋아하는 과목 (복수 선택 가능)</Label>
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {SUBJECT_OPTIONS.map((subject) => (
+                    <div key={subject} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={subject}
+                        checked={form.favoriteSubjects.includes(subject)}
+                        onCheckedChange={(checked) =>
+                          handleSubjectChange(subject, checked as boolean)
+                        }
+                      />
+                      <Label htmlFor={subject}>{subject}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="font-semibold">직업 가치관</Label>
+                <Select
+                  value={form.jobValue}
+                  onValueChange={(v) => setForm((p) => ({ ...p, jobValue: v as JobValue }))}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="가장 중요한 가치관을 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JOB_VALUE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={!isComplete || isUpdating || isCreating}
+                  className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  {isUpdating || isCreating ? '제출 중...' : '제출하기'}
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
       </main>

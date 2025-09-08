@@ -1,4 +1,4 @@
-import SiteHeader from '@/components/site-header';
+import SiteHeader from '@/components/layout/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Users, Heart } from 'lucide-react';
@@ -9,20 +9,20 @@ export default function CommunityPage() {
       icon: <MessageCircle className="w-8 h-8 text-blue-500" />,
       title: '진로 상담',
       description: '다른 사용자들과 진로 고민을 나누어보세요.',
-      status: '추후 업데이트 예정'
+      status: '추후 업데이트 예정',
     },
     {
       icon: <Users className="w-8 h-8 text-green-500" />,
       title: '동종업계 모임',
       description: '같은 분야에 관심 있는 사람들과 연결되세요.',
-      status: '추후 업데이트 예정'
+      status: '추후 업데이트 예정',
     },
     {
       icon: <Heart className="w-8 h-8 text-red-500" />,
       title: '성공 사례',
       description: '진로 변경에 성공한 사례들을 공유해보세요.',
-      status: '추후 업데이트 예정'
-    }
+      status: '추후 업데이트 예정',
+    },
   ];
 
   return (
@@ -60,12 +60,11 @@ export default function CommunityPage() {
             <CardContent>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">커뮤니티 기능 준비 중</h2>
               <p className="text-gray-600 mb-6">
-                더 나은 서비스를 위해 커뮤니티 기능을 개발 중입니다.<br/>
+                더 나은 서비스를 위해 커뮤니티 기능을 개발 중입니다.
+                <br />
                 빠른 시일 내에 만나볼 수 있도록 하겠습니다.
               </p>
-              <Button className="bg-blue-600 text-white hover:bg-blue-700">
-                알림 신청하기
-              </Button>
+              <Button className="bg-blue-600 text-white hover:bg-blue-700">알림 신청하기</Button>
             </CardContent>
           </Card>
         </div>

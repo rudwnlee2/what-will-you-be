@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import SiteHeader from '@/components/site-header';
+import SiteHeader from '@/components/layout/site-header';
 import { getCurrentUser } from '@/api/auth';
 
 export default function CareerFormPage() {

@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Search, MoreVertical, UserPlus, Check, X, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import SiteHeader from '@/components/site-header';
+import SiteHeader from '@/components/layout/site-header';
 import {
   getFriends,
   getFriendRequests,

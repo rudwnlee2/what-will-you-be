@@ -1,9 +1,9 @@
 'use client';
 
-import SiteHeader from '@/components/site-header';
+import SiteHeader from '@/components/layout/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import Pagination from '@/components/pagination';
+import Pagination from '@/components/layout/pagination';
 import { useEffect, useState } from 'react';
 import { isLoggedIn } from '@/lib/auth-client';
 import { CheckCircle, Trash2, Users, User } from 'lucide-react';
