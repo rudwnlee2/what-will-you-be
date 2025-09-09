@@ -6,7 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { login as apiLogin, signup as apiSignup, getMyProfile } from '../api/members';
 import { saveToken, removeToken, getToken } from '../api/auth'; // 토큰 관리 헬퍼
 // 2. 새로운 타입 정의를 가져옵니다.
-import type { LoginData, SignUpData } from '../types/user.types';
+import type { LoginData } from '../types/user.types';
+import type { MemberRequest } from '../types/api';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ export const useAuth = () => {
   return {
     // Methods
     login: (credentials: LoginData) => loginMutation.mutate(credentials),
-    signup: (memberData: SignUpData) => signupMutation.mutate(memberData),
+    signup: (memberData: MemberRequest) => signupMutation.mutate(memberData),
     logout,
 
     // State & Data

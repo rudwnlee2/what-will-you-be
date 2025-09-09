@@ -4,11 +4,10 @@ import SiteHeader from '@/components/layout/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/layout/pagination';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { isLoggedIn } from '@/lib/auth-client';
 import { Eye } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 interface HistorySession {
   id: string;
@@ -31,7 +30,8 @@ interface PaginationInfo {
 }
 
 export default function HistoryPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [history, setHistory] = useState<HistorySession[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,32 +39,35 @@ export default function HistoryPage() {
 
   const fetchHistory = async (page: number) => {
     setLoading(true);
-    try {
-      const response = await fetch(`/api/history?page=${page}&limit=10`);
-      const result = await response.json();
-      setHistory(result.data);
-      setPagination(result.pagination);
-    } catch (error) {
-      console.error('Failed to fetch history:', error);
-    } finally {
+    // Mock data for now
+    setTimeout(() => {
+      setHistory([]);
+      setPagination({
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: 10,
+        hasNextPage: false,
+        hasPrevPage: false
+      });
       setLoading(false);
-    }
+    }, 1000);
   };
 
   useEffect(() => {
-    if (!isLoggedIn()) {
-      router.replace('/login');
+    if (!isAuthenticated) {
+      navigate('/login');
       return;
     }
     fetchHistory(currentPage);
-  }, [router, currentPage]);
+  }, [navigate, currentPage, isAuthenticated]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
   const viewSavedResults = (sessionId: string) => {
-    router.push(`/results/saved/${sessionId}`);
+    navigate(`/results/saved/${sessionId}`);
   };
 
   return (
@@ -97,7 +100,7 @@ export default function HistoryPage() {
               <div className="text-center py-12">
                 <p className="text-gray-600 mb-4">아직 추천 기록이 없습니다.</p>
                 <Button
-                  onClick={() => router.push('/career-form')}
+                  onClick={() => navigate('/career-form')}
                   className="bg-blue-600 text-white hover:bg-blue-700"
                 >
                   진로 탐색하러 가기
@@ -133,14 +136,10 @@ export default function HistoryPage() {
                             className="relative bg-white rounded-lg border shadow-sm hover:shadow transition p-3 cursor-pointer hover:border-blue-300"
                           >
                             <div className="relative w-full h-24 rounded overflow-hidden">
-                              <Image
-                                src={
-                                  c.image ||
-                                  '/placeholder.svg?height=96&width=192&query=career%20thumb'
-                                }
+                              <img
+                                src={c.image || '/placeholder.svg'}
                                 alt={c.name}
-                                fill
-                                className="object-cover"
+                                className="w-full h-full object-cover"
                               />
                               {h.confirmedCareerId === c.id && (
                                 <div className="absolute top-1 right-1 bg-yellow-400 rounded-full p-1">

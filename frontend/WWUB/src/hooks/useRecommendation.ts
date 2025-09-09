@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // 1. 새로 만든 API 함수들을 가져옵니다.
 import { getRecommendationInfo, updateRecommendationInfo } from '../api/recommendations';
-import type { RecommendationInfo } from '../types/recommendation.types';
+import type { RecommendationInfoRequest } from '../types/api';
 import { getToken } from '../api/auth';
 
 export const useRecommendation = () => {
@@ -31,7 +31,7 @@ export const useRecommendation = () => {
     error: infoQuery.error,
 
     // Methods & Status (Mutation)
-    update: (data: RecommendationInfo) => updateMutation.mutate(data),
+    updateRecommendation: (data: RecommendationInfoRequest, options?: any) => updateMutation.mutate(data, options),
     isUpdating: updateMutation.isPending,
     updateError: updateMutation.error,
   };

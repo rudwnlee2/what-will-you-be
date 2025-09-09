@@ -5,10 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/layout/pagination';
 import { useEffect, useState } from 'react';
-import { isLoggedIn } from '@/lib/auth-client';
 import { CheckCircle, Trash2, Users, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 interface Mission {
   id: string;
@@ -32,7 +31,8 @@ interface PaginationInfo {
 }
 
 export default function MissionsPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [missions, setMissions] = useState<Mission[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,31 +45,32 @@ export default function MissionsPage() {
 
   const fetchMissions = async (page: number, type: string, status: string) => {
     setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/missions?page=${page}&limit=10&type=${type}&status=${status}`,
-      );
-      const result = await response.json();
-      setMissions(result.data);
-      setPagination(result.pagination);
-    } catch (error) {
-      console.error('Failed to fetch missions:', error);
-    } finally {
+    // Mock data for now
+    setTimeout(() => {
+      setMissions([]);
+      setPagination({
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: 0,
+        itemsPerPage: 10,
+        hasNextPage: false,
+        hasPrevPage: false
+      });
       setLoading(false);
-    }
+    }, 1000);
   };
 
   useEffect(() => {
-    if (!isLoggedIn()) {
-      router.replace('/login');
+    if (!isAuthenticated) {
+      navigate('/login');
       return;
     }
     setCurrentPage(1); // Reset to first page when filters change
     fetchMissions(1, selectedMissionType, selectedStatusTab);
-  }, [router, selectedMissionType, selectedStatusTab]);
+  }, [navigate, selectedMissionType, selectedStatusTab, isAuthenticated]);
 
   useEffect(() => {
-    if (isLoggedIn()) {
+    if (isAuthenticated) {
       fetchMissions(currentPage, selectedMissionType, selectedStatusTab);
     }
   }, [currentPage]);

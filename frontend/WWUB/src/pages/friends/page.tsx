@@ -11,68 +11,60 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Search, MoreVertical, UserPlus, Check, X, Users } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import SiteHeader from '@/components/layout/site-header';
-import {
-  getFriends,
-  getFriendRequests,
-  searchUsers,
-  addFriend,
-  acceptFriendRequest,
-  rejectFriendRequest,
-  removeFriend,
-  type Friend,
-  type FriendRequest,
-} from '@/api/friends';
-import { addFriendMission } from '@/api/mission';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function FriendsPage() {
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [friends, setFriends] = useState<any[]>([]);
+  const [friendRequests, setFriendRequests] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Friend[]>([]);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showMissionModal, setShowMissionModal] = useState(false);
-  const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
+  const [selectedFriend, setSelectedFriend] = useState<any | null>(null);
   const [isGeneratingMission, setIsGeneratingMission] = useState(false);
-  const router = useRouter();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    setFriends(getFriends());
-    setFriendRequests(getFriendRequests());
-  }, []);
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    // Mock data for now
+    setFriends([]);
+    setFriendRequests([]);
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (searchQuery.trim()) {
-      setSearchResults(searchUsers(searchQuery));
+      // Mock search results
+      setSearchResults([]);
     } else {
       setSearchResults([]);
     }
   }, [searchQuery]);
 
   const handleAddFriend = (userId: string, userName: string) => {
-    addFriend(userId, userName);
+    console.log('Add friend:', userId, userName);
     setSearchResults([]);
     setSearchQuery('');
   };
 
   const handleAcceptRequest = (requestId: string, userName: string) => {
-    acceptFriendRequest(requestId, userName);
-    setFriends(getFriends());
-    setFriendRequests(getFriendRequests());
+    console.log('Accept request:', requestId, userName);
   };
 
   const handleRejectRequest = (requestId: string) => {
-    rejectFriendRequest(requestId);
-    setFriendRequests(getFriendRequests());
+    console.log('Reject request:', requestId);
   };
 
   const handleRemoveFriend = (friendId: string) => {
-    removeFriend(friendId);
-    setFriends(getFriends());
+    console.log('Remove friend:', friendId);
   };
 
   const handleViewFriend = (friendId: string) => {
-    router.push(`/friends/info?id=${friendId}`);
+    navigate(`/friends/info/${friendId}`);
   };
 
   const handleCreateFriendMission = (friend: Friend) => {
@@ -113,7 +105,7 @@ export default function FriendsPage() {
         setSelectedFriend(null);
 
         // Navigate to missions page to show the new friend mission
-        router.push('/missions');
+        navigate('/missions');
       }
     } catch (error) {
       console.error('Failed to generate friend mission:', error);

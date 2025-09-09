@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 export default function PrivacyPage() {
@@ -6,7 +6,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen bg-purple-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link
-          href="/"
+          to="/"
           className="inline-flex items-center text-purple-600 hover:text-purple-700 mb-6 group"
         >
           <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />

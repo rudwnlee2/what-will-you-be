@@ -11,7 +11,7 @@ import {
 import { getToken } from '../api/auth';
 
 /** 직업 추천 목록과 생성/삭제를 관리하는 훅 */
-export const useJobRecommendations = () => {
+export const useJobRecommendation = () => {
   const queryClient = useQueryClient();
 
   const listQuery = useQuery({
@@ -44,7 +44,7 @@ export const useJobRecommendations = () => {
     listError: listQuery.error,
 
     // Methods & Status (Create)
-    create: () => createMutation.mutate(),
+    createRecommendations: (data: any, options?: any) => createMutation.mutate(data, options),
     isCreating: createMutation.isPending,
     createError: createMutation.error,
 

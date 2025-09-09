@@ -1,19 +1,11 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useParams, useNavigate } from 'react-router-dom';
 import SiteHeader from '@/components/layout/site-header';
 import { Card } from '@/components/ui/card';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getProfile } from '@/api/profile';
-import {
-  addMission,
-  hasActiveMissionForCareer,
-  updateMissionStatus,
-  deleteMission,
-  type Mission,
-} from '@/api/mission';
+import { useAuth } from '../../../hooks/useAuth';
 import { AlertCircle, Trash2, CheckCircle } from 'lucide-react';
 
 type Career = {
@@ -36,15 +28,11 @@ type Career = {
 };
 
 export default function ResultDetailPage() {
-  const params = useSearchParams();
-  const router = useRouter();
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [careers, setCareers] = useState<Career[]>([]);
   const [current, setCurrent] = useState<Career | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
-  const [currentMission, setCurrentMission] = useState<Mission | null>(null);
-  const [isGeneratingMission, setIsGeneratingMission] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const id = params.get('id') ?? '';
+  const { user } = useAuth();
   const guarded = useRef(false);
 
   useEffect(() => {
@@ -52,7 +40,7 @@ export default function ResultDetailPage() {
     if (!raw) {
       if (!guarded.current) {
         guarded.current = true;
-        router.replace('/results');
+        navigate('/results');
       }
       return;
     }
@@ -65,81 +53,21 @@ export default function ResultDetailPage() {
     } catch {
       if (!guarded.current) {
         guarded.current = true;
-        router.replace('/results');
+        navigate('/results');
       }
     }
   }, [id]);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const profileData = await getProfile();
-      setProfile(profileData);
-    };
-    fetchProfile();
-  }, []);
 
-  useEffect(() => {
-    if (current) {
-      const missions = JSON.parse(localStorage.getItem('userMissions') || '[]');
-      const activeMission = missions.find(
-        (m: Mission) => m.careerId === current.id && m.status === 'progress',
-      );
-      setCurrentMission(activeMission || null);
-    }
-  }, [current]);
+
+
 
   const otherCareers = useMemo(
     () => careers.filter((c) => c.id !== current?.id),
     [careers, current],
   );
 
-  const generateMission = async () => {
-    if (!current || hasActiveMissionForCareer(current.id)) return;
 
-    setIsGeneratingMission(true);
-    try {
-      const response = await fetch('/api/missions/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          careerName: current.name,
-          careerDetails: current.role,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        const newMission = addMission({
-          careerId: current.id,
-          careerName: current.name,
-          title: data.mission.title,
-          content: data.mission.content,
-        });
-        setCurrentMission(newMission);
-      }
-    } catch (error) {
-      console.error('Failed to generate mission:', error);
-    } finally {
-      setIsGeneratingMission(false);
-    }
-  };
-
-  const completeMission = () => {
-    if (!currentMission) return;
-    updateMissionStatus(currentMission.id, 'completed');
-    setCurrentMission({
-      ...currentMission,
-      status: 'completed',
-      completedAt: new Date().toISOString(),
-    });
-  };
-
-  const handleDeleteMission = () => {
-    if (!currentMission) return;
-    deleteMission(currentMission.id);
-    setCurrentMission(null);
-    setShowDeleteConfirm(false);
-  };
 
   if (!current) return null;
 
@@ -163,11 +91,10 @@ export default function ResultDetailPage() {
               >
                 <div className="flex items-center gap-3">
                   <div className="relative w-16 h-12 rounded overflow-hidden">
-                    <Image
-                      src={c.image || '/placeholder.svg?height=96&width=192&query=career%20thumb'}
+                    <img
+                      src={c.image || '/placeholder.svg'}
                       alt={c.name}
-                      fill
-                      className="object-cover"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <div className="text-sm font-semibold text-gray-900">{c.name}</div>
@@ -181,23 +108,16 @@ export default function ResultDetailPage() {
             <Card className="bg-white rounded-xl shadow p-6 sm:p-8 relative">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="relative w-full h-64 rounded-lg overflow-hidden">
-                  <Image
-                    src={
-                      current.image || '/placeholder.svg?height=256&width=512&query=career%20image'
-                    }
+                  <img
+                    src={current.image || '/placeholder.svg'}
                     alt={current.name}
-                    fill
-                    className="object-cover"
+                    className="w-full h-full object-cover"
                   />
-                  {profile?.avatarDataUrl && (
+                  {user?.name && (
                     <div className="absolute bottom-0 right-0 p-2">
-                      <Image
-                        src={profile.avatarDataUrl || '/placeholder.svg'}
-                        alt="Profile Avatar"
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
+                      <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        {user.name.charAt(0)}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -249,18 +169,15 @@ export default function ResultDetailPage() {
               </div>
 
               <div className="mt-8 border-t pt-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">미션</h3>
+                <div className="text-center">
                   <Button
-                    onClick={generateMission}
-                    disabled={isGeneratingMission || hasActiveMissionForCareer(current.id)}
+                    onClick={() => navigate('/results')}
                     className="bg-blue-600 text-white hover:bg-blue-700"
                   >
-                    {isGeneratingMission ? '미션 생성 중...' : '미션 받기'}
+                    다른 추천 결과 보기
                   </Button>
                 </div>
-
-                {hasActiveMissionForCareer(current.id) && !currentMission && (
+              </div> && !currentMission && (
                   <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-3 rounded-lg mb-4">
                     <AlertCircle className="w-4 h-4" />
                     <span className="text-sm">미션을 완료한 후 다시 시도해 주세요.</span>

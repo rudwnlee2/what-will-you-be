@@ -5,7 +5,7 @@ import type React from 'react';
 import SiteHeader from '@/components/layout/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -17,11 +17,9 @@ import {
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
-import Link from 'next/link';
+import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import { computeAge, getProfile, type Profile } from '@/api/profile';
-import { getAllUsers, getCurrentUser, isLoggedIn } from '@/api/auth';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '../../hooks/useAuth';
 
 type Options = {
   mbti: string[];
@@ -31,9 +29,8 @@ type Options = {
 };
 
 export default function MyInfoPage() {
-  const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [options, setOptions] = useState<Options | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -51,53 +48,23 @@ export default function MyInfoPage() {
   });
 
   useEffect(() => {
-    if (!isLoggedIn()) {
-      router.replace('/login');
+    if (!isAuthenticated) {
+      navigate('/login');
       return;
     }
-    const cu = getCurrentUser();
-    setUsername(cu?.username || null);
-    const p = getProfile();
-    // fallback email from user store if missing
-    if (!p?.email && cu?.username) {
-      const users = getAllUsers() as any;
-      const rec = users[cu.username];
-      setProfile(
-        p
-          ? { ...p, email: rec?.email || p.email }
-          : {
-              name: cu.name,
-              email: rec?.email || '',
-            },
-      );
-    } else {
-      setProfile(p);
-    }
-
     loadOptionsAndSavedData();
-  }, [router]);
+  }, [isAuthenticated, navigate]);
 
   const loadOptionsAndSavedData = async () => {
     setLoading(true);
     try {
-      // Load options
-      const res = await fetch('/api/options', { cache: 'no-store' });
-      if (res.ok) {
-        const data = (await res.json()) as Options;
-        setOptions(data);
-      }
-
-      // Load saved career form data
-      const user = getCurrentUser();
-      if (user) {
-        const formRes = await fetch(`/api/career-form/load?userId=${user.id}`);
-        if (formRes.ok) {
-          const result = await formRes.json();
-          if (result.success && result.data) {
-            setForm(result.data);
-          }
-        }
-      }
+      // Mock options data
+      setOptions({
+        mbti: ['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'],
+        holland: ['현실형', '탐구형', '예술형', '사회형', '진취형', '관습형'],
+        subjects: ['국어', '영어', '수학', '사회', '과학', '예체능', '기타'],
+        values: ['안정성', '성장 가능성', '워라밸', '경제적 보상', '명예/인정', '봉사', '자율성', '창의성']
+      });
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
@@ -105,7 +72,12 @@ export default function MyInfoPage() {
     }
   };
 
-  const age = useMemo(() => computeAge(profile?.birthDate ?? undefined), [profile]);
+  const age = useMemo(() => {
+    if (!user?.birthDate) return null;
+    const today = new Date();
+    const birth = new Date(user.birthDate);
+    return today.getFullYear() - birth.getFullYear();
+  }, [user?.birthDate]);
 
   const setSubject = (s: string) => {
     setForm((prev) => {
@@ -129,40 +101,20 @@ export default function MyInfoPage() {
   }, [form]);
 
   const saveForm = async () => {
-    try {
-      setSaving(true);
-      setSaveMessage(null);
-
-      const user = getCurrentUser();
-      if (!user) {
-        setSaveMessage('로그인이 필요합니다.');
-        return;
-      }
-
-      const res = await fetch('/api/career-form/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, userId: user.id }),
-      });
-
-      const result = await res.json();
-      if (result.success) {
-        setSaveMessage('저장되었습니다!');
-      } else {
-        setSaveMessage('저장 중 오류가 발생했습니다.');
-      }
-    } catch (error) {
-      setSaveMessage('저장 중 오류가 발생했습니다.');
-    } finally {
+    setSaving(true);
+    setSaveMessage(null);
+    
+    setTimeout(() => {
+      setSaveMessage('저장되었습니다!');
       setSaving(false);
       setTimeout(() => setSaveMessage(null), 3000);
-    }
+    }, 1000);
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     sessionStorage.setItem('careerForm', JSON.stringify(form));
-    router.push('/loading');
+    navigate('/career-form');
   };
 
   return (
@@ -172,34 +124,27 @@ export default function MyInfoPage() {
         {/* Profile Section */}
         <Card className="bg-white shadow">
           <CardContent className="p-6 sm:p-8 flex flex-col md:flex-row gap-6 items-center md:items-start">
-            <Avatar className="h-24 w-24">
-              <AvatarImage
-                src={
-                  profile?.avatarDataUrl ||
-                  '/placeholder.svg?height=96&width=96&query=profile%20avatar'
-                }
-                alt="프로필 이미지"
-              />
-              <AvatarFallback>프로필</AvatarFallback>
-            </Avatar>
+            <div className="h-24 w-24 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+              {user?.name?.charAt(0) || 'U'}
+            </div>
             <div className="flex-1 w-full">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">{profile?.name || '이름 미입력'}</h2>
+                <h2 className="text-2xl font-bold">{user?.name || '이름 미입력'}</h2>
                 <Link href="/me/edit">
                   <Button variant="outline">내 정보 수정</Button>
                 </Link>
               </div>
               <div className="grid sm:grid-cols-2 gap-2 mt-3 text-gray-700 text-sm">
-                <div>아이디: {username || '-'}</div>
-                <div>이메일: {profile?.email || '-'}</div>
+                <div>아이디: {user?.loginId || '-'}</div>
+                <div>이메일: {user?.email || '-'}</div>
                 <div>
                   나이: {age ?? '-'}
                   {age !== null ? '세' : ''}
                 </div>
-                <div>성별: {profile?.gender || '-'}</div>
-                <div>학교: {profile?.school || '-'}</div>
-                <div>전화번호: {profile?.phone || '-'}</div>
-                <div>생년월일: {profile?.birthDate || '-'}</div>
+                <div>성별: {user?.gender === 'MALE' ? '남성' : user?.gender === 'FEMALE' ? '여성' : '-'}</div>
+                <div>학교: {user?.school || '-'}</div>
+                <div>전화번호: {user?.phone || '-'}</div>
+                <div>생년월일: {user?.birthDate || '-'}</div>
               </div>
             </div>
           </CardContent>

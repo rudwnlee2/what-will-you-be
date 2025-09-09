@@ -1,13 +1,14 @@
 // src/api/members.ts
 
 import axiosInstance from './axiosInstance';
-import type { LoginData, SignUpData, UpdateProfileData, UserProfile } from '../types/user.types';
+import type { LoginData, UpdateProfileData, UserProfile } from '../types/user.types';
+import type { MemberRequest } from '../types/api';
 
 /**
  * 1. 회원가입
  * POST /api/members/signup
  */
-export const signup = async (data: SignUpData): Promise<UserProfile> => {
+export const signup = async (data: MemberRequest): Promise<UserProfile> => {
   const response = await axiosInstance.post('/api/members/signup', data);
   return response.data;
 };

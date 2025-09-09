@@ -1,13 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 import { useEffect, useState } from 'react';
 
 export default function SiteHeader() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
-  const { profile, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,10 +68,10 @@ export default function SiteHeader() {
           </nav>
 
           <div className="flex items-center space-x-3">
-            {isAuthenticated && profile ? (
+            {isAuthenticated && user ? (
               <div className="flex items-center space-x-4">
                 <span className="text-gray-900 font-semibold">
-                  {profile.name}씨 어서오세요
+                  {user.name}씨 어서오세요
                 </span>
                 <Button onClick={logout} variant="ghost" className="font-medium text-gray-700">
                   로그아웃

@@ -7,11 +7,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { getProfile, setProfile, type Profile, clearAllPersonalData } from '@/api/profile';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { AlertTriangle } from 'lucide-react';
+import { useAuth } from '../../../hooks/useAuth';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,26 +22,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {
-  getAllUsers,
-  getCurrentUser,
-  isLoggedIn,
-  setCurrentUser,
-  clearCurrentUser,
-} from '@/api/auth';
+
 
 export default function EditProfilePage() {
-  const router = useRouter();
-  const [profile, setProfileState] = useState<Profile>({
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const [profile, setProfileState] = useState({
     name: '',
     email: '',
     birthDate: '',
     gender: '',
     phone: '',
     school: '',
-    avatarDataUrl: '',
   });
-  const [username, setUsername] = useState<string>('');
   const [preview, setPreview] = useState<string | undefined>(undefined);
   const [saving, setSaving] = useState(false);
 
@@ -52,33 +44,21 @@ export default function EditProfilePage() {
   const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn()) {
-      router.replace('/login');
+    if (!isAuthenticated) {
+      navigate('/login');
       return;
     }
-    const cu = getCurrentUser();
-    const uname = cu?.username || '';
-    setUsername(uname);
-    const p = getProfile();
-    if (p) {
-      setProfileState({ ...profile, ...p });
-      setPreview(p.avatarDataUrl);
-    } else {
-      // fallback from users store if any
-      const users = getAllUsers() as any;
-      const rec = uname ? users[uname] : null;
+    if (user) {
       setProfileState({
-        name: cu?.name || '',
-        email: rec?.email || '',
-        birthDate: rec?.birthDate || '',
-        gender: rec?.gender || '',
-        phone: '',
-        school: '',
-        avatarDataUrl: '',
+        name: user.name || '',
+        email: user.email || '',
+        birthDate: user.birthDate || '',
+        gender: user.gender || '',
+        phone: user.phone || '',
+        school: user.school || '',
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, [isAuthenticated, navigate, user]);
 
   useEffect(() => {
     setPasswordMismatch(!!confirmPassword && password !== confirmPassword);
@@ -101,47 +81,16 @@ export default function EditProfilePage() {
     if (passwordMismatch) return;
     setSaving(true);
 
-    // Save profile to profile store
-    setProfile(profile);
-
-    // Update users store (name, email, password if provided)
-    try {
-      const users = getAllUsers() as any;
-      const rec = users[username] || {};
-      users[username] = {
-        ...rec,
-        username,
-        name: profile.name,
-        email: profile.email,
-        password: password ? password : rec.password,
-        birthDate: profile.birthDate || rec.birthDate,
-        gender: profile.gender || rec.gender,
-      };
-      localStorage.setItem('wwub_users', JSON.stringify(users));
-      // Update current user name for header greeting
-      setCurrentUser({ username, name: profile.name });
-    } catch {}
-
+    // Mock save operation
     setTimeout(() => {
       setSaving(false);
-      router.push('/me');
-    }, 300);
+      navigate('/me');
+    }, 1000);
   };
 
   const onDeleteAccount = () => {
-    try {
-      // Remove from users db
-      const users = getAllUsers() as any;
-      if (username && users[username]) {
-        delete users[username];
-        localStorage.setItem('wwub_users', JSON.stringify(users));
-      }
-      // Clear auth and personal data
-      clearCurrentUser();
-      clearAllPersonalData();
-    } finally {
-      router.replace('/');
-    }
+    // Mock delete operation
+    navigate('/');
   };
 
   return (
@@ -158,11 +107,10 @@ export default function EditProfilePage() {
                 <div className="mt-2 flex items-center gap-4">
                   <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-100">
                     {preview ? (
-                      <Image
-                        src={preview || '/placeholder.svg?height=96&width=96&query=avatar'}
+                      <img
+                        src={preview || '/placeholder.svg'}
                         alt="미리보기"
-                        fill
-                        className="object-cover"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
@@ -257,7 +205,7 @@ export default function EditProfilePage() {
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="username">아이디</Label>
-                    <Input id="username" value={username} disabled />
+                    <Input id="username" value={user?.loginId || ''} disabled />
                   </div>
                   <div>
                     <Label htmlFor="birthDate">생년월일</Label>

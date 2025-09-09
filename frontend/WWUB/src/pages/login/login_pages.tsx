@@ -7,13 +7,13 @@ import { Link } from "react-router-dom"
 import { useAuth } from "../../hooks/useAuth"
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("")
+  const [loginId, setLoginId] = useState("")
   const [password, setPassword] = useState("")
   const { login, isLoginLoading, loginError } = useAuth()
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    login({ username: username.trim(), password })
+    login({ loginId: loginId.trim(), password })
   }
 
   return (
@@ -34,15 +34,15 @@ export default function LoginPage() {
 
           <form className="space-y-6" onSubmit={onSubmit}>
             <div>
-              <Label htmlFor="username" className="text-gray-700 font-medium mb-2 block">
+              <Label htmlFor="loginId" className="text-gray-700 font-medium mb-2 block">
                 아이디
               </Label>
               <Input
-                id="username"
+                id="loginId"
                 type="text"
                 placeholder="아이디를 입력하세요"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={loginId}
+                onChange={(e) => setLoginId(e.target.value)}
               />
             </div>
             <div>

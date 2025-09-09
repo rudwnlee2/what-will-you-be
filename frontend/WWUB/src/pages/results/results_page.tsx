@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useMemo, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import SiteHeader from '@/components/layout/site-header';
 import { Card } from '@/components/ui/card';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { getProfile, addHistory } from '@/api/profile';
+import { useAuth } from '../../hooks/useAuth';
 
 type Career = {
   id: string;
@@ -28,62 +27,31 @@ type Career = {
 };
 
 export default function ResultsPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [careers, setCareers] = useState<Career[]>([]);
   const [selected, setSelected] = useState<number | null>(0);
   const [flip, setFlip] = useState<Record<number, boolean>>({});
-  const [profile, setProfile] = useState<any>(null);
   const savedRef = useRef(false);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const profileData = await getProfile();
-      setProfile(profileData);
-    };
 
-    fetchProfile();
-  }, []);
 
   useEffect(() => {
     const raw = sessionStorage.getItem('recommendationResult');
     if (!raw) {
-      router.replace('/career-form');
+      navigate('/career-form');
       return;
     }
     try {
       const data = JSON.parse(raw);
       setCareers(data.careers || []);
-      if (!savedRef.current) {
-        const session = addHistory({
-          careers: (data.careers || []).map((c: any) => ({
-            id: c.id,
-            name: c.name,
-            image: c.image,
-          })),
-        });
-        saveResultsToBackend(session.id, data.careers);
-        savedRef.current = true;
-      }
+      savedRef.current = true;
     } catch {
-      router.replace('/career-form');
+      navigate('/career-form');
     }
-  }, [router]);
+  }, [navigate]);
 
-  const saveResultsToBackend = async (sessionId: string, careers: Career[]) => {
-    try {
-      await fetch('/api/results/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          careers,
-          userId: 'current-user', // In real app, get from auth
-        }),
-      });
-    } catch (error) {
-      console.error('Failed to save results to backend:', error);
-    }
-  };
+
 
   const handleCardClick = (idx: number) => {
     setSelected(idx);
@@ -113,7 +81,7 @@ export default function ResultsPage() {
                 className={`flex-1 transition-all duration-300 ${isSelected ? 'md:flex-[2] scale-[1.02]' : 'md:flex-[1] opacity-90'} ${selected != null && !isSelected ? 'md:opacity-60' : ''}`}
                 onClick={() => handleCardClick(idx)}
               >
-                <FlipCard career={c} flipped={!!flip[idx]} profile={profile} />
+                <FlipCard career={c} flipped={!!flip[idx]} user={user} />
               </div>
             );
           })}
@@ -122,7 +90,7 @@ export default function ResultsPage() {
         {selectedCareer && (
           <div className="mt-8 flex justify-center">
             <Button
-              onClick={() => router.push(`/results/detail?id=${selectedCareer.id}`)}
+              onClick={() => navigate(`/results/detail/${selectedCareer.id}`)}
               className="bg-blue-600 text-white hover:bg-blue-700"
             >
               자세히 보기
@@ -137,11 +105,11 @@ export default function ResultsPage() {
 function FlipCard({
   career,
   flipped,
-  profile,
+  user,
 }: {
   career: Career;
   flipped: boolean;
-  profile?: any;
+  user?: any;
 }) {
   return (
     <div className="group [perspective:1000px] cursor-pointer">
@@ -151,19 +119,14 @@ function FlipCard({
         {/* Front: 이미지 + 직업명 */}
         <Card className="absolute inset-0 bg-white rounded-xl shadow-md p-4 flex flex-col justify-between [backface-visibility:hidden] hover:shadow-lg transition">
           <div className="relative h-48 w-full overflow-hidden rounded-lg">
-            <Image
-              src={career.image || '/placeholder.svg?height=192&width=384&query=career%20image'}
+            <img
+              src={career.image || '/placeholder.svg'}
               alt={career.name}
-              fill
-              className="object-cover"
+              className="w-full h-full object-cover"
             />
-            {profile?.avatarDataUrl && (
-              <div className="absolute bottom-3 right-3 h-10 w-10 rounded-full ring-2 ring-white overflow-hidden shadow">
-                <img
-                  src={profile.avatarDataUrl || '/placeholder.svg'}
-                  alt="사용자"
-                  className="h-full w-full object-cover"
-                />
+            {user?.name && (
+              <div className="absolute bottom-3 right-3 h-10 w-10 rounded-full ring-2 ring-white bg-blue-500 flex items-center justify-center text-white font-semibold shadow">
+                {user.name.charAt(0)}
               </div>
             )}
           </div>
@@ -178,13 +141,9 @@ function FlipCard({
           <p className="text-gray-700 leading-relaxed">
             <b>추천 이유:</b> {career.reason}
           </p>
-          {profile?.avatarDataUrl && (
-            <div className="absolute bottom-3 right-3 h-10 w-10 rounded-full ring-2 ring-white overflow-hidden shadow">
-              <img
-                src={profile.avatarDataUrl || '/placeholder.svg'}
-                alt="사용자"
-                className="h-full w-full object-cover"
-              />
+          {user?.name && (
+            <div className="absolute bottom-3 right-3 h-10 w-10 rounded-full ring-2 ring-white bg-blue-500 flex items-center justify-center text-white font-semibold shadow">
+              {user.name.charAt(0)}
             </div>
           )}
         </Card>
