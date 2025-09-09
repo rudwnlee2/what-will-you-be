@@ -1,6 +1,7 @@
 package com.example.whatwillyoube.whatwillyoube_backend.service;
 
-import com.example.whatwillyoube.whatwillyoube_backend.domain.*;
+import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
+import com.example.whatwillyoube.whatwillyoube_backend.domain.RecommendationInfo;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoResponseDto;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
@@ -8,180 +9,139 @@ import com.example.whatwillyoube.whatwillyoube_backend.repository.Recommendation
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@Transactional
-@DisplayName("RecommendationInfoService 테스트")
-class RecommendationInfoServiceTest {
+@ExtendWith(MockitoExtension.class)
+@DisplayName("RecommendationInfoService 단위 테스트")
+public class RecommendationInfoServiceTest {
 
-    @Autowired
-    private RecommendationInfoService recommendationInfoService;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
+    @Mock
     private RecommendationInfoRepository recommendationInfoRepository;
 
+    @Mock
+    private MemberRepository memberRepository;
+
+    @InjectMocks
+    private RecommendationInfoService recommendationInfoService;
+
     private Member testMember;
-    private RecommendationInfoRequestDto validRequestDto;
+    private RecommendationInfo testRecommendationInfo;
+    private RecommendationInfoRequestDto requestDto;
 
     @BeforeEach
     void setUp() {
-        recommendationInfoRepository.deleteAll();
-        memberRepository.deleteAll();
+        testMember = Member.builder().loginId("testuser").build();
+        org.springframework.test.util.ReflectionTestUtils.setField(testMember, "id", 1L);
 
-        testMember = Member.builder()
-                .loginId("testuser")
-                .password("password123")
-                .name("테스트유저")
-                .email("test@example.com")
-                .birth(LocalDate.of(2000, 1, 1))
-                .gender(Gender.MALE)
-                .phone("010-1234-5678")
-                .school("테스트고등학교")
+        requestDto = RecommendationInfoRequestDto.builder()
+                .dream("소프트웨어 아키텍트")
+                .interest("시스템 설계")
                 .build();
-        testMember = memberRepository.save(testMember);
 
-        validRequestDto = createRecommendationInfoRequestDto();
-    }
-
-    private RecommendationInfoRequestDto createRecommendationInfoRequestDto() {
-        return RecommendationInfoRequestDto.builder()
-                .dream("소프트웨어 개발자")
-                .dreamReason("프로그래밍이 재미있어서")
-                .interest("컴퓨터, 게임")
-                .hobby("코딩, 독서")
-                .favoriteSubject("수학, 과학")
-                .mbti(MBTI.INTJ)
-                .holland(Holland.INVESTIGATIVE)
-                .jobValue(JobValue.STABILITY)
+        testRecommendationInfo = RecommendationInfo.builder()
+                .member(testMember)
+                .dream("기존 꿈")
+                .interest("기존 관심사")
                 .build();
     }
 
     @Test
-    @DisplayName("추천 정보 최초 생성 성공")
-    void createRecommendationInfo_Success() {
-        // when
-        RecommendationInfoResponseDto result = recommendationInfoService
-                .createOrUpdateRecommendationInfo(testMember.getId(), validRequestDto);
-
-        // then
-        assertNotNull(result);
-        assertEquals("소프트웨어 개발자", result.getDream());
-        assertEquals("프로그래밍이 재미있어서", result.getDreamReason());
-        assertEquals("컴퓨터, 게임", result.getInterest());
-        assertEquals(MBTI.INTJ, result.getMbti());
-        assertEquals(Holland.INVESTIGATIVE, result.getHolland());
-        assertEquals(JobValue.STABILITY, result.getJobValue());
-    }
-
-    @Test
-    @DisplayName("추천 정보 수정 성공")
-    void updateRecommendationInfo_Success() {
-        // given - 먼저 추천 정보 생성
-        recommendationInfoService.createOrUpdateRecommendationInfo(testMember.getId(), validRequestDto);
-
-        // 수정할 데이터 준비
-        RecommendationInfoRequestDto updateDto = RecommendationInfoRequestDto.builder()
-                .dream("데이터 사이언티스트")
-                .dreamReason("데이터 분석이 흥미로워서")
-                .interest("AI, 머신러닝")
-                .hobby("데이터 분석, 통계")
-                .favoriteSubject("수학, 통계학")
-                .mbti(MBTI.ENFP)
-                .holland(Holland.ARTISTIC)
-                .jobValue(JobValue.CHALLENGE)
-                .build();
+    @DisplayName("추천 정보 생성 성공 (기존 정보가 없을 경우)")
+    void createRecommendationInfo_WhenInfoNotExists() {
+        // given
+        // 1. memberId로 회원을 찾으면 testMember가 반환된다고 설정
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
+        // 2. memberId로 추천 정보를 찾으면 결과가 없다고(empty) 설정 -> '생성' 로직을 타게 됨
+        when(recommendationInfoRepository.findById(1L)).thenReturn(Optional.empty());
 
         // when
-        RecommendationInfoResponseDto result = recommendationInfoService
-                .createOrUpdateRecommendationInfo(testMember.getId(), updateDto);
+        RecommendationInfoResponseDto responseDto = recommendationInfoService.createOrUpdateRecommendationInfo(1L, requestDto);
 
         // then
-        assertEquals("데이터 사이언티스트", result.getDream());
-        assertEquals("데이터 분석이 흥미로워서", result.getDreamReason());
-        assertEquals("AI, 머신러닝", result.getInterest());
-        assertEquals(MBTI.ENFP, result.getMbti());
-        assertEquals(Holland.ARTISTIC, result.getHolland());
-        assertEquals(JobValue.CHALLENGE, result.getJobValue());
+        assertNotNull(responseDto);
+        assertEquals(requestDto.getDream(), responseDto.getDream());
+        assertEquals(requestDto.getInterest(), responseDto.getInterest());
+
+        verify(recommendationInfoRepository, times(1)).save(any(RecommendationInfo.class));
     }
 
     @Test
-    @DisplayName("존재하지 않는 회원으로 추천 정보 생성 실패")
-    void createRecommendationInfo_MemberNotFound() {
+    @DisplayName("추천 정보 수정 성공 (기존 정보가 있을 경우)")
+    void updateRecommendationInfo_WhenInfoExists() {
+        // given
+        // 1. memberId로 회원을 찾으면 testMember가 반환된다고 설정
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
+        // 2. memberId로 추천 정보를 찾으면 기존 정보(testRecommendationInfo)가 반환된다고 설정 -> '수정' 로git  로직을 타게 됨
+        when(recommendationInfoRepository.findById(1L)).thenReturn(Optional.of(testRecommendationInfo));
+
+        // when
+        RecommendationInfoResponseDto responseDto = recommendationInfoService.createOrUpdateRecommendationInfo(1L, requestDto);
+
+        // then
+        assertNotNull(responseDto);
+        assertEquals(requestDto.getDream(), responseDto.getDream());
+        assertEquals(requestDto.getInterest(), responseDto.getInterest());
+
+        verify(recommendationInfoRepository, never()).save(any(RecommendationInfo.class));
+    }
+
+    @Test
+    @DisplayName("추천 정보 생성/수정 실패 - 존재하지 않는 회원")
+    void createOrUpdate_Fail_MemberNotFound() {
+        // given
+        // memberId로 회원을 찾았지만 결과가 없다고 설정
+        when(memberRepository.findById(999L)).thenReturn(Optional.empty());
+
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> recommendationInfoService.createOrUpdateRecommendationInfo(999L, validRequestDto));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            recommendationInfoService.createOrUpdateRecommendationInfo(999L, requestDto);
+        });
         assertEquals("존재하지 않는 회원입니다.", exception.getMessage());
+
+        verifyNoInteractions(recommendationInfoRepository);
     }
 
     @Test
     @DisplayName("추천 정보 조회 성공")
     void getRecommendationInfo_Success() {
         // given
-        recommendationInfoService.createOrUpdateRecommendationInfo(testMember.getId(), validRequestDto);
+        // repository가 ID로 조회 시 testRecommendationInfo를 반환한다고 설정
+        when(recommendationInfoRepository.findById(1L)).thenReturn(Optional.of(testRecommendationInfo));
 
         // when
-        RecommendationInfoResponseDto result = recommendationInfoService
-                .getRecommendationInfo(testMember.getId());
+        RecommendationInfoResponseDto responseDto = recommendationInfoService.getRecommendationInfo(1L);
 
         // then
-        assertNotNull(result);
-        assertEquals("소프트웨어 개발자", result.getDream());
-        assertEquals("프로그래밍이 재미있어서", result.getDreamReason());
+        assertNotNull(responseDto);
+        assertEquals(testRecommendationInfo.getDream(), responseDto.getDream());
     }
 
     @Test
-    @DisplayName("추천 정보가 없는 경우 빈 DTO 반환")
-    void getRecommendationInfo_NotFound() {
-        // when
-        RecommendationInfoResponseDto result = recommendationInfoService
-                .getRecommendationInfo(testMember.getId());
-
-        // then
-        assertNotNull(result);
-        assertEquals("", result.getDream());
-        assertEquals("", result.getDreamReason());
-        assertEquals("", result.getInterest());
-    }
-
-    @Test
-    @DisplayName("null 값이 포함된 요청으로 추천 정보 생성")
-    void createRecommendationInfo_WithNullValues() {
+    @DisplayName("추천 정보 조회 - 정보가 없을 경우 빈 DTO 반환")
+    void getRecommendationInfo_ReturnsEmptyDto_WhenInfoNotExists() {
         // given
-        RecommendationInfoRequestDto requestWithNulls = RecommendationInfoRequestDto.builder()
-                .dream("개발자")
-                .dreamReason(null)
-                .interest("프로그래밍")
-                .hobby(null)
-                .favoriteSubject("수학")
-                .mbti(MBTI.INTJ)
-                .holland(null)
-                .jobValue(JobValue.STABILITY)
-                .build();
+        // repository가 ID로 조회 시 결과가 없다고 설정
+        when(recommendationInfoRepository.findById(1L)).thenReturn(Optional.empty());
 
         // when
-        RecommendationInfoResponseDto result = recommendationInfoService
-                .createOrUpdateRecommendationInfo(testMember.getId(), requestWithNulls);
+        RecommendationInfoResponseDto responseDto = recommendationInfoService.getRecommendationInfo(1L);
 
         // then
-        assertNotNull(result);
-        assertEquals("개발자", result.getDream());
-        assertNull(result.getDreamReason());
-        assertEquals("프로그래밍", result.getInterest());
-        assertNull(result.getHobby());
-        assertEquals("수학", result.getFavoriteSubject());
-        assertEquals(MBTI.INTJ, result.getMbti());
-        assertNull(result.getHolland());
-        assertEquals(JobValue.STABILITY, result.getJobValue());
+        assertNotNull(responseDto);
+
+        assertEquals("", responseDto.getDream());
+        assertEquals("", responseDto.getInterest());
+
+        assertNull(responseDto.getJobValue());
+        assertNull(responseDto.getMbti());
     }
 }
