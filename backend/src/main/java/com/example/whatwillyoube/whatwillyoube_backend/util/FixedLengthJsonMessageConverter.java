@@ -32,13 +32,8 @@ public class FixedLengthJsonMessageConverter extends MappingJackson2HttpMessageC
      * @throws IOException 직렬화 중 오류 발생 시
      */
     private long calculateSize(Object value) throws IOException {
-        // 출력을 버리면서 바이트 수만 세는 스트림 (JDK 기본 기능 사용으로 변경)
-        CountingOutputStream countingStream = new CountingOutputStream(OutputStream.nullOutputStream());
-        try (JsonGenerator generator = getObjectMapper().getFactory().createGenerator(countingStream)) {
-            // ObjectMapper를 통해 객체를 스트림에 씁니다 (실제로는 카운팅만 됨).
-            getObjectMapper().writeValue(generator, value);
-        }
-        // 계산된 바이트 수를 반환합니다.
-        return countingStream.getCount();
+        // 직접 JSON 문자열로 변환 후 UTF-8 바이트 크기 계산
+        String jsonString = getObjectMapper().writeValueAsString(value);
+        return jsonString.getBytes("UTF-8").length;
     }
 }
