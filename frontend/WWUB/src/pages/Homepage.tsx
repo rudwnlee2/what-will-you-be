@@ -29,7 +29,6 @@ export default function Homepage() {
   const startCareerFlow = () => {
     if (!isAuthenticated) {
       navigate('/login');
-      return;
     }
     navigate('/career-form');
   };
