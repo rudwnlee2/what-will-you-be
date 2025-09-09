@@ -135,20 +135,3 @@ def extract_json_from_gpt(response: str):
             except json.JSONDecodeError:
                 return block  # 파싱 실패 시 문자열 그대로
         return response
-
-
-# gpt 답변에서 JSON만 떼어오기
-def extract_json_from_gpt(response: str):
-    try:
-        # 먼저 응답 전체가 JSON일 경우 바로 파싱
-        return json.loads(response)
-    except json.JSONDecodeError:
-        # 정규식으로 JSON 블록만 추출 (비탐욕 모드)
-        match = re.search(r"\{.*?\}|\[.*?\]", response, re.DOTALL)
-        if match:
-            block = match.group(0)
-            try:
-                return json.loads(block)
-            except json.JSONDecodeError:
-                return block  # 파싱 실패 시 문자열 그대로
-        return response
