@@ -13,7 +13,7 @@ import {
 import { Link } from 'react-router-dom';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { MemberRequest } from '../../types/api';
+import type { MemberRequest } from '../../types/api';
 
 type FormState = {
   loginId: string;
@@ -95,7 +95,6 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-purple-50 p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-lg bg-white rounded-lg shadow-xl p-8 sm:p-10">
-
         <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">회원가입</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -226,8 +225,6 @@ export default function SignupPage() {
             </Select>
             {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender}</p>}
           </div>
-
-
 
           <div className="flex items-center">
             <input

@@ -74,7 +74,7 @@ export default function ResultDetailPage() {
   return (
     <div className="min-h-screen bg-purple-50">
       <SiteHeader />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16"/>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">당신에게 추천하는 직업</h1>
         <p className="text-gray-600 mb-8">
           왼쪽 목록에서 다른 직업을 선택해 상세 정보를 확인하세요.
@@ -182,7 +182,7 @@ export default function ResultDetailPage() {
                     <AlertCircle className="w-4 h-4" />
                     <span className="text-sm">미션을 완료한 후 다시 시도해 주세요.</span>
                   </div>
-                )}
+                )
 
                 {currentMission ? (
                   <Card className="bg-gray-50 p-4">
