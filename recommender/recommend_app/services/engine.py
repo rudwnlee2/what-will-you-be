@@ -5,6 +5,8 @@ from typing import List, Dict, Any
 
 from django.conf import settings
 from openai import OpenAI
+import json
+import re
 
 # ─────────────────────────────────────────────────────────────────────
 # 책임 1: OpenAI 클라이언트 초기화
@@ -70,3 +72,66 @@ def get_overall_reason(user_text: str, recommendations: List[Dict[str, Any]]) ->
         " (예시: <직업1>, <직업2>, <직업3>은 당신의 ~한 성향과 잘 어울립니다!)"
     )
     return _chat_once(system_msg, user_msg)
+
+# ─────────────────────────────────────────────────────────────────────
+# 책임 5: RAG - 초기 추천 직업에서 사용자 성향과 맞는 직업 재추천
+# 외부 데이터를 사용하는 것을 허용하되, 초기 직업 정보 3개와 연관되어야 함.
+# ─────────────────────────────────────────────────────────────────────
+def get_reconstruct_job_info(user_text: str, recommendations: List[Dict[str, Any]],
+                              model: str = "gpt-4o-mini",
+                              temperature: float = 0.7,
+                              max_tokens: int = 1500) -> List[Dict[str, Any]]:
+
+    reconstructs = []
+    rec_json = json.dumps(recommendations, ensure_ascii=False)
+
+    system_msg = (
+        "너는 중학생과 고등학생을 대상으로 일하는 직업 추천 전문가다. "
+        "항상 JSON만 반환해야 하며, 불필요한 설명은 포함하지 마라. "
+        "말투는 '~합니다.'이나'~습니다.'로 통일하라 "
+        "반환할 직업 개수는 항상 3개이다. "
+        "모든 직업은 입력된 직업 정보와 반드시 연관이 있어야 한다. "
+        "외부 직업을 추천할 수 있지만, 직업 정보는 반드시 초기 추천 직업 정보와 연관되어야 한다. "
+
+    )
+
+    user_msg = (
+        f"사용자 정보: {user_text}\n\n"
+        f"초기 추천 직업 목록:\n{rec_json}\n\n"
+        "초기 추천 직업 목록 중 사용자와 연관성이 높은 3가지 직업을 추천하라. "
+        "모든 필드는 사용자의 관심사에 맞게 1~2문장으로 요약하고 재작성해야 한다. "
+        "생성한 직업 정보는 사용자에게 더 어울리는 순서대로 반환한다. "
+        "다음 키를 반드시 포함하여 JSON 형식으로만 반환: {jobName, jobSum, way, major, certificate, pay, jobProspect, knowledge, jobEnvironment, jobValues}"
+    )
+    response = _chat_once(system_msg, user_msg, model, temperature, max_tokens)
+    clean_response = extract_json_from_gpt(response)
+
+    # clean_response가 문자열이면 JSON으로 파싱, 아니면 그대로 사용
+    if isinstance(clean_response, str):
+        try:
+            reconstructs = json.loads(clean_response)
+        except json.JSONDecodeError:
+            print("JSON 파싱 실패, 초기 추천 데이터 반환")
+            reconstructs = recommendations
+    else:
+        reconstructs = clean_response
+
+    return reconstructs
+
+# ─────────────────────────────────────────────────────────────────────
+# 책임 5-1: get_reconstruct_job_info() 안에서 gpt 답변 중 json만 추출하는 함수
+# ─────────────────────────────────────────────────────────────────────
+def extract_json_from_gpt(response: str):
+    try:
+        # 먼저 응답 전체가 JSON일 경우 바로 파싱
+        return json.loads(response)
+    except json.JSONDecodeError:
+        # 정규식으로 JSON 블록만 추출 (비탐욕 모드)
+        match = re.search(r"\{.*?\}|\[.*?\]", response, re.DOTALL)
+        if match:
+            block = match.group(0)
+            try:
+                return json.loads(block)
+            except json.JSONDecodeError:
+                return block  # 파싱 실패 시 문자열 그대로
+        return response
