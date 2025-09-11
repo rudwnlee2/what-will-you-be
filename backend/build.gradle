@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'jacoco'
 	id 'org.springframework.boot' version '3.5.0'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -24,20 +25,59 @@ repositories {
 }
 
 dependencies {
+	// Spring Boot 기본 스타터
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	implementation 'commons-io:commons-io:2.11.0' // 최신 버전으로 변경 가능
+
+	// Lombok (보일러플레이트 코드 자동 생성)
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// MySQL 데이터베이스 드라이버
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// 테스트용 라이브러리
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// JJWT (JSON Web Token) 라이브러리
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON 직렬화 지원
-	implementation 'org.springframework.boot:spring-boot-starter-security' //스프링 시큐리티
-	implementation 'org.springframework.boot:spring-boot-starter-validation' //검증
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy 'jacocoTestReport' // (1) 추가된 부분: test 태스크 실행 후 jacocoTestReport 태스크를 실행시킵니다.
+}
+
+tasks.named('jacocoTestReport') {
+	dependsOn tasks.named('test') // test 태스크에 의존성을 가집니다.
+
+	reports {
+		xml.required = false  // XML 리포트는 생성하지 않습니다.
+		csv.required = false  // CSV 리포트는 생성하지 않습니다.
+		html.required = true  // 사람이 보기 좋은 HTML 리포트를 생성합니다.
+	}
+
+	// 특정 파일들을 커버리지 측정에서 제외하는 설정입니다.
+	def jacocoExcludes = [
+			// DTO, Config, Entity 등 순수 데이터 객체나 설정 파일은 제외하는 것이 좋습니다.
+			'**/*DTO.*',
+			'**/*Dto.*',
+			'**/*Request.*',
+			'**/*Response.*',
+			'**/*Config.*',
+			'**/*Entity.*',
+			'**/*Filter.*',
+			// 애플리케이션 메인 클래스 제외
+			'**/WhatwillyoubeApplication.*'
+	]
+	classDirectories.setFrom(files(classDirectories.files.collect {
+		fileTree(dir: it, excludes: jacocoExcludes)
+	}))
 }
