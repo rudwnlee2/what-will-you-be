@@ -1,4 +1,4 @@
-import { MBTI, Holland, JobValue } from '../types/api';
+import type { MBTI, Holland, JobValue } from '../types/api';
 
 export const MBTI_OPTIONS: { value: MBTI; label: string }[] = [
   { value: 'ISTJ', label: 'ISTJ - 청렴결백한 논리주의자' },
@@ -43,6 +43,4 @@ export const JOB_VALUE_OPTIONS: { value: JobValue; label: string }[] = [
   { value: 'AUTONOMY', label: '자율성 - 스스로 결정하고 선택하는 것' },
 ];
 
-export const SUBJECT_OPTIONS = [
-  '국어', '영어', '수학', '사회', '과학', '예체능', '기타'
-];
+export const SUBJECT_OPTIONS = ['국어', '영어', '수학', '사회', '과학', '예체능', '기타'];

@@ -23,7 +23,7 @@ import {
   JOB_VALUE_OPTIONS,
   SUBJECT_OPTIONS,
 } from '../../constants/options';
-import { RecommendationInfoRequest, MBTI, Holland, JobValue } from '../../types/api';
+import type { RecommendationInfoRequest, MBTI, Holland, JobValue } from '../../types/api';
 
 export default function CareerFormSinglePage() {
   const navigate = useNavigate();
