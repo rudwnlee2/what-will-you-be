@@ -60,18 +60,18 @@ def get_recommendation_reason(user_text: str, recommendations: List[Dict[str, An
         reasons.append(_chat_once(system_msg, user_msg))
     return reasons
 
-#이부분은 일단 없애기로 저희 정했었는데 다같이 있을 때 말하고 넘어가려고 남겨놨어요!
-def get_overall_reason(user_text: str, recommendations: List[Dict[str, Any]]) -> str:
-    """추천된 직업들 전체를 아우르는 종합적인 한 문장 메시지를 생성합니다."""
-    job_summary = "; ".join(", ".join(f"{k}: {v}" for k, v in rec.items() if v) for rec in recommendations)
-    system_msg = "너는 직업 추천 전문가야."
-    user_msg = (
-        f"사용자 설명: {user_text}\n"
-        f"직업 요약: {job_summary}\n"
-        "이 직업 3가지 추천한 이유를 1문장으로 설명해줘."
-        " (예시: <직업1>, <직업2>, <직업3>은 당신의 ~한 성향과 잘 어울립니다!)"
-    )
-    return _chat_once(system_msg, user_msg)
+# #이부분은 일단 없애기로 저희 정했었는데 다같이 있을 때 말하고 넘어가려고 남겨놨어요!
+# def get_overall_reason(user_text: str, recommendations: List[Dict[str, Any]]) -> str:
+#     """추천된 직업들 전체를 아우르는 종합적인 한 문장 메시지를 생성합니다."""
+#     job_summary = "; ".join(", ".join(f"{k}: {v}" for k, v in rec.items() if v) for rec in recommendations)
+#     system_msg = "너는 직업 추천 전문가야."
+#     user_msg = (
+#         f"사용자 설명: {user_text}\n"
+#         f"직업 요약: {job_summary}\n"
+#         "이 직업 3가지 추천한 이유를 1문장으로 설명해줘."
+#         " (예시: <직업1>, <직업2>, <직업3>은 당신의 ~한 성향과 잘 어울립니다!)"
+#     )
+#     return _chat_once(system_msg, user_msg)
 
 # ─────────────────────────────────────────────────────────────────────
 # 책임 5: RAG - 초기 추천 직업에서 사용자 성향과 맞는 직업 재추천

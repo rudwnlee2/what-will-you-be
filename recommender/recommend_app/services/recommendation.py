@@ -41,16 +41,16 @@ def generate_recommendation(user_input: Dict[str, Any]) -> Dict[str, Any]:
     recommendations = vector_store.build_recommendation_entries(indices, metadata_list)
 
     if not recommendations:
-        return {"recommendations": [], "gpt_message": ""}
+        return {"recommendations": []}
 
     # 5. AI 엔진을 통해 추천 이유 및 요약 메시지 생성 (RAG)
     reconstructed_recs = engine.get_reconstruct_job_info(user_text, recommendations) # 요약한 직업 정보
     reasons = engine.get_recommendation_reason(user_text, recommendations)
     recommendations_with_reasons = _add_reasons_to_recommendations(reconstructed_recs, reasons)
-    gpt_message = engine.get_overall_reason(user_text, recommendations)
+    # gpt_message = engine.get_overall_reason(user_text, recommendations)
 
     # 6. 최종 결과 조합하여 반환
     return {
-        "recommendations": recommendations_with_reasons,
-        "gpt_message": gpt_message,
+        "recommendations": recommendations_with_reasons
+        # "gpt_message": gpt_message,
     }
