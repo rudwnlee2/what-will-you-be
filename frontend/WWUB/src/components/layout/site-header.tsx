@@ -1,39 +1,75 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+// 1. react-router-dom에서 Link와 useNavigate를 가져옵니다.
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '../../hooks/useAuth';
-import { useEffect, useState } from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+// 2. 확장된 인증 유틸리티 함수들을 가져옵니다.
+import { getCurrentUser, isLoggedIn, removeToken } from '@/api/auth';
 
-export default function SiteHeader() {
+// 1. App.tsx로부터 받을 prop의 타입을 정의합니다.
+interface SiteHeaderProps {
+  onWipClick: () => void;
+}
+
+export default function SiteHeader({ onWipClick }: SiteHeaderProps) {
+  const [userName, setUserName] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+
+  // 사용자 정보를 새로고침하는 함수
+  const refreshUser = () => {
+    const user = getCurrentUser();
+    setUserName(user?.username || null);
+  };
 
   useEffect(() => {
+    refreshUser(); // 컴포넌트가 처음 마운트될 때 사용자 정보 확인
+
+    // 다른 탭에서 로그인을 하거나 로그아웃했을 때, 상태를 동기화하기 위한 이벤트 리스너
+    const onStorageChange = () => refreshUser();
+    window.addEventListener('storage', onStorageChange);
+
+    // 스크롤 위치에 따라 헤더를 숨기거나 보여주는 로직
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-
-      if (currentScrollY < 10) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY) {
-        setIsVisible(true);
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false); // 아래로 스크롤
+      } else {
+        setIsVisible(true); // 위로 스크롤
       }
-
       setLastScrollY(currentScrollY);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // 컴포넌트가 언마운트될 때 이벤트 리스너를 정리합니다. (메모리 누수 방지)
+    return () => {
+      window.removeEventListener('storage', onStorageChange);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [lastScrollY]);
 
+  // '진로 탐색하기' 버튼 클릭 시의 동작
   const goCareer = () => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
+    if (!isLoggedIn()) {
+      navigate('/login'); // 로그인 안 되어 있으면 로그인 페이지로
+    } else {
+      navigate('/career'); // 로그인 되어 있으면 진로 탐색 페이지로
     }
-    navigate('/career-form');
+  };
+
+  // 로그아웃 처리
+  const logout = () => {
+    removeToken(); // 토큰 삭제
+    refreshUser(); // 사용자 상태 새로고침 (userName을 null로 만듦)
+    navigate('/'); // 메인 페이지로 이동
   };
 
   return (
@@ -44,12 +80,10 @@ export default function SiteHeader() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
+          {/* 3. Next.js의 Link를 react-router-dom의 Link로 교체 (href -> to) */}
           <Link to="/" className="flex items-center">
-            <img
-              src="/images/WWUB 로고.png"
-              alt="WWUB Logo"
-              className="h-14 w-auto"
-            />
+            {/* 4. Next.js의 Image를 일반 img 태그로 교체 (public 폴더 기준 경로) */}
+            <img src="/WWUB 로고.png" alt="WWUB 로고" className="h-14 w-auto" />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
@@ -68,15 +102,22 @@ export default function SiteHeader() {
           </nav>
 
           <div className="flex items-center space-x-3">
-            {isAuthenticated && user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-900 font-semibold">
-                  {user.name}씨 어서오세요
-                </span>
-                <Button onClick={logout} variant="ghost" className="font-medium text-gray-700">
-                  로그아웃
-                </Button>
-              </div>
+            {/* 5. 로그인 상태에 따라 다른 UI를 보여줍니다. */}
+            {userName ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="text-gray-900 font-semibold hover:underline">
+                    {userName}님, 환영합니다!
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40 bg-white shadow-lg border">
+                  <DropdownMenuItem onClick={() => navigate('/me')}>내 정보</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/history')}>
+                    추천 기록
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>로그아웃</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
                 <Link to="/login">
