@@ -54,7 +54,7 @@ export default function MissionsPage() {
         totalItems: 0,
         itemsPerPage: 10,
         hasNextPage: false,
-        hasPrevPage: false
+        hasPrevPage: false,
       });
       setLoading(false);
     }, 1000);
@@ -182,13 +182,13 @@ export default function MissionsPage() {
                 {selectedStatusTab === 'progress' && (
                   <div className="space-y-2">
                     {selectedMissionType === 'individual' ? (
-                      <Link href="/results">
+                      <Link to="/results">
                         <Button className="bg-blue-600 text-white hover:bg-blue-700">
                           추천 결과에서 미션 받기
                         </Button>
                       </Link>
                     ) : (
-                      <Link href="/friends">
+                      <Link to="/friends">
                         <Button className="bg-purple-600 text-white hover:bg-purple-700">
                           친구와 함께 미션 만들기
                         </Button>

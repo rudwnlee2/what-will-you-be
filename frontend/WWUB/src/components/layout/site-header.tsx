@@ -115,6 +115,9 @@ export default function SiteHeader({ onWipClick }: SiteHeaderProps) {
                   <DropdownMenuItem onClick={() => navigate('/history')}>
                     추천 기록
                   </DropdownMenuItem>
+                  {/* 2. '미션'과 '친구' 메뉴 아이템을 클릭하면 onWipClick 함수를 호출합니다. */}
+                  <DropdownMenuItem onSelect={onWipClick}>미션</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={onWipClick}>친구</DropdownMenuItem>
                   <DropdownMenuItem onClick={logout}>로그아웃</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
