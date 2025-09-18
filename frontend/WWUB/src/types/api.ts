@@ -7,8 +7,8 @@ export interface MemberRequest {
   password: string;
   birth: string;
   gender: 'MALE' | 'FEMALE';
-  phone?: string;
-  school?: string;
+  phone: string;
+  school: string;
 }
 
 export interface MemberResponse {
@@ -18,8 +18,8 @@ export interface MemberResponse {
   email: string;
   birth: string;
   gender: 'MALE' | 'FEMALE';
-  phone?: string;
-  school?: string;
+  phone: string;
+  school: string;
   createdDate: string;
 }
 

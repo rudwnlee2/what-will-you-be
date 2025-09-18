@@ -25,8 +25,8 @@ type FormState = {
   confirmPassword: string;
   birth: string;
   gender: 'MALE' | 'FEMALE' | '';
-  phone?: string;
-  school?: string;
+  phone: string;
+  school: string;
   agreeToTerms: boolean;
 };
 
