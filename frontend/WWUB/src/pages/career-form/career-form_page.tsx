@@ -1,7 +1,6 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SiteHeader from '@/components/layout/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -112,7 +111,6 @@ export default function CareerFormSinglePage() {
 
   return (
     <div className="min-h-screen bg-purple-50">
-      <SiteHeader />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <Card className="bg-white shadow-xl">
           <CardContent className="p-6 sm:p-10">

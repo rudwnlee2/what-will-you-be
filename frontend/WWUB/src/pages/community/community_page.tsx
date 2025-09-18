@@ -1,4 +1,3 @@
-import SiteHeader from '@/components/layout/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Users, Heart } from 'lucide-react';
@@ -27,7 +26,6 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-purple-50">
-      <SiteHeader />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">커뮤니티</h1>

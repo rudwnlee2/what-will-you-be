@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Homepage from './pages/Homepage';
 import CareerFormPage from './pages/career-form/career-form_page';
 import LoginPage from './pages/login/login_pages';
@@ -11,22 +11,34 @@ import ContactPage from './pages/contact/contact_page';
 import MePage from './pages/me/me_pages';
 import EditPage from './pages/me/edit/edit_pages';
 import HistoryPage from './pages/history/history_page';
-import MissionsPage from './pages/missions/missions_page';
-import FriendsPage from './pages/friends/page';
+// import MissionsPage from './pages/missions/missions_page';
+// import FriendsPage from './pages/friends/page';
 import TermsPage from './pages/terms/terms_page';
 import PrivacyPage from './pages/privacy/privacy_pages';
 import WipModal from './components/layout/WipModal'; // WipModal 컴포넌트
 import { useWipModal } from './hooks/useWipModal'; // 모달 훅
 import SiteHeader from './components/layout/site-header'; // SiteHeader 컴포넌트
+import { useEffect } from 'react';
 import './App.css';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   const { isWipModalOpen, openWipModal, closeWipModal } = useWipModal();
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <SiteHeader onWipClick={openWipModal} />
-      <main>
+      <main className="pt-20">
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/career-form" element={<CareerFormPage />} />
@@ -40,8 +52,8 @@ function App() {
           <Route path="/me" element={<MePage />} />
           <Route path="/me/edit" element={<EditPage />} />
           <Route path="/history" element={<HistoryPage />} />
-          <Route path="/missions" element={<MissionsPage />} />
-          <Route path="/friends" element={<FriendsPage />} />
+          {/* <Route path="/missions" element={<MissionsPage />} /> */}
+          {/* <Route path="/friends" element={<FriendsPage />} /> */}
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
         </Routes>

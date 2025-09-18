@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, Users, Target, ArrowRight } from 'lucide-react';
-import SiteHeader from '../components/layout/site-header';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
@@ -35,8 +34,6 @@ export default function Homepage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <SiteHeader />
-
       {/* Hero */}
       <section className="relative pt-32 pb-20 sm:pb-24 lg:pb-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>

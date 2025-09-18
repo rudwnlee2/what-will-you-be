@@ -1,7 +1,6 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import SiteHeader from '@/components/layout/site-header';
 import { Card } from '@/components/ui/card';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -171,7 +170,6 @@ export default function SavedResultDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-purple-50">
-        <SiteHeader />
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
           <div className="text-center">
             <p className="text-gray-600">저장된 결과를 불러오는 중...</p>
@@ -185,7 +183,6 @@ export default function SavedResultDetailPage() {
 
   return (
     <div className="min-h-screen bg-purple-50">
-      <SiteHeader />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">

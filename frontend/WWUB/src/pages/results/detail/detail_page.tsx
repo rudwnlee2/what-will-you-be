@@ -1,7 +1,6 @@
 'use client';
 
 import { useParams, useNavigate } from 'react-router-dom';
-import SiteHeader from '@/components/layout/site-header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -66,7 +65,6 @@ export default function ResultDetailPage() {
 
   return (
     <div className="min-h-screen bg-purple-50">
-      <SiteHeader />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16" />
       <h1 className="text-3xl font-bold text-gray-900 mb-2">당신에게 추천하는 직업</h1>
       <p className="text-gray-600 mb-8">왼쪽 목록에서 다른 직업을 선택해 상세 정보를 확인하세요.</p>

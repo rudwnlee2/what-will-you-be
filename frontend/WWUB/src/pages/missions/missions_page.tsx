@@ -1,6 +1,5 @@
 'use client';
 
-import SiteHeader from '@/components/layout/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/layout/pagination';
@@ -98,7 +97,6 @@ export default function MissionsPage() {
 
   return (
     <div className="min-h-screen bg-purple-50">
-      <SiteHeader />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <Card className="bg-white shadow">
           <CardContent className="p-6 sm:p-8">

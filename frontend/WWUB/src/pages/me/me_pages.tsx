@@ -2,7 +2,6 @@
 
 import type React from 'react';
 
-import SiteHeader from '@/components/layout/site-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -60,10 +59,36 @@ export default function MyInfoPage() {
     try {
       // Mock options data
       setOptions({
-        mbti: ['ISTJ', 'ISFJ', 'INFJ', 'INTJ', 'ISTP', 'ISFP', 'INFP', 'INTP', 'ESTP', 'ESFP', 'ENFP', 'ENTP', 'ESTJ', 'ESFJ', 'ENFJ', 'ENTJ'],
+        mbti: [
+          'ISTJ',
+          'ISFJ',
+          'INFJ',
+          'INTJ',
+          'ISTP',
+          'ISFP',
+          'INFP',
+          'INTP',
+          'ESTP',
+          'ESFP',
+          'ENFP',
+          'ENTP',
+          'ESTJ',
+          'ESFJ',
+          'ENFJ',
+          'ENTJ',
+        ],
         holland: ['현실형', '탐구형', '예술형', '사회형', '진취형', '관습형'],
         subjects: ['국어', '영어', '수학', '사회', '과학', '예체능', '기타'],
-        values: ['안정성', '성장 가능성', '워라밸', '경제적 보상', '명예/인정', '봉사', '자율성', '창의성']
+        values: [
+          '안정성',
+          '성장 가능성',
+          '워라밸',
+          '경제적 보상',
+          '명예/인정',
+          '봉사',
+          '자율성',
+          '창의성',
+        ],
       });
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -103,7 +128,7 @@ export default function MyInfoPage() {
   const saveForm = async () => {
     setSaving(true);
     setSaveMessage(null);
-    
+
     setTimeout(() => {
       setSaveMessage('저장되었습니다!');
       setSaving(false);
@@ -119,7 +144,6 @@ export default function MyInfoPage() {
 
   return (
     <div className="min-h-screen bg-purple-50">
-      <SiteHeader />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 space-y-8">
         {/* Profile Section */}
         <Card className="bg-white shadow">
@@ -130,7 +154,7 @@ export default function MyInfoPage() {
             <div className="flex-1 w-full">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold">{user?.name || '이름 미입력'}</h2>
-                <Link href="/me/edit">
+                <Link to="/me/edit">
                   <Button variant="outline">내 정보 수정</Button>
                 </Link>
               </div>
@@ -141,7 +165,10 @@ export default function MyInfoPage() {
                   나이: {age ?? '-'}
                   {age !== null ? '세' : ''}
                 </div>
-                <div>성별: {user?.gender === 'MALE' ? '남성' : user?.gender === 'FEMALE' ? '여성' : '-'}</div>
+                <div>
+                  성별:{' '}
+                  {user?.gender === 'MALE' ? '남성' : user?.gender === 'FEMALE' ? '여성' : '-'}
+                </div>
                 <div>학교: {user?.school || '-'}</div>
                 <div>전화번호: {user?.phone || '-'}</div>
                 <div>생년월일: {user?.birthDate || '-'}</div>

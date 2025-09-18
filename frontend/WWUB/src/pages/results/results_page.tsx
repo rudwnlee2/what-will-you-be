@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SiteHeader from '@/components/layout/site-header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../../hooks/useAuth';
@@ -34,8 +33,6 @@ export default function ResultsPage() {
   const [flip, setFlip] = useState<Record<number, boolean>>({});
   const savedRef = useRef(false);
 
-
-
   useEffect(() => {
     const raw = sessionStorage.getItem('recommendationResult');
     if (!raw) {
@@ -51,8 +48,6 @@ export default function ResultsPage() {
     }
   }, [navigate]);
 
-
-
   const handleCardClick = (idx: number) => {
     setSelected(idx);
     setFlip((f) => ({ ...f, [idx]: !f[idx] }));
@@ -65,7 +60,6 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen bg-purple-50">
-      <SiteHeader />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <h1 className="text-3xl font-bold text-gray-900">당신에게 추천하는 직업</h1>
         <p className="text-gray-600 mb-8">
@@ -102,15 +96,7 @@ export default function ResultsPage() {
   );
 }
 
-function FlipCard({
-  career,
-  flipped,
-  user,
-}: {
-  career: Career;
-  flipped: boolean;
-  user?: any;
-}) {
+function FlipCard({ career, flipped, user }: { career: Career; flipped: boolean; user?: any }) {
   return (
     <div className="group [perspective:1000px] cursor-pointer">
       <div

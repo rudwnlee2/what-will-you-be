@@ -1,4 +1,3 @@
-import SiteHeader from '@/components/layout/site-header';
 import { useState } from 'react';
 
 const sections = [
@@ -25,7 +24,6 @@ export default function AboutPage() {
   const content = sections.find((s) => s.key === active)?.content;
   return (
     <div className="min-h-screen bg-purple-50">
-      <SiteHeader />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 flex gap-8">
         <aside className="w-56 shrink-0">
           <nav className="sticky top-28 space-y-2">

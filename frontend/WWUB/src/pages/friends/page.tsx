@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Search, MoreVertical, UserPlus, Check, X, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import SiteHeader from '@/components/layout/site-header';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function FriendsPage() {
@@ -116,7 +115,6 @@ export default function FriendsPage() {
 
   return (
     <div className="min-h-screen bg-purple-50">
-      <SiteHeader />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-8">
         <div className="space-y-6">
           {/* Header */}
