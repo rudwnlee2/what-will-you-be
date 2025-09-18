@@ -48,7 +48,7 @@ def generate_recommendation(user_input: Dict[str, Any]) -> Dict[str, Any]:
     # reasons = engine.get_recommendation_reason(user_text, recommendations)
     # recommendations_with_reasons = _add_reasons_to_recommendations(reconstructed_recs, reasons)
     # gpt_message = engine.get_overall_reason(user_text, recommendations)
-    recommendations_with_reasons = engine.get_recommendation_reason(user_text, recommendations)
+    recommendations_with_reasons = engine.get_reconstruct_job_info_reason(user_text, recommendations)
 
     # 6. 최종 결과 조합하여 반환
     return {
