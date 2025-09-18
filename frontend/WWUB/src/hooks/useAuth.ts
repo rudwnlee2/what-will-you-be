@@ -3,7 +3,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 // 1. 새로 만든 API 함수들을 가져옵니다.
-import { login as apiLogin, signup as apiSignup, getMyProfile } from '../api/members';
+import {
+  login as apiLogin,
+  signup as apiSignup,
+  checkLoginId as apicheckLoginId,
+  getMyProfile,
+} from '../api/members';
 import { saveToken, removeToken, getToken } from '../api/auth'; // 토큰 관리 헬퍼
 // 2. 새로운 타입 정의를 가져옵니다.
 import type { LoginData } from '../types/user.types';
@@ -37,6 +42,14 @@ export const useAuth = () => {
     },
   });
 
+  const checkLoginIdMutation = useMutation({
+    mutationFn: apicheckLoginId, // API 함수 교체
+    onSuccess: (isAvailable) => {
+      if (!isAvailable) {
+        alert('이미 사용 중인 아이디입니다.');
+      }
+    },
+  });
   // --- Queries ---
 
   const profileQuery = useQuery({
@@ -71,9 +84,11 @@ export const useAuth = () => {
     isLoginLoading: loginMutation.isPending,
     isSignupLoading: signupMutation.isPending,
     isProfileLoading: profileQuery.isLoading,
-
+    ischeckLoginIdLoading: checkLoginIdMutation.isPending,
     // Errors
     loginError: loginMutation.error,
     signupError: signupMutation.error,
+    checkLoginIdError: checkLoginIdMutation.error,
+    profileError: profileQuery.error,
   };
 };

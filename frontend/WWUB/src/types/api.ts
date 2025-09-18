@@ -5,7 +5,7 @@ export interface MemberRequest {
   name: string;
   email: string;
   password: string;
-  birthDate: string;
+  birth: string;
   gender: 'MALE' | 'FEMALE';
   phone?: string;
   school?: string;
@@ -16,7 +16,7 @@ export interface MemberResponse {
   loginId: string;
   name: string;
   email: string;
-  birthDate: string;
+  birth: string;
   gender: 'MALE' | 'FEMALE';
   phone?: string;
   school?: string;
@@ -24,23 +24,47 @@ export interface MemberResponse {
 }
 
 // MBTI 타입
-export type MBTI = 
-  | 'ISTJ' | 'ISFJ' | 'INFJ' | 'INTJ'
-  | 'ISTP' | 'ISFP' | 'INFP' | 'INTP'
-  | 'ESTP' | 'ESFP' | 'ENFP' | 'ENTP'
-  | 'ESTJ' | 'ESFJ' | 'ENFJ' | 'ENTJ';
+export type MBTI =
+  | 'ISTJ'
+  | 'ISFJ'
+  | 'INFJ'
+  | 'INTJ'
+  | 'ISTP'
+  | 'ISFP'
+  | 'INFP'
+  | 'INTP'
+  | 'ESTP'
+  | 'ESFP'
+  | 'ENFP'
+  | 'ENTP'
+  | 'ESTJ'
+  | 'ESFJ'
+  | 'ENFJ'
+  | 'ENTJ';
 
 // Holland 타입
-export type Holland = 
-  | 'REALISTIC' | 'INVESTIGATIVE' | 'ARTISTIC'
-  | 'SOCIAL' | 'ENTERPRISING' | 'CONVENTIONAL';
+export type Holland =
+  | 'REALISTIC'
+  | 'INVESTIGATIVE'
+  | 'ARTISTIC'
+  | 'SOCIAL'
+  | 'ENTERPRISING'
+  | 'CONVENTIONAL';
 
 // JobValue 타입
-export type JobValue = 
-  | 'STABILITY' | 'COMPENSATION' | 'WORK_LIFE_BALANCE'
-  | 'FUN' | 'BELONGING' | 'SELF_DEVELOPMENT'
-  | 'CHALLENGE' | 'INFLUENCE' | 'CONTRIBUTION'
-  | 'ACHIEVEMENT' | 'RECOGNITION' | 'AUTONOMY';
+export type JobValue =
+  | 'STABILITY'
+  | 'COMPENSATION'
+  | 'WORK_LIFE_BALANCE'
+  | 'FUN'
+  | 'BELONGING'
+  | 'SELF_DEVELOPMENT'
+  | 'CHALLENGE'
+  | 'INFLUENCE'
+  | 'CONTRIBUTION'
+  | 'ACHIEVEMENT'
+  | 'RECOGNITION'
+  | 'AUTONOMY';
 
 // 추천 정보 요청 타입
 export interface RecommendationInfoRequest {

@@ -14,6 +14,7 @@ import { Link } from 'react-router-dom';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import type { MemberRequest } from '../../types/api';
+import { useMutation } from '@tanstack/react-query';
 
 type FormState = {
   loginId: string;
@@ -21,7 +22,7 @@ type FormState = {
   email: string;
   password: string;
   confirmPassword: string;
-  birthDate: string;
+  birth: string;
   gender: 'MALE' | 'FEMALE' | '';
   agreeToTerms: boolean;
 };
@@ -29,13 +30,15 @@ type FormState = {
 export default function SignupPage() {
   const { signup, isSignupLoading, signupError } = useAuth();
 
+
+
   const [formData, setFormData] = useState<FormState>({
     loginId: '',
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    birthDate: '',
+    birth: '',
     gender: '',
     agreeToTerms: false,
   });
@@ -68,7 +71,7 @@ export default function SignupPage() {
     if (formData.password.length < 8) next.password = '비밀번호는 8자 이상이어야 합니다.';
     if (formData.password !== formData.confirmPassword)
       next.confirmPassword = '비밀번호가 일치하지 않습니다.';
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.birthDate))
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.birth))
       next.birthDate = 'YYYY-MM-DD 형식으로 입력해주세요.';
     if (!formData.gender) next.gender = '성별을 선택해주세요.';
     if (!formData.agreeToTerms) next.agreeToTerms = '개인정보 처리에 동의가 필요합니다.';
@@ -86,7 +89,7 @@ export default function SignupPage() {
       email: formData.email,
       password: formData.password,
       gender: formData.gender as 'MALE' | 'FEMALE',
-      birthDate: formData.birthDate,
+      birth: formData.birth,
     };
 
     signup(memberData);
@@ -205,8 +208,8 @@ export default function SignupPage() {
             <Input
               id="birthDate"
               placeholder="YYYY-MM-DD 형식으로 입력하세요"
-              value={formData.birthDate}
-              onChange={(e) => handleInputChange('birthDate', e.target.value)}
+              value={formData.birth}
+              onChange={(e) => handleInputChange('birth', e.target.value)}
               aria-invalid={!!errors.birthDate}
             />
             {errors.birthDate && <p className="mt-1 text-sm text-red-600">{errors.birthDate}</p>}

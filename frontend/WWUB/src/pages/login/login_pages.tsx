@@ -1,30 +1,30 @@
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Link } from "react-router-dom"
-import { useAuth } from "../../hooks/useAuth"
+import type React from 'react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
-export default function LoginPage() {
-  const [loginId, setLoginId] = useState("")
-  const [password, setPassword] = useState("")
-  const { login, isLoginLoading, loginError } = useAuth()
+interface LoginPageProps {
+  onWipClick: () => void;
+}
+
+export default function LoginPage({ onWipClick }: LoginPageProps) {
+  const [loginId, setLoginId] = useState('');
+  const [password, setPassword] = useState('');
+  const { login, isLoginLoading, loginError } = useAuth();
 
   const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    login({ loginId: loginId.trim(), password })
-  }
+    e.preventDefault();
+    login({ loginId: loginId.trim(), password });
+  };
 
   return (
     <div className="min-h-screen bg-purple-50 p-4 sm:p-6 lg:p-8">
       <div className="absolute top-4 left-4 sm:top-6 sm:left-6">
         <Link to="/" className="flex items-center hover:opacity-80 transition-opacity">
-          <img
-            src="/images/WWUB 로고.png"
-            alt="너 커서 뭐할래?"
-            className="h-8 w-auto sm:h-10"
-          />
+          <img src="/images/WWUB 로고.png" alt="너 커서 뭐할래?" className="h-8 w-auto sm:h-10" />
         </Link>
       </div>
 
@@ -81,12 +81,12 @@ export default function LoginPage() {
               className="w-full py-3 bg-black text-white font-semibold hover:bg-gray-800"
               disabled={isLoginLoading}
             >
-              {isLoginLoading ? "처리중..." : "로그인"}
+              {isLoginLoading ? '처리중...' : '로그인'}
             </Button>
 
             {loginError && (
               <p className="text-center text-sm text-red-600">
-                {loginError.message || "아이디 또는 비밀번호를 확인해주세요."}
+                {loginError.message || '아이디 또는 비밀번호를 확인해주세요.'}
               </p>
             )}
           </form>
@@ -103,6 +103,7 @@ export default function LoginPage() {
           {/* Social buttons same style as requested previously */}
           <div className="space-y-3">
             <Button
+              onClick={onWipClick}
               variant="outline"
               className="w-full py-4 flex items-center justify-center space-x-3 border border-gray-300 rounded-lg text-gray-900 hover:bg-gray-50 bg-white font-medium text-base"
             >
@@ -127,8 +128,9 @@ export default function LoginPage() {
               <span>Google로 시작하기</span>
             </Button>
             <Button
+              onClick={onWipClick}
               className="w-full py-4 flex items-center justify-center space-x-3 rounded-lg font-medium text-base text-black"
-              style={{ backgroundColor: "#FEE500" }}
+              style={{ backgroundColor: '#FEE500' }}
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 4C7.58 4 4 7.06 4 10.8c0 2.39 1.58 4.51 3.94 5.76L7.3 19.7c-.06.22.15.41.35.32l3.9-1.81c.47.06.95.09 1.45.09 4.42 0 8-3.06 8-6.8S16.42 4 12 4z" />
@@ -138,7 +140,7 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-8 text-center text-sm text-gray-600">
-            아직 계정이 없으신가요?{" "}
+            아직 계정이 없으신가요?{' '}
             <Link to="/signup" className="font-medium text-blue-600 hover:underline">
               회원가입하기
             </Link>
@@ -146,5 +148,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

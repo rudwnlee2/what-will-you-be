@@ -42,7 +42,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/career-form" element={<CareerFormPage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage onWipClick={openWipModal} />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/results" element={<ResultsPage />} />
           <Route path="/results/detail/:id" element={<JobDetailPage />} />
