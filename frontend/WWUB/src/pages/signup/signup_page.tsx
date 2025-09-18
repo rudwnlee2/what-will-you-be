@@ -15,6 +15,7 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import type { MemberRequest } from '../../types/api';
 import { useMutation } from '@tanstack/react-query';
+import { checkLoginId } from '../../api/members';
 
 type FormState = {
   loginId: string;
@@ -24,13 +25,13 @@ type FormState = {
   confirmPassword: string;
   birth: string;
   gender: 'MALE' | 'FEMALE' | '';
+  phone?: string;
+  school?: string;
   agreeToTerms: boolean;
 };
 
 export default function SignupPage() {
   const { signup, isSignupLoading, signupError } = useAuth();
-
-
 
   const [formData, setFormData] = useState<FormState>({
     loginId: '',
@@ -40,12 +41,17 @@ export default function SignupPage() {
     confirmPassword: '',
     birth: '',
     gender: '',
+    phone: '',
+    school: '',
     agreeToTerms: false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [passwordMismatch, setPasswordMismatch] = useState(false);
-  const [usernameChecked, setUsernameChecked] = useState<null | boolean>(null);
+  const [idCheckStatus, setIdCheckStatus] = useState<{
+    status: 'idle' | 'checking' | 'success' | 'error';
+    message: string;
+  }>({ status: 'idle', message: '' });
 
   const handleInputChange = (field: keyof FormState, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -54,25 +60,49 @@ export default function SignupPage() {
       const newConfirmPassword = field === 'confirmPassword' ? value : formData.confirmPassword;
       setPasswordMismatch(!!newConfirmPassword && newPassword !== newConfirmPassword);
     }
+    if (field === 'loginId') {
+      setIdCheckStatus({ status: 'idle', message: '' });
+    }
   };
 
-  const handleUsernameCheck = async () => {
-    setUsernameChecked(null);
-    await new Promise((r) => setTimeout(r, 400));
-    setUsernameChecked(true);
+  const checkIdMutation = useMutation({
+    mutationFn: checkLoginId,
+    onSuccess: (data) => {
+      if (!data.exists) {
+        setIdCheckStatus({ status: 'success', message: '사용 가능한 아이디입니다.' });
+      } else {
+        setIdCheckStatus({ status: 'error', message: '이미 사용 중인 아이디입니다.' });
+      }
+    },
+    onError: () => {
+      setIdCheckStatus({ status: 'error', message: '중복 확인 중 오류가 발생했습니다.' });
+    },
+  });
+
+  const handleUsernameCheck = () => {
+    if (!formData.loginId.trim()) {
+      setErrors((prev) => ({ ...prev, loginId: '아이디를 입력해주세요.' }));
+      return;
+    }
+    checkIdMutation.mutate(formData.loginId);
   };
 
   const validate = () => {
     const next: Record<string, string> = {};
     if (!formData.loginId.trim()) next.loginId = '아이디를 입력해주세요.';
+    if (idCheckStatus.status !== 'success') next.loginId = '아이디 중복 확인을 완료해주세요.';
     if (!formData.name.trim()) next.name = '이름을 입력해주세요.';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       next.email = '올바른 이메일 주소를 입력해주세요.';
-    if (formData.password.length < 8) next.password = '비밀번호는 8자 이상이어야 합니다.';
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,16}$/;
+    if (!passwordRegex.test(formData.password))
+      next.password = '비밀번호는 영문, 숫자, 특수문자를 포함한 8~16자여야 합니다.';
     if (formData.password !== formData.confirmPassword)
       next.confirmPassword = '비밀번호가 일치하지 않습니다.';
     if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.birth))
-      next.birthDate = 'YYYY-MM-DD 형식으로 입력해주세요.';
+      next.birth = 'YYYY-MM-DD 형식으로 입력해주세요.';
+    if (!formData.phone?.trim()) next.phone = '전화번호를 입력해주세요.';
+    if (!formData.school?.trim()) next.school = '학교 이름을 입력해주세요.';
     if (!formData.gender) next.gender = '성별을 선택해주세요.';
     if (!formData.agreeToTerms) next.agreeToTerms = '개인정보 처리에 동의가 필요합니다.';
     setErrors(next);
@@ -90,6 +120,8 @@ export default function SignupPage() {
       password: formData.password,
       gender: formData.gender as 'MALE' | 'FEMALE',
       birth: formData.birth,
+      phone: formData.phone,
+      school: formData.school,
     };
 
     signup(memberData);
@@ -121,16 +153,22 @@ export default function SignupPage() {
                 onClick={handleUsernameCheck}
                 variant="outline"
                 className="bg-transparent"
+                disabled={checkIdMutation.isPending}
               >
-                중복확인
+                {checkIdMutation.isPending ? '확인 중...' : '중복확인'}
               </Button>
             </div>
-            {usernameChecked === true && (
-              <p className="flex items-center gap-1 text-sm text-green-600 mt-1">
-                <CheckCircle2 className="h-4 w-4" /> 사용 가능한 아이디입니다.
+            {idCheckStatus.message && (
+              <p
+                className={`mt-1 text-sm ${idCheckStatus.status === 'success' ? 'text-green-600' : 'text-red-500'}`}
+              >
+                {idCheckStatus.status === 'success' && (
+                  <CheckCircle2 className="inline h-4 w-4 mr-1" />
+                )}
+                {idCheckStatus.message}
               </p>
             )}
-            {usernameChecked === null && <p className="text-sm text-gray-500 mt-1">확인중...</p>}
+            {errors.loginId && <p className="mt-1 text-sm text-red-600">{errors.loginId}</p>}
           </div>
 
           <div>
@@ -169,7 +207,7 @@ export default function SignupPage() {
             <Input
               id="password"
               type="password"
-              placeholder="비밀번호를 입력하세요"
+              placeholder="비밀번호는 영문, 숫자, 특수문자를 포함한 8~16자여야 합니다."
               value={formData.password}
               onChange={(e) => handleInputChange('password', e.target.value)}
               aria-invalid={!!errors.password}
@@ -202,17 +240,17 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <Label htmlFor="birthDate" className="text-gray-700 font-medium mb-2 block">
+            <Label htmlFor="birth" className="text-gray-700 font-medium mb-2 block">
               생년월일
             </Label>
             <Input
-              id="birthDate"
+              id="birth"
               placeholder="YYYY-MM-DD 형식으로 입력하세요"
               value={formData.birth}
               onChange={(e) => handleInputChange('birth', e.target.value)}
-              aria-invalid={!!errors.birthDate}
+              aria-invalid={!!errors.birth}
             />
-            {errors.birthDate && <p className="mt-1 text-sm text-red-600">{errors.birthDate}</p>}
+            {errors.birth && <p className="mt-1 text-sm text-red-600">{errors.birth}</p>}
           </div>
 
           <div>
@@ -227,6 +265,33 @@ export default function SignupPage() {
               </SelectContent>
             </Select>
             {errors.gender && <p className="mt-1 text-sm text-red-600">{errors.gender}</p>}
+          </div>
+          {/* 9. 전화번호와 학교 입력 필드 추가 */}
+          <div>
+            <Label htmlFor="phone" className="text-gray-700 font-medium mb-2 block">
+              전화번호
+            </Label>
+            <Input
+              id="phone"
+              value={formData.phone}
+              placeholder="010-1234-5678"
+              onChange={(e) => handleInputChange('phone', e.target.value)}
+              aria-invalid={!!errors.phone}
+            />
+            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
+          </div>
+          <div>
+            <Label htmlFor="school" className="text-gray-700 font-medium mb-2 block">
+              학교 이름
+            </Label>
+            <Input
+              id="school"
+              value={formData.school}
+              placeholder="00대학교"
+              onChange={(e) => handleInputChange('school', e.target.value)}
+              aria-invalid={!!errors.school}
+            />
+            {errors.school && <p className="mt-1 text-sm text-red-600">{errors.school}</p>}
           </div>
 
           <div className="flex items-center">

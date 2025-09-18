@@ -28,7 +28,7 @@ export default function EditProfilePage() {
   const [profile, setProfileState] = useState({
     name: '',
     email: '',
-    birthDate: '',
+    birth: '',
     gender: '',
     phone: '',
     school: '',
@@ -50,7 +50,7 @@ export default function EditProfilePage() {
       setProfileState({
         name: user.name || '',
         email: user.email || '',
-        birthDate: user.birthDate || '',
+        birth: user.birth || '',
         gender: user.gender || '',
         phone: user.phone || '',
         school: user.school || '',
@@ -205,8 +205,8 @@ export default function EditProfilePage() {
                     <Input id="username" value={user?.loginId || ''} disabled />
                   </div>
                   <div>
-                    <Label htmlFor="birthDate">생년월일</Label>
-                    <Input id="birthDate" value={profile.birthDate || ''} disabled />
+                    <Label htmlFor="birth">생년월일</Label>
+                    <Input id="birth" value={profile.birth || ''} disabled />
                   </div>
                   <div>
                     <Label htmlFor="gender">성별</Label>

@@ -98,11 +98,11 @@ export default function MyInfoPage() {
   };
 
   const age = useMemo(() => {
-    if (!user?.birthDate) return null;
+    if (!user?.birth) return null;
     const today = new Date();
-    const birth = new Date(user.birthDate);
+    const birth = new Date(user.birth);
     return today.getFullYear() - birth.getFullYear();
-  }, [user?.birthDate]);
+  }, [user?.birth]);
 
   const setSubject = (s: string) => {
     setForm((prev) => {
@@ -171,7 +171,7 @@ export default function MyInfoPage() {
                 </div>
                 <div>학교: {user?.school || '-'}</div>
                 <div>전화번호: {user?.phone || '-'}</div>
-                <div>생년월일: {user?.birthDate || '-'}</div>
+                <div>생년월일: {user?.birth || '-'}</div>
               </div>
             </div>
           </CardContent>
