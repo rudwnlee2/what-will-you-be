@@ -29,7 +29,7 @@ export const login = async (data: LoginData) => {
  * GET /api/members/check-username/{loginId}
  */
 export const checkLoginId = async (loginId: string): Promise<{ exists: boolean }> => {
-  const response = await axiosInstance.get(`/api/members/check-username/${loginId}`);
+  const response = await axiosInstance.get(`/api/members/check-loginId/${loginId}`);
   return response.data;
 };
 
