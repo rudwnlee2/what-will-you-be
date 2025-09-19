@@ -30,6 +30,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+
 
 	implementation 'commons-io:commons-io:2.11.0' // 최신 버전으로 변경 가능
 
@@ -72,7 +75,7 @@ tasks.named('jacocoTestReport') {
 			'**/*Request.*',
 			'**/*Response.*',
 			'**/*Config.*',
-			'**/*Entity.*',
+			'**/*domain.*', //Entity 이부분을 바꿔야해 -> domain으로 나는 지금 domain으로 쓰고 있음
 			'**/*Filter.*',
 			// 애플리케이션 메인 클래스 제외
 			'**/WhatwillyoubeApplication.*'
