@@ -26,7 +26,7 @@ export const login = async (data: LoginData) => {
 
 /**
  * 3. 아이디 중복 확인
- * GET /api/members/check-loginid/{loginId}
+ * GET /api/members/check-username/{loginId}
  */
 export const checkLoginId = async (loginId: string): Promise<{ exists: boolean }> => {
   const response = await axiosInstance.get(`/api/members/check-username/${loginId}`);
