@@ -40,17 +40,22 @@ class JwtUtilTest {
     }
 
     @Test
-    @DisplayName("JWT 토큰 생성 시 정상적으로 Bearer 접두사와 subject 포함")
-    void createToken_containsEmail() {
+    @DisplayName("JWT 토큰 생성 시 Bearer 접두사와 subject(email), username 포함")
+    void createToken_containsEmailAndUsername() {
+        // given
+        String testEmail = "test@test.com";
+        String testUsername = "홍길동";
+
         // when
-        String tokenWithPrefix = jwtUtil.createToken(testEmail);
+        String tokenWithPrefix = jwtUtil.createToken(testEmail, testUsername);
         String token = tokenWithPrefix.substring(7);
 
         // then
         assertTrue(tokenWithPrefix.startsWith(JwtUtil.BEARER_PREFIX));
 
         Claims claims = jwtUtil.getUserInfoFromToken(token);
-        assertEquals(testEmail, claims.getSubject());
+        assertEquals(testEmail, claims.getSubject());            // sub 확인
+        assertEquals(testUsername, claims.get("username"));      // username claim 확인
     }
 
     @Test
@@ -83,7 +88,7 @@ class JwtUtilTest {
     @DisplayName("JWT 토큰 검증 성공")
     void validateToken_success() {
         // given
-        String token = jwtUtil.createToken(testEmail).substring(7);
+        String token = jwtUtil.createToken("test@test.com", "홍길동").substring(7);
 
         // when
         boolean isValid = jwtUtil.validateToken(token);
@@ -112,7 +117,7 @@ class JwtUtilTest {
         ReflectionTestUtils.setField(jwtUtil, "tokenExpiration", 1L);
         jwtUtil.init();
 
-        String token = jwtUtil.createToken(testEmail).substring(7);
+        String token = jwtUtil.createToken("test@test.com", "홍길동").substring(7);
         Thread.sleep(5); // 만료될 때까지 잠깐 대기
 
         // when
@@ -126,14 +131,17 @@ class JwtUtilTest {
     @DisplayName("JWT 토큰에서 사용자 정보 추출 성공")
     void getUserInfoFromToken_success() {
         // given
-        String token = jwtUtil.createToken(testEmail).substring(7);
+        String testEmail = "test@test.com";
+        String testUsername = "홍길동";
+        String token = jwtUtil.createToken(testEmail, testUsername).substring(7);
 
         // when
         Claims claims = jwtUtil.getUserInfoFromToken(token);
 
         // then
         assertNotNull(claims);
-        assertEquals(testEmail, claims.getSubject());
+        assertEquals(testEmail, claims.getSubject());           // 이메일 확인
+        assertEquals(testUsername, claims.get("username"));     // 이름 확인
     }
 
     @Test

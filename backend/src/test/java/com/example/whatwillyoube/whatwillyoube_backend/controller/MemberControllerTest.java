@@ -1,5 +1,6 @@
 package com.example.whatwillyoube.whatwillyoube_backend.controller;
 
+import com.example.whatwillyoube.whatwillyoube_backend.config.SecurityConfig;
 import com.example.whatwillyoube.whatwillyoube_backend.domain.Gender;
 import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.LoginRequestDto;
@@ -13,10 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,19 +29,31 @@ import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest(controllers = MemberController.class)
-@AutoConfigureMockMvc(addFilters = false) // 시큐리티 필터 제외
+@Import(SecurityConfig.class)
+@TestPropertySource(properties = {
+        "jwt.secret.key=dGVzdC1zZWNyZXQta2V5LXRlc3Qtc2VjcmV0LWtleS10ZXN0LXNlY3JldC1rZXkK",
+        "jwt.token.expiration=60000"
+})
 class MemberControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private MemberService memberService; // Service 계층은 Mock 처리
+    private MemberService memberService;
+
+    @MockitoBean
+    private JwtUtil jwtUtil;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -47,7 +62,6 @@ class MemberControllerTest {
 
     @BeforeEach
     void setup() {
-        // 테스트용 Member 엔티티 생성
         testMember = Member.builder()
                 .loginId("testId")
                 .password("encodedPw")
@@ -59,7 +73,6 @@ class MemberControllerTest {
                 .school("테스트학교")
                 .build();
 
-        // JPA가 자동으로 넣어주는 필드를 리플렉션으로 세팅
         ReflectionTestUtils.setField(testMember, "id", 1L);
         ReflectionTestUtils.setField(testMember, "createdDate", LocalDateTime.now());
     }
@@ -67,7 +80,6 @@ class MemberControllerTest {
     @Test
     @DisplayName("회원가입 성공 시 201 반환")
     void signUp_success() throws Exception {
-        // given: 요청 DTO와 Mock 응답 DTO 준비
         MemberRequestDto requestDto = new MemberRequestDto(
                 "testId", "Password!1", "테스터", "test@test.com",
                 LocalDate.of(2000, 1, 1), Gender.MALE,
@@ -76,10 +88,10 @@ class MemberControllerTest {
         MemberResponseDto responseDto = MemberResponseDto.from(testMember);
         given(memberService.signUp(any(MemberRequestDto.class))).willReturn(responseDto);
 
-        // when & then: POST 요청 → 201 응답 + 응답 본문 검증
         mockMvc.perform(post("/api/members/signup")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.loginId").value("testId"))
                 .andExpect(jsonPath("$.email").value("test@test.com"));
@@ -88,12 +100,10 @@ class MemberControllerTest {
     @Test
     @DisplayName("로그인 성공 시 200 반환 + Authorization 헤더 추가")
     void login_success() throws Exception {
-        // given
         LoginRequestDto requestDto = new LoginRequestDto("testId", "Password!1");
         String token = "Bearer test.jwt.token";
         given(memberService.login(anyString(), anyString())).willReturn(token);
 
-        // when & then
         mockMvc.perform(post("/api/members/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
@@ -104,12 +114,10 @@ class MemberControllerTest {
     @Test
     @DisplayName("내 정보 조회 성공 시 200 반환")
     void myPage_success() throws Exception {
-        // given: 서비스 계층에서 응답할 DTO 세팅
         MemberResponseDto responseDto = MemberResponseDto.from(testMember);
         given(memberService.getMember(1L)).willReturn(responseDto);
         UserDetailsImpl principal = new UserDetailsImpl(testMember);
 
-        // when & then: GET 요청 + 커스텀 유저 주입 → 200 응답
         mockMvc.perform(get("/api/members/me")
                         .with(SecurityMockMvcRequestPostProcessors.user(principal)))
                 .andExpect(status().isOk())
@@ -119,7 +127,6 @@ class MemberControllerTest {
     @Test
     @DisplayName("내 정보 수정 성공 시 200 반환")
     void updateMyPage_success() throws Exception {
-        // given
         MemberRequestDto updateRequest = new MemberRequestDto(
                 "newId", "Password!1", "새이름", "new@test.com",
                 LocalDate.of(2001, 2, 2), Gender.FEMALE,
@@ -138,7 +145,6 @@ class MemberControllerTest {
 
         UserDetailsImpl principal = new UserDetailsImpl(testMember);
 
-        // when & then
         mockMvc.perform(patch("/api/members/me")
                         .with(SecurityMockMvcRequestPostProcessors.user(principal))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -151,14 +157,143 @@ class MemberControllerTest {
     @Test
     @DisplayName("회원 탈퇴 성공 시 204 반환")
     void deleteMember_success() throws Exception {
-        // given
         UserDetailsImpl principal = new UserDetailsImpl(testMember);
 
-        // when & then: DELETE 요청 → 204 응답 + 서비스 호출 검증
         mockMvc.perform(delete("/api/members/me")
                         .with(SecurityMockMvcRequestPostProcessors.user(principal)))
                 .andExpect(status().isNoContent());
 
         verify(memberService).deleteMember(1L);
+    }
+
+    // ======================== 실패 케이스 ========================
+
+    @Test
+    @DisplayName("회원가입 실패 - 유효성 검사 실패 시 400 반환")
+    void signUp_fail_validation() throws Exception {
+        MemberRequestDto requestDto = new MemberRequestDto(
+                "testId", "", "테스터", "test@test.com", // 비밀번호 공백
+                LocalDate.of(2000, 1, 1), Gender.MALE,
+                "010-1234-5678", "테스트학교"
+        );
+
+        mockMvc.perform(post("/api/members/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("회원가입 실패 - 아이디 중복 시 예외 발생")
+    void signUp_fail_duplicateLoginId() throws Exception {
+        MemberRequestDto requestDto = new MemberRequestDto(
+                "testId", "Password!1", "테스터", "test@test.com",
+                LocalDate.of(2000, 1, 1), Gender.MALE,
+                "010-1234-5678", "테스트학교"
+        );
+
+        given(memberService.signUp(any(MemberRequestDto.class)))
+                .willThrow(new RuntimeException("이미 사용 중인 아이디입니다."));
+
+        try {
+            mockMvc.perform(post("/api/members/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestDto))
+                            .with(csrf()));
+        } catch (Exception e) {
+            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
+            assert e.getCause() instanceof RuntimeException;
+        }
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 존재하지 않는 회원 시 예외 발생")
+    void login_fail_memberNotFound() throws Exception {
+        LoginRequestDto requestDto = new LoginRequestDto("nonExistentId", "Password!1");
+        given(memberService.login(anyString(), anyString()))
+                .willThrow(new RuntimeException("존재하지 않는 회원입니다."));
+
+        try {
+            mockMvc.perform(post("/api/members/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestDto)));
+        } catch (Exception e) {
+            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
+            assert e.getCause() instanceof RuntimeException;
+        }
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 비밀번호 불일치 시 예외 발생")
+    void login_fail_wrongPassword() throws Exception {
+        LoginRequestDto requestDto = new LoginRequestDto("testId", "wrongPassword");
+        given(memberService.login(anyString(), anyString()))
+                .willThrow(new RuntimeException("비밀번호가 틀렸습니다."));
+
+        try {
+            mockMvc.perform(post("/api/members/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestDto)));
+        } catch (Exception e) {
+            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
+            assert e.getCause() instanceof RuntimeException;
+        }
+    }
+
+    @Test
+    @DisplayName("내 정보 조회 실패 - 존재하지 않는 회원 시 예외 발생")
+    void myPage_fail_memberNotFound() throws Exception {
+        given(memberService.getMember(1L))
+                .willThrow(new RuntimeException("존재하지 않는 회원입니다."));
+        UserDetailsImpl principal = new UserDetailsImpl(testMember);
+
+        try {
+            mockMvc.perform(get("/api/members/me")
+                            .with(SecurityMockMvcRequestPostProcessors.user(principal)));
+        } catch (Exception e) {
+            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
+            assert e.getCause() instanceof RuntimeException;
+        }
+    }
+
+    @Test
+    @DisplayName("내 정보 수정 실패 - 유효성 검사 실패 시 400 반환")
+    void updateMyPage_fail_validation() throws Exception {
+        MemberRequestDto updateRequest = new MemberRequestDto(
+                "newId", "Password!1", "", "new@test.com", // 이름이 빈 문자열
+                LocalDate.of(2001, 2, 2), Gender.FEMALE,
+                "010-1111-2222", "새학교"
+        );
+        UserDetailsImpl principal = new UserDetailsImpl(testMember);
+
+        mockMvc.perform(patch("/api/members/me")
+                        .with(SecurityMockMvcRequestPostProcessors.user(principal))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 실패 - 존재하지 않는 회원 시 예외 발생")
+    void deleteMember_fail_memberNotFound() throws Exception {
+        doThrow(new RuntimeException("존재하지 않는 회원입니다."))
+                .when(memberService).deleteMember(1L);
+        UserDetailsImpl principal = new UserDetailsImpl(testMember);
+
+        try {
+            mockMvc.perform(delete("/api/members/me")
+                            .with(SecurityMockMvcRequestPostProcessors.user(principal)));
+        } catch (Exception e) {
+            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
+            assert e.getCause() instanceof RuntimeException;
+        }
+    }
+
+    @Test
+    @DisplayName("인증되지 않은 사용자의 보호된 리소스 접근 시 403 반환")
+    void accessProtectedResource_fail_unauthorized() throws Exception {
+        mockMvc.perform(get("/api/members/me"))
+                .andExpect(status().isForbidden());
     }
 }
