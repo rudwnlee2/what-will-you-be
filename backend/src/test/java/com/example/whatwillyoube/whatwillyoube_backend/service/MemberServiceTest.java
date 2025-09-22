@@ -137,7 +137,8 @@ public class MemberServiceTest {
         // given
         when(memberRepository.findByLoginId("testuser")).thenReturn(Optional.of(testMember));
         when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(true);
-        when(jwtUtil.createToken(testMember.getEmail())).thenReturn("test-jwt-token");
+        when(jwtUtil.createToken(testMember.getEmail(), testMember.getName()))
+                .thenReturn("test-jwt-token");
 
         // when
         String token = memberService.login("testuser", "password123");

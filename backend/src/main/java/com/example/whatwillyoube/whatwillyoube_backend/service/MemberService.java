@@ -46,7 +46,7 @@ public class MemberService {
             throw new RuntimeException("비밀번호가 틀렸습니다.");
         }
 
-        return jwtUtil.createToken(member.getEmail());
+        return jwtUtil.createToken(member.getEmail(), member.getName());
     }
 
     public MemberResponseDto getMember(Long id) {

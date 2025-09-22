@@ -41,13 +41,14 @@ public class JwtUtil {
     }
 
     //토큰 생성
-    public String createToken(String email) { // <-- 파라미터 이름 변경
+    public String createToken(String email, String username) { // <-- 파라미터 이름 변경
         Date now = new Date();
         Date expirationDate = new Date(now.getTime() + tokenExpiration);
 
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(email) // <-- 사용자 식별값(email) 저장
+                        .claim("username", username)
                         .setIssuedAt(now)
                         .setExpiration(expirationDate)
                         .signWith(key, signatureAlgorithm)
