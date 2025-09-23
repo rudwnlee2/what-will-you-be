@@ -47,7 +47,7 @@ def _chat_once(system_msg: str, user_msg: str, model: str = "gpt-4o-mini", tempe
 def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[str, Any]],
                                     model: str = "gpt-4o-mini",
                                     temperature: float = 0.7,
-                                    max_tokens: int = 2000) -> List[Dict[str, Any]]:
+                                    max_tokens: int = 2500) -> List[Dict[str, Any]]:
 
     reconstructs = []
     rec_json = json.dumps(recommendations, ensure_ascii=False)
@@ -59,8 +59,6 @@ def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[s
         "설명은 따뜻하고 친근한 말투로 한다. "
         "반환할 직업 개수는 항상 3개이다. "
         "너가 생성할 내용은 입력된 직업 정보와 반드시 연관이 있어야 한다. "
-        "외부 직업을 추천할 수 있지만, 직업 정보는 반드시 초기 추천 직업 정보와 연관되어야 한다. "
-
     )
     user_msg = (
         f"사용자 정보: {user_text}\n\n"
@@ -68,8 +66,10 @@ def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[s
         "초기 추천 직업 목록 중 사용자와 연관성이 높은 3가지 직업을 추천하라. "
         "반환할 JSON 키 목록: {jobName, jobSum, way, major, certificate, pay, jobProspect, knowledge, jobEnvironment, jobValues, reason}"
         "'reason' 필드에 사용자에게 이 직업을 추천한 이유를 작성한다. "
-        "모든 필드는 사용자의 관심사에 맞게 2~3문장으로 요약, 재작성, 생성해야 한다. "
-        "생성한 직업 정보는 사용자에게 더 어울리는 순서대로 반환한다. "
+        "모든 필드는 사용자의 관심사에 맞게 2문장 이상, 3문장 이하로 요약해라. "
+        "생성한 직업 정보는 사용자에게 더 어울리는 순서대로 반환. "
+        "초기 추천 직업 목록에 없는 직업을 추천할 수 있지만, 반드시 초기 추천 직업 정보와 연관되어야 한다. "
+        "요약할 정보가 없다면 '해당 사항 없음'이라고 해라. "
     )
     response = _chat_once(system_msg, user_msg, model, temperature, max_tokens)
     clean_response = extract_json_from_gpt(response)
