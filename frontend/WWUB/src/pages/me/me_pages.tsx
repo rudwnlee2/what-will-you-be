@@ -253,7 +253,7 @@ export default function MyInfoPage() {
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="MBTI 유형을 선택하세요" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-ground shadow-md border">
                         {options.mbti.map((m) => (
                           <SelectItem key={m} value={m}>
                             {m}
@@ -271,7 +271,7 @@ export default function MyInfoPage() {
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="홀란드 유형을 선택하세요" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-ground shadow-md border">
                         {options.holland.map((h) => (
                           <SelectItem key={h} value={h}>
                             {h}
@@ -319,7 +319,7 @@ export default function MyInfoPage() {
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="가장 중요한 가치관을 선택하세요" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-ground shadow-md border">
                       {options.values.map((v) => (
                         <SelectItem key={v} value={v}>
                           {v}
