@@ -5,10 +5,20 @@ const TOKEN_KEY = 'jwtToken';
 /** JWT 토큰을 디코딩하여 payload(내용물)를 추출하는 내부 함수 */
 function decodeJwt(token: string) {
   try {
-    // atob는 Base64로 인코딩된 문자열을 디코딩합니다.
-    // JWT는 세 부분(header.payload.signature)으로 나뉘어 있으므로,
-    // 가운데 payload 부분만 디코딩하면 됩니다.
-    return JSON.parse(atob(token.split('.')[1]));
+    const base64Url = token.split('.')[1];
+    // Base64url을 일반 Base64로 변환합니다.
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    // atob로 디코딩한 후, 한글 깨짐을 방지하기 위해 UTF-8로 변환하는 과정
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join(''),
+    );
+
+    return JSON.parse(jsonPayload);
   } catch (e) {
     console.error('토큰 디코딩 실패:', e);
     return null;
@@ -20,9 +30,15 @@ export const saveToken = (token: string) => {
   localStorage.setItem(TOKEN_KEY, token);
 };
 
-/** localStorage에서 토큰을 가져오는 함수 */
+/** localStorage에서 토큰을 가져오고, 'Bearer ' 접두어를 제거하는 함수 */
 export const getToken = (): string | null => {
-  return localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY);
+  // 토큰이 존재하고 'Bearer '로 시작하면, 해당 부분을 제거하고 순수 토큰만 반환합니다.
+  if (token && token.startsWith('Bearer ')) {
+    return token.slice(7); // 'Bearer '.length === 7
+    // 또는 return token.replace('Bearer ', '');
+  }
+  return token; // 'Bearer '가 없는 일반 토큰이거나 null인 경우 그대로 반환
 };
 
 /** 로그아웃 시 토큰을 삭제하는 함수 */
