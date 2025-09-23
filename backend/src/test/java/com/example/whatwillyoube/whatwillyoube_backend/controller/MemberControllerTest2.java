@@ -166,6 +166,69 @@ class MemberControllerTest2 {
                 .body("phone", equalTo("010-1234-5678"))
                 .body("school", equalTo("테스트학교"));
 
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("내 정보 수정 성공")
+    void updateMyPage_success() {
+        MemberRequestDto memberRequestDto = createTestMemberDto();
+        memberRepository.save(memberRequestDto.toEntity(passwordEncoder));
+
+        LoginRequestDto loginRequest = new LoginRequestDto("testId", "Password!1");
+        String token = login(loginRequest);
+
+
+        MemberRequestDto updateMemberDto = new MemberRequestDto(
+                "testId",
+                "Password!1",
+                "이름 변경",
+                "test2@naver.com",
+                LocalDate.of(2001, 11, 1),
+                Gender.MALE,
+                "010-1234-5678",
+                "테스트학교"
+        );
+
+        given()
+                .log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", token)
+                .body(updateMemberDto)
+        .when()
+                .patch("/api/members/me")
+        .then()
+                .log().all()
+                .statusCode(200)
+                .body("loginId", equalTo("testId"))
+                .body("email", equalTo("test2@naver.com"))
+                .body("name", equalTo("이름 변경"))
+                .body("gender", equalTo("MALE"))
+                .body("birth", equalTo("2001-11-01"))
+                .body("phone", equalTo("010-1234-5678"))
+                .body("school", equalTo("테스트학교"));
+
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("회원 탈퇴 성공")
+    void deleteMember_success() {
+        MemberRequestDto memberRequestDto = createTestMemberDto();
+        memberRepository.save(memberRequestDto.toEntity(passwordEncoder));
+
+        LoginRequestDto loginRequest = new LoginRequestDto("testId", "Password!1");
+        String token = login(loginRequest);
+
+        given()
+                .log().all()
+                .contentType(ContentType.JSON)
+                .header("Authorization", token)
+        .when()
+                .delete("/api/members/me")
+        .then()
+                .log().all()
+                .statusCode(204);
 
     }
 
