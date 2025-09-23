@@ -13,7 +13,9 @@
 - ✅ **직업 추천 API (Python API 연동 완료)**
 - ✅ 직업 추천 결과 저장 및 조회
 - ✅ 옵션 조회 API (성별, MBTI, 홀랜드, 직업가치관)
-- ✅ **테스트 코드 작성 완료** (Service Layer)
+- ✅ **완전한 테스트 환경 구축** (Service, Controller, Security, Util Layer)
+- ✅ **코드 커버리지 측정** (Jacoco 통합)
+- ✅ **통합 테스트** (Rest-Assured 적용)
 - 🚧 친구 관계 관리 (도메인 설계 완료)
 - 🚧 개인/그룹 미션 시스템 (도메인 설계 완료)
 
@@ -29,6 +31,9 @@
 - **Gradle 8.14.2**
 - **Lombok**
 - **Validation**
+- **Jacoco** (코드 커버리지)
+- **Rest-Assured** (통합 테스트)
+- **Commons IO** (파일 처리)
 
 ## 📊 데이터베이스 설계
 
@@ -150,15 +155,23 @@
 
 ```
 src/main/java/com/example/whatwillyoube/whatwillyoube_backend/
-├── config/          # 설정 클래스 (Security, App)
+├── config/          # 설정 클래스 (3개: Security, App, JpaAuditing)
 ├── controller/      # REST 컨트롤러 (4개)
 ├── domain/          # 엔티티 클래스 (20개)
-├── dto/            # 데이터 전송 객체 (13개)
+├── dto/            # 데이터 전송 객체 (14개)
 ├── repository/     # JPA 리포지토리 (3개)
-├── security/       # 보안 관련 클래스
+├── security/       # 보안 관련 클래스 (3개)
 ├── service/        # 비즈니스 로직 (4개)
-├── util/           # 유틸리티 클래스 (JWT)
+├── util/           # 유틸리티 클래스 (2개: JWT, MessageConverter)
 └── WhatWillYouBeBackendApplication.java
+
+src/test/java/com/example/whatwillyoube/whatwillyoube_backend/
+├── controller/      # 컨트롤러 테스트 (2개)
+├── security/       # 보안 테스트 (1개)
+├── service/        # 서비스 테스트 (4개)
+├── util/           # 유틸리티 테스트 (2개)
+├── JacksonTest.java # JSON 직렬화 테스트
+└── WhatWillYouBeBackendApplicationTests.java
 ```
 
 ### 주요 컴포넌트
@@ -243,9 +256,26 @@ spring:
 - **트랜잭션 롤백**: @Transactional로 테스트 격리
 
 ### 테스트 파일
+**Service Layer 테스트:**
 - `MemberServiceTest.java` - 회원 관리 서비스 테스트
 - `JobRecommendationsServiceTest.java` - 직업 추천 서비스 테스트
 - `RecommendationInfoServiceTest.java` - 추천 정보 서비스 테스트
+- `RecommendationServiceTest.java` - Python API 연동 테스트
+
+**Controller Layer 테스트:**
+- `MemberControllerTest.java` - 회원 관리 컨트롤러 테스트
+- `MemberControllerTest2.java` - 추가 회원 컨트롤러 테스트
+
+**Security Layer 테스트:**
+- `JwtAuthenticationFilterTest.java` - JWT 인증 필터 테스트
+
+**Utility Layer 테스트:**
+- `JwtUtilTest.java` - JWT 유틸리티 테스트
+- `FixedLengthJsonMessageConverterTest.java` - 메시지 컨버터 테스트
+
+**기타 테스트:**
+- `JacksonTest.java` - JSON 직렬화/역직렬화 테스트
+- `WhatWillYouBeBackendApplicationTests.java` - 애플리케이션 컨텍스트 테스트
 
 ### 테스트 실행
 ```bash
@@ -257,7 +287,19 @@ spring:
 
 # 테스트 결과 리포트 확인
 ./gradlew test --info
+
+# 코드 커버리지 리포트 생성
+./gradlew jacocoTestReport
+
+# 테스트 + 커버리지 리포트 (자동 실행)
+./gradlew test
 ```
+
+### 코드 커버리지
+- **도구**: Jacoco
+- **리포트 위치**: `build/reports/jacoco/test/html/index.html`
+- **제외 대상**: DTO, Config, Filter, Application 클래스
+- **자동 생성**: 테스트 실행 시 자동으로 HTML 리포트 생성
 
 ## 🐍 Python API 연동
 
@@ -323,8 +365,13 @@ spring:
 - 추천 결과 저장/조회/삭제
 - 옵션 조회 API
 - 완전한 도메인 모델 설계
-- **Service Layer 테스트 코드 작성**
-- **통합 테스트 환경 구축**
+- **완전한 테스트 환경 구축**
+  - Service Layer 테스트 (4개 클래스)
+  - Controller Layer 테스트 (2개 클래스)
+  - Security Layer 테스트 (1개 클래스)
+  - Utility Layer 테스트 (2개 클래스)
+- **코드 커버리지 측정** (Jacoco 통합)
+- **통합 테스트** (Rest-Assured 적용)
 
 ### 🚧 진행 예정
 - [ ] 친구 시스템 API 구현
@@ -338,10 +385,13 @@ spring:
 - [ ] 예외 처리 표준화
 - [ ] API 문서 자동화 (Swagger)
 - [x] **Service Layer 테스트 코드 작성**
-- [ ] Controller Layer 테스트 코드 작성
+- [x] **Controller Layer 테스트 코드 작성**
+- [x] **Security Layer 테스트 코드 작성**
+- [x] **Utility Layer 테스트 코드 작성**
+- [x] **코드 커버리지 측정 도구 적용**
 - [ ] 로깅 시스템 개선
 - [ ] 성능 최적화
-- [ ] 테스트 커버리지 향상
+- [ ] E2E 테스트 추가
 
 ## 🚀 배포 및 운영
 
@@ -359,14 +409,11 @@ JWT_SECRET=your_jwt_secret_key
 PYTHON_API_URL=http://127.0.0.1:8000
 ```
 
-## 🧪 테스트
+## 🧪 빌드 및 실행
 
 ```bash
-# 전체 테스트 실행
+# 전체 테스트 실행 (커버리지 리포트 자동 생성)
 ./gradlew test
-
-# 테스트 리포트 생성
-./gradlew test jacocoTestReport
 
 # 빌드 (테스트 포함)
 ./gradlew build
@@ -376,7 +423,14 @@ PYTHON_API_URL=http://127.0.0.1:8000
 
 # 애플리케이션 실행
 ./gradlew bootRun
+
+# 코드 커버리지 리포트만 생성
+./gradlew jacocoTestReport
 ```
+
+### 테스트 리포트 확인
+- **테스트 결과**: `build/reports/tests/test/index.html`
+- **코드 커버리지**: `build/reports/jacoco/test/html/index.html`
 
 ## 📞 문의 및 지원
 
@@ -387,4 +441,4 @@ PYTHON_API_URL=http://127.0.0.1:8000
 ---
 
 **개발팀** | What Will You Be Project  
-**최종 업데이트** | 2024년 12월
+**최종 업데이트** | 2024년 12월 (테스트 환경 완성)
