@@ -26,17 +26,26 @@ public class RecommendationInfoService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
 
-        RecommendationInfo info;
+        RecommendationInfo info = recommendationInfoRepository.findByMemberId(memberId)
+                .orElse(null);
 
-        Optional<RecommendationInfo> infoOptional = recommendationInfoRepository.findById(memberId);
-
-        if (infoOptional.isPresent()) {
+        if (info != null) {
             // 이미 존재하면 업데이트
-            info = infoOptional.get();
             info.update(requestDto);
         } else {
-            // 존재하지 않으면 새로 생성 후 저장
-            info = requestDto.toEntity(member);
+            // 존재하지 않으면 새로 생성
+            info = RecommendationInfo.builder()
+                    .member(member)
+                    .dream(requestDto.getDream())
+                    .dreamReason(requestDto.getDreamReason())
+                    .interest(requestDto.getInterest())
+                    .jobValue(requestDto.getJobValue())
+                    .mbti(requestDto.getMbti())
+                    .hobby(requestDto.getHobby())
+                    .favoriteSubject(requestDto.getFavoriteSubject())
+                    .holland(requestDto.getHolland())
+                    .build();
+
             recommendationInfoRepository.save(info);
         }
 
@@ -45,10 +54,13 @@ public class RecommendationInfoService {
 
     @Transactional(readOnly = true)
     public RecommendationInfoResponseDto getRecommendationInfo(Long memberId) {
-        // ID로 RecommendationInfo를 찾고, 존재하면 DTO로 변환하여 반환
-        return recommendationInfoRepository.findById(memberId)
-                .map(RecommendationInfoResponseDto::new) // 정보가 있으면 이 생성자가 호출됨
-                .orElse(new RecommendationInfoResponseDto()); // 정보가 없으면 빈 DTO를 생성하는 생성자가 호출됨
-    }
+        RecommendationInfo info = recommendationInfoRepository.findByMemberId(memberId)
+                .orElse(null);
 
+        if (info != null) {
+            return new RecommendationInfoResponseDto(info);
+        } else {
+            return new RecommendationInfoResponseDto();
+        }
+    }
 }
