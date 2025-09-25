@@ -55,4 +55,6 @@ export interface UserProfile {
  * PATCH /api/members/me
  * 모든 필드는 선택적이므로 Partial 유틸리티 타입을 사용하거나 직접 optional로 지정합니다.
  */
-export type UpdateProfileData = Partial<Omit<UserProfile, 'id' | 'createdDate'>>;
+export type UpdateProfileData = Partial<Omit<UserProfile, 'id' | 'createdDate'>> & {
+  password?: string; // 비밀번호 필드를 선택적으로 추가
+};

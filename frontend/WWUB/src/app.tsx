@@ -18,6 +18,7 @@ import PrivacyPage from './pages/privacy/privacy_pages';
 import WipModal from './components/layout/WipModal'; // WipModal 컴포넌트
 import { useWipModal } from './hooks/useWipModal'; // 모달 훅
 import SiteHeader from './components/layout/site-header'; // SiteHeader 컴포넌트
+import Loading from './pages/loading/loading_pages';
 import { useEffect } from 'react';
 import './App.css';
 
@@ -56,6 +57,7 @@ function App() {
           {/* <Route path="/friends" element={<FriendsPage />} /> */}
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/loading" element={<Loading />} />
         </Routes>
       </main>
       <WipModal isOpen={isWipModalOpen} onClose={closeWipModal} />

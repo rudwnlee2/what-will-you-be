@@ -23,7 +23,6 @@ export const useJobRecommendation = () => {
   const createMutation = useMutation({
     mutationFn: createJobRecommendation,
     onSuccess: () => {
-      alert('직업 추천이 생성되었습니다.');
       queryClient.invalidateQueries({ queryKey: ['jobRecommendations'] });
     },
   });
@@ -31,7 +30,6 @@ export const useJobRecommendation = () => {
   const deleteMutation = useMutation({
     mutationFn: deleteJobRecommendation, // mutationFn은 recommendationId를 인자로 받음
     onSuccess: () => {
-      alert('추천 기록이 삭제되었습니다.');
       queryClient.invalidateQueries({ queryKey: ['jobRecommendations'] });
     },
   });
@@ -44,7 +42,8 @@ export const useJobRecommendation = () => {
     listError: listQuery.error,
 
     // Methods & Status (Create)
-    createRecommendations: (data: any, options?: any) => createMutation.mutate(data, options),
+    createRecommendations: (data: void, options?: Parameters<typeof createMutation.mutate>[1]) =>
+      createMutation.mutate(data, options),
     isCreating: createMutation.isPending,
     createError: createMutation.error,
 

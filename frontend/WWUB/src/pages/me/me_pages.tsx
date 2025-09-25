@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,88 +12,65 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Input } from '@/components/ui/input';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 
-type Options = {
-  mbti: string[];
-  holland: string[];
-  subjects: string[];
-  values: string[];
-};
+import {
+  useGetRecommendationInfo,
+  useUpdateRecommendationInfo,
+} from '../../hooks/useRecommendation';
+import type { RecommendationInfoRequest, MBTI, Holland, JobValue } from '../../types/api';
+import {
+  JOB_VALUE_OPTIONS,
+  MBTI_OPTIONS,
+  HOLLAND_OPTIONS,
+  SUBJECT_OPTIONS,
+} from '../../constants/options'; // 옵션 데이터 import
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'; // ❗ 이 줄을 추가하세요.
 
 export default function MyInfoPage() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const [options, setOptions] = useState<Options | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+
+  // ❗ 2. React Query 훅으로 데이터 로딩 및 저장 처리
+  const { data: initialData, isLoading: isInfoLoading } = useGetRecommendationInfo();
+  const { mutate: updateRecommendation, isPending: isUpdating } = useUpdateRecommendationInfo();
+
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
+  // ❗ 3. form 상태 이름을 API 타입과 일치시킴
   const [form, setForm] = useState({
-    futureDream: '',
+    dream: '',
     dreamReason: '',
-    interestsHobbies: '',
-    mbtiType: '',
-    hollandType: '',
-    subject: '',
-    otherSubject: '',
-    careerValue: '',
+    interest: '',
+    mbti: '' as MBTI | '',
+    holland: '' as Holland | '',
+    favoriteSubject: '', // UI용 배열 상태
+    jobValue: '' as JobValue | '',
   });
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    loadOptionsAndSavedData();
+    if (!isAuthenticated) navigate('/login');
   }, [isAuthenticated, navigate]);
 
-  const loadOptionsAndSavedData = async () => {
-    setLoading(true);
-    try {
-      // Mock options data
-      setOptions({
-        mbti: [
-          'ISTJ',
-          'ISFJ',
-          'INFJ',
-          'INTJ',
-          'ISTP',
-          'ISFP',
-          'INFP',
-          'INTP',
-          'ESTP',
-          'ESFP',
-          'ENFP',
-          'ENTP',
-          'ESTJ',
-          'ESFJ',
-          'ENFJ',
-          'ENTJ',
-        ],
-        holland: ['현실형', '탐구형', '예술형', '사회형', '진취형', '관습형'],
-        subjects: ['국어', '영어', '수학', '사회', '과학', '예체능', '기타'],
-        values: [
-          '안정성',
-          '성장 가능성',
-          '워라밸',
-          '경제적 보상',
-          '명예/인정',
-          '봉사',
-          '자율성',
-          '창의성',
-        ],
+  // ❗ 4. 데이터 로딩 성공 시 form 상태 업데이트
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        dream: initialData.dream || '',
+        dreamReason: initialData.dreamReason || '',
+        interest: initialData.interest || '',
+        mbti: initialData.mbti || '',
+        holland: initialData.holland || '',
+        // ❗ 2. 불러온 문자열을 배열로 변환하여 UI 상태에 저장
+        favoriteSubject: initialData.favoriteSubject || '',
+        jobValue: initialData.jobValue || '',
       });
-    } catch (error) {
-      console.error('Failed to load data:', error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [initialData]);
+
+  // ❗ 3. 체크박스 핸들링 함수 추가
 
   const age = useMemo(() => {
     if (!user?.birth) return null;
@@ -104,42 +79,34 @@ export default function MyInfoPage() {
     return today.getFullYear() - birth.getFullYear();
   }, [user?.birth]);
 
-  const setSubject = (s: string) => {
-    setForm((prev) => {
-      const nextOther = s !== '기타' ? '' : prev.otherSubject;
-      return { ...prev, subject: s, otherSubject: nextOther };
+  // ❗ 4. 저장/제출 시 배열을 문자열로 변환하는 로직 추가
+  const handleSaveOrSubmit = (onSuccessCallback: () => void) => {
+    const requestData: RecommendationInfoRequest = {
+      dream: form.dream,
+      dreamReason: form.dreamReason,
+      interest: form.interest,
+      mbti: form.mbti as MBTI,
+      holland: form.holland as Holland,
+      hobby: form.interest, // API 명세에 따라 interest를 hobby로도 사용
+      favoriteSubject: form.favoriteSubject, // 배열을 문자열로 변환
+      jobValue: form.jobValue as JobValue,
+    };
+    updateRecommendation(requestData, {
+      onSuccess: onSuccessCallback,
+      onError: (error) => alert(`처리 중 오류 발생: ${error.message}`),
+    });
+  };
+  // ❗ 5. 저장하기 함수를 실제 API 호출로 변경
+  const saveForm = () => {
+    handleSaveOrSubmit(() => {
+      setSaveMessage('성공적으로 저장되었습니다!');
+      setTimeout(() => setSaveMessage(null), 3000);
     });
   };
 
-  const isComplete = useMemo(() => {
-    const requiresOther = form.subject === '기타';
-    return (
-      form.futureDream.trim() &&
-      form.dreamReason.trim() &&
-      form.interestsHobbies.trim() &&
-      form.mbtiType &&
-      form.hollandType &&
-      form.subject &&
-      (!requiresOther || form.otherSubject.trim()) &&
-      form.careerValue
-    );
-  }, [form]);
-
-  const saveForm = async () => {
-    setSaving(true);
-    setSaveMessage(null);
-
-    setTimeout(() => {
-      setSaveMessage('저장되었습니다!');
-      setSaving(false);
-      setTimeout(() => setSaveMessage(null), 3000);
-    }, 1000);
-  };
-
-  const submit = async (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    sessionStorage.setItem('careerForm', JSON.stringify(form));
-    navigate('/career-form');
+    handleSaveOrSubmit(() => navigate('/loading'));
   };
 
   return (
@@ -196,67 +163,78 @@ export default function MyInfoPage() {
               </div>
             )}
 
-            {loading ? (
+            {isInfoLoading ? (
               <p className="text-gray-600">정보를 불러오는 중...</p>
-            ) : options ? (
-              <form onSubmit={submit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
+            ) : (
+              <form onSubmit={submit} className="space-y-8">
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="md:col-span-1">
                     <Label htmlFor="futureDream" className="font-semibold">
                       장래희망
                     </Label>
+                    <p className="text-sm text-gray-500 mt-1">당신의 목표를 자유롭게 적어주세요</p>
+                  </div>
+                  <div className="md:col-span-2">
                     <Textarea
                       id="futureDream"
                       placeholder="당신의 장래희망을 자유롭게 적어주세요"
-                      rows={3}
-                      value={form.futureDream}
-                      onChange={(e) => setForm((p) => ({ ...p, futureDream: e.target.value }))}
-                      className="mt-2"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="dreamReason" className="font-semibold">
-                      장래희망을 선택한 이유
-                    </Label>
-                    <Textarea
-                      id="dreamReason"
-                      placeholder="왜 이 직업을 선택하셨나요?"
-                      rows={3}
-                      value={form.dreamReason}
-                      onChange={(e) => setForm((p) => ({ ...p, dreamReason: e.target.value }))}
-                      className="mt-2"
+                      rows={4}
+                      value={form.dream}
+                      onChange={(e) => setForm((p) => ({ ...p, dream: e.target.value }))}
                     />
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="interests" className="font-semibold">
-                    관심사와 취미
-                  </Label>
-                  <Textarea
-                    id="interests"
-                    placeholder="관심 있는 활동, 즐겨하는 취미를 자유롭게 입력해주세요"
-                    rows={3}
-                    value={form.interestsHobbies}
-                    onChange={(e) => setForm((p) => ({ ...p, interestsHobbies: e.target.value }))}
-                    className="mt-2"
-                  />
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="md:col-span-1">
+                    <Label htmlFor="dreamReason" className="font-semibold">
+                      장래희망을 선택한 이유
+                    </Label>
+                    <p className="text-sm text-gray-500 mt-1">선택하신 이유를 알려주세요</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Textarea
+                      id="dreamReason"
+                      placeholder="왜 이 직업을 선택하셨나요?"
+                      rows={4}
+                      value={form.dreamReason}
+                      onChange={(e) => setForm((p) => ({ ...p, dreamReason: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="md:col-span-1">
+                    <Label htmlFor="interests" className="font-semibold">
+                      관심사와 취미
+                    </Label>
+                    <p className="text-sm text-gray-500 mt-1">관심 있는 활동, 즐겨하는 취미</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Textarea
+                      id="interests"
+                      placeholder="관심 있는 활동, 즐겨하는 취미를 자유롭게 입력해주세요"
+                      rows={4}
+                      value={form.interest}
+                      onChange={(e) => setForm((p) => ({ ...p, interest: e.target.value }))}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <Label className="font-semibold">MBTI 유형</Label>
                     <Select
-                      value={form.mbtiType}
-                      onValueChange={(v) => setForm((p) => ({ ...p, mbtiType: v }))}
+                      value={form.mbti}
+                      onValueChange={(v) => setForm((p) => ({ ...p, mbti: v as MBTI }))}
                     >
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="MBTI 유형을 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>
-                        {options.mbti.map((m) => (
-                          <SelectItem key={m} value={m}>
-                            {m}
+                        {MBTI_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -265,16 +243,16 @@ export default function MyInfoPage() {
                   <div>
                     <Label className="font-semibold">홀란드 유형</Label>
                     <Select
-                      value={form.hollandType}
-                      onValueChange={(v) => setForm((p) => ({ ...p, hollandType: v }))}
+                      value={form.holland}
+                      onValueChange={(v) => setForm((p) => ({ ...p, holland: v as Holland }))}
                     >
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="홀란드 유형을 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>
-                        {options.holland.map((h) => (
-                          <SelectItem key={h} value={h}>
-                            {h}
+                        {HOLLAND_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -282,47 +260,44 @@ export default function MyInfoPage() {
                   </div>
                 </div>
 
+                {/* ❗ 5. 좋아하는 과목 UI를 체크박스로 구현 */}
                 <div>
-                  <Label className="font-semibold">좋아하는 과목</Label>
-                  <RadioGroup value={form.subject} onValueChange={setSubject} className="mt-3">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {options.subjects.map((s) => (
-                        <div key={s} className="flex items-center space-x-2">
-                          <RadioGroupItem value={s} id={s} />
-                          <Label htmlFor={s}>{s}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </RadioGroup>
-                  {form.subject === '기타' && (
-                    <div className="mt-3">
-                      <Label htmlFor="otherSubject" className="text-sm text-gray-700">
-                        기타 과목 입력
-                      </Label>
-                      <Input
-                        id="otherSubject"
-                        placeholder="예: 코딩, 경제, 심리학 등"
-                        value={form.otherSubject}
-                        onChange={(e) => setForm((p) => ({ ...p, otherSubject: e.target.value }))}
-                        className="mt-1"
-                      />
-                    </div>
-                  )}
+                  <Label className="font-semibold">좋아하는 과목 (하나만 선택)</Label>
+                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {SUBJECT_OPTIONS.map((subject) => (
+                      <div key={subject} className="flex items-center space-x-2">
+                        <RadioGroup
+                          value={form.favoriteSubject}
+                          onValueChange={(value) =>
+                            setForm((p) => ({ ...p, favoriteSubject: value }))
+                          }
+                          className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3"
+                        >
+                          {SUBJECT_OPTIONS.map((subject) => (
+                            <div key={subject} className="flex items-center space-x-2">
+                              <RadioGroupItem value={subject} id={`me-${subject}`} />
+                              <Label htmlFor={`me-${subject}`}>{subject}</Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                        <Label htmlFor={subject}>{subject}</Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-
                 <div>
                   <Label className="font-semibold">직업 가치관</Label>
                   <Select
-                    value={form.careerValue}
-                    onValueChange={(v) => setForm((p) => ({ ...p, careerValue: v }))}
+                    value={form.jobValue}
+                    onValueChange={(v) => setForm((p) => ({ ...p, jobValue: v as JobValue }))}
                   >
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="가장 중요한 가치관을 선택하세요" />
                     </SelectTrigger>
                     <SelectContent>
-                      {options.values.map((v) => (
-                        <SelectItem key={v} value={v}>
-                          {v}
+                      {JOB_VALUE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -330,26 +305,14 @@ export default function MyInfoPage() {
                 </div>
 
                 <div className="flex justify-end gap-3">
-                  <Button
-                    type="button"
-                    onClick={saveForm}
-                    disabled={saving}
-                    variant="outline"
-                    className="px-6 py-3 bg-transparent"
-                  >
-                    {saving ? '저장 중...' : '저장하기'}
+                  <Button type="button" onClick={saveForm} disabled={isUpdating} variant="outline">
+                    {isUpdating ? '저장 중...' : '저장하기'}
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={!isComplete}
-                    className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700"
-                  >
+                  <Button type="submit" disabled={isUpdating}>
                     진로 추천 받기
                   </Button>
                 </div>
               </form>
-            ) : (
-              <p className="text-gray-600">정보를 불러올 수 없습니다.</p>
             )}
           </CardContent>
         </Card>

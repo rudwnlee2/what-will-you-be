@@ -21,10 +21,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { useUpdateProfile, useDeleteAccount } from '../../../hooks/useUser'; // ❗ 새 훅 import
+import type { UpdateProfileData } from '../../../types/user.types';
 
 export default function EditProfilePage() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { mutate: updateProfile, isPending: isSaving } = useUpdateProfile();
+  const { mutate: deleteAccount } = useDeleteAccount();
+
   const [profile, setProfileState] = useState({
     name: '',
     email: '',
@@ -34,7 +39,6 @@ export default function EditProfilePage() {
     school: '',
   });
   const [preview, setPreview] = useState<string | undefined>(undefined);
-  const [saving, setSaving] = useState(false);
 
   // Editable fields (password managed in users store)
   const [password, setPassword] = useState('');
@@ -77,18 +81,22 @@ export default function EditProfilePage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordMismatch) return;
-    setSaving(true);
+    const updatedData: UpdateProfileData = {
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone,
+      school: profile.school,
+    };
+    // 비밀번호가 입력된 경우에만 포함
+    if (password) {
+      updatedData.password = password;
+    }
 
-    // Mock save operation
-    setTimeout(() => {
-      setSaving(false);
-      navigate('/me');
-    }, 1000);
+    updateProfile(updatedData); // ❗ API 호출로 변경
   };
 
   const onDeleteAccount = () => {
-    // Mock delete operation
-    navigate('/');
+    deleteAccount(); // ❗ API 호출로 변경
   };
 
   return (
@@ -218,10 +226,10 @@ export default function EditProfilePage() {
               <div className="flex flex-col sm:flex-row gap-3 justify-between">
                 <Button
                   type="submit"
-                  disabled={saving}
+                  disabled={isSaving}
                   className="bg-blue-600 text-white hover:bg-blue-700"
                 >
-                  {saving ? '저장중...' : '저장하기'}
+                  {isSaving ? '저장중...' : '저장하기'}
                 </Button>
 
                 {/* Account Deletion */}

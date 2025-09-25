@@ -11,10 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'; // ❗ 이 줄을 추가하세요.
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../../hooks/useAuth';
-import { useRecommendation } from '../../hooks/useRecommendation';
+import {
+  useGetRecommendationInfo,
+  useUpdateRecommendationInfo,
+} from '../../hooks/useRecommendation';
 import { useJobRecommendation } from '../../hooks/useJobRecommendation';
 import {
   MBTI_OPTIONS,
@@ -27,8 +30,12 @@ import type { RecommendationInfoRequest, MBTI, Holland, JobValue } from '../../t
 export default function CareerFormSinglePage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { updateRecommendation, isUpdating } = useRecommendation();
-  const { createRecommendations, isCreating } = useJobRecommendation();
+  const { data: initialData, isLoading: isInfoLoading } = useGetRecommendationInfo();
+  const { mutate: updateRecommendation, isPending: isUpdating } = useUpdateRecommendationInfo();
+
+  const { isCreating } = useJobRecommendation();
+  // 저장 메시지 state 추가
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const [form, setForm] = useState<{
     dream: string;
@@ -36,7 +43,7 @@ export default function CareerFormSinglePage() {
     interest: string;
     mbti: MBTI | '';
     holland: Holland | '';
-    favoriteSubjects: string[];
+    favoriteSubject: string;
     jobValue: JobValue | '';
   }>({
     dream: '',
@@ -44,7 +51,7 @@ export default function CareerFormSinglePage() {
     interest: '',
     mbti: '',
     holland: '',
-    favoriteSubjects: [],
+    favoriteSubject: '',
     jobValue: '',
   });
 
@@ -54,14 +61,20 @@ export default function CareerFormSinglePage() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubjectChange = (subject: string, checked: boolean) => {
-    setForm((prev) => ({
-      ...prev,
-      favoriteSubjects: checked
-        ? [...prev.favoriteSubjects, subject]
-        : prev.favoriteSubjects.filter((s) => s !== subject),
-    }));
-  };
+  useEffect(() => {
+    if (initialData) {
+      setForm({
+        dream: initialData.dream || '',
+        dreamReason: initialData.dreamReason || '',
+        interest: initialData.interest || '',
+        mbti: initialData.mbti || '',
+        holland: initialData.holland || '',
+        // favoriteSubject는 쉼표로 구분된 문자열이므로 배열로 변환합니다.
+        favoriteSubject: initialData.favoriteSubject || '',
+        jobValue: initialData.jobValue || '',
+      });
+    }
+  }, [initialData]);
 
   const isComplete = useMemo(() => {
     return (
@@ -70,10 +83,41 @@ export default function CareerFormSinglePage() {
       form.interest.trim() &&
       form.mbti &&
       form.holland &&
-      form.favoriteSubjects.length > 0 &&
+      form.favoriteSubject.length > 0 &&
       form.jobValue
     );
   }, [form]);
+  //'저장하기' 버튼을 위한 함수 추가
+  const saveForm = () => {
+    // 1. 필수 항목이 모두 채워졌는지 확인 (저장은 필수가 아니어도 되게 하려면 이 줄을 지워도 됩니다)
+    if (!isComplete) {
+      alert('모든 항목을 입력해야 저장할 수 있습니다.');
+      return;
+    }
+
+    // 2. 서버에 보낼 데이터 형식으로 변환
+    const requestData: RecommendationInfoRequest = {
+      dream: form.dream,
+      dreamReason: form.dreamReason,
+      interest: form.interest,
+      mbti: form.mbti as MBTI,
+      holland: form.holland as Holland,
+      hobby: form.interest,
+      favoriteSubject: form.favoriteSubject,
+      jobValue: form.jobValue as JobValue,
+    };
+
+    // 3. updateRecommendation 함수를 호출하여 서버에 저장
+    updateRecommendation(requestData, {
+      onSuccess: () => {
+        setSaveMessage('성공적으로 저장되었습니다!');
+        setTimeout(() => setSaveMessage(null), 3000); // 3초 후 메시지 숨기기
+      },
+      onError: (error) => {
+        setSaveMessage(`저장 중 오류 발생: ${error.message}`);
+      },
+    });
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,24 +130,17 @@ export default function CareerFormSinglePage() {
       mbti: form.mbti as MBTI,
       holland: form.holland as Holland,
       hobby: form.interest, // 취미와 관심사를 같은 필드로 사용
-      favoriteSubject: form.favoriteSubjects.join(', '),
+      favoriteSubject: form.favoriteSubject,
       jobValue: form.jobValue as JobValue,
     };
 
     updateRecommendation(requestData, {
       onSuccess: () => {
-        // 진로 정보 저장 후 직업 추천 생성
-        createRecommendations(undefined, {
-          onSuccess: () => {
-            alert('진로 정보가 저장되고 직업 추천이 생성되었습니다!');
-            navigate('/results');
-          },
-          onError: (error) => {
-            alert('직업 추천 생성 중 오류가 발생했습니다: ' + error.message);
-          },
-        });
+        // ❗ 정보 저장에 성공하면, 즉시 로딩 페이지로 이동합니다.
+        // 실제 추천 생성은 로딩 페이지에서 수행합니다.
+        navigate('/loading');
       },
-      onError: (error) => {
+      onError: (error: Error) => {
         alert('진로 정보 저장 중 오류가 발생했습니다: ' + error.message);
       },
     });
@@ -120,7 +157,15 @@ export default function CareerFormSinglePage() {
             <p className="text-lg text-gray-600 mb-8">
               아래 항목을 한 번에 입력하면, 나에게 맞는 직업을 추천해드려요
             </p>
-
+            {/* 로딩 및 저장 메시지 UI 추가 */}
+            <div>
+              {isInfoLoading && (
+                <p className="text-center text-gray-500 mb-4">저장된 정보를 불러오는 중입니다...</p>
+              )}
+              {saveMessage && (
+                <p className="text-center text-green-600 font-semibold mb-4">{saveMessage}</p>
+              )}
+            </div>
             <form onSubmit={submit} className="space-y-8">
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="md:col-span-1">
@@ -220,13 +265,20 @@ export default function CareerFormSinglePage() {
                 <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {SUBJECT_OPTIONS.map((subject) => (
                     <div key={subject} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={subject}
-                        checked={form.favoriteSubjects.includes(subject)}
-                        onCheckedChange={(checked) =>
-                          handleSubjectChange(subject, checked as boolean)
+                      <RadioGroup
+                        value={form.favoriteSubject}
+                        onValueChange={(value) =>
+                          setForm((p) => ({ ...p, favoriteSubject: value }))
                         }
-                      />
+                        className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3"
+                      >
+                        {SUBJECT_OPTIONS.map((subject) => (
+                          <div key={subject} className="flex items-center space-x-2">
+                            <RadioGroupItem value={subject} id={subject} />
+                            <Label htmlFor={subject}>{subject}</Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
                       <Label htmlFor={subject}>{subject}</Label>
                     </div>
                   ))}
@@ -251,14 +303,22 @@ export default function CareerFormSinglePage() {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="flex justify-end">
+              {/*  버튼 영역 수정 */}
+              <div className="flex items-center justify-end gap-4 pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={saveForm}
+                  disabled={isUpdating || isCreating}
+                >
+                  저장하기
+                </Button>
                 <Button
                   type="submit"
                   disabled={!isComplete || isUpdating || isCreating}
                   className="px-6 py-3 bg-blue-600 text-white hover:bg-blue-700"
                 >
-                  {isUpdating || isCreating ? '제출 중...' : '제출하기'}
+                  {isUpdating || isCreating ? '제출 중...' : '추천 받기'}
                 </Button>
               </div>
             </form>

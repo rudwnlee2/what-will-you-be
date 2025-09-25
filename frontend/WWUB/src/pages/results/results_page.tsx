@@ -1,52 +1,33 @@
 'use client';
 
-import { useEffect, useMemo, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom'; // ❗ useLocation 추가
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../../hooks/useAuth';
-
-type Career = {
-  id: string;
-  name: string;
-  image: string;
-  reason: string;
-  role: string;
-  howTo: string;
-  majors: string[];
-  certificates: string[];
-  salary: string;
-  outlook: string;
-  knowledge: string[];
-  environment: string;
-  values: string[];
-  satisfaction: string;
-  labor: string;
-  skills: string[];
-};
+import type { JobRecommendationDetail } from '../../types/job.types'; // ❗ API 타입을 직접 사용
+import type { UserProfile } from '../../types/user.types';
 
 export default function ResultsPage() {
   const navigate = useNavigate();
+  const location = useLocation(); // ❗ location 훅 사용
   const { user } = useAuth();
-  const [careers, setCareers] = useState<Career[]>([]);
+
+  // ❗ sessionStorage 대신 location.state에서 데이터를 직접 받습니다.
+  const recommendations = useMemo(
+    () => (location.state?.recommendations as JobRecommendationDetail[]) || [],
+    [location.state],
+  );
   const [selected, setSelected] = useState<number | null>(0);
   const [flip, setFlip] = useState<Record<number, boolean>>({});
-  const savedRef = useRef(false);
 
+  // ❗ 데이터가 없으면 career-form으로 보내는 로직
   useEffect(() => {
-    const raw = sessionStorage.getItem('recommendationResult');
-    if (!raw) {
-      navigate('/career-form');
-      return;
-    }
-    try {
-      const data = JSON.parse(raw);
-      setCareers(data.careers || []);
-      savedRef.current = true;
-    } catch {
+    if (!recommendations || recommendations.length === 0) {
+      alert('추천 결과가 없습니다. 다시 시도해주세요.');
       navigate('/career-form');
     }
-  }, [navigate]);
+  }, [recommendations, navigate]);
 
   const handleCardClick = (idx: number) => {
     setSelected(idx);
@@ -54,8 +35,8 @@ export default function ResultsPage() {
   };
 
   const selectedCareer = useMemo(
-    () => (selected != null ? careers[selected] : null),
-    [selected, careers],
+    () => (selected != null ? recommendations[selected] : null),
+    [selected, recommendations],
   );
 
   return (
@@ -67,11 +48,11 @@ export default function ResultsPage() {
         </p>
 
         <div className="flex flex-col md:flex-row gap-6 items-stretch">
-          {careers.map((c, idx) => {
+          {recommendations.map((c, idx) => {
             const isSelected = selected === idx;
             return (
               <div
-                key={c.id}
+                key={c.recommendationId}
                 className={`flex-1 transition-all duration-300 ${isSelected ? 'md:flex-[2] scale-[1.02]' : 'md:flex-[1] opacity-90'} ${selected != null && !isSelected ? 'md:opacity-60' : ''}`}
                 onClick={() => handleCardClick(idx)}
               >
@@ -84,7 +65,7 @@ export default function ResultsPage() {
         {selectedCareer && (
           <div className="mt-8 flex justify-center">
             <Button
-              onClick={() => navigate(`/results/detail/${selectedCareer.id}`)}
+              onClick={() => navigate(`/results/detail/${selectedCareer.recommendationId}`)}
               className="bg-blue-600 text-white hover:bg-blue-700"
             >
               자세히 보기
@@ -96,7 +77,15 @@ export default function ResultsPage() {
   );
 }
 
-function FlipCard({ career, flipped, user }: { career: Career; flipped: boolean; user?: any }) {
+function FlipCard({
+  career,
+  flipped,
+  user,
+}: {
+  career: JobRecommendationDetail;
+  flipped: boolean;
+  user?: UserProfile;
+}) {
   return (
     <div className="group [perspective:1000px] cursor-pointer">
       <div
@@ -106,8 +95,8 @@ function FlipCard({ career, flipped, user }: { career: Career; flipped: boolean;
         <Card className="absolute inset-0 bg-white rounded-xl shadow-md p-4 flex flex-col justify-between [backface-visibility:hidden] hover:shadow-lg transition">
           <div className="relative h-48 w-full overflow-hidden rounded-lg">
             <img
-              src={career.image || '/placeholder.svg'}
-              alt={career.name}
+              src={career.jobName || '/placeholder.svg'}
+              alt={career.jobName}
               className="w-full h-full object-cover"
             />
             {user?.name && (
@@ -117,13 +106,13 @@ function FlipCard({ career, flipped, user }: { career: Career; flipped: boolean;
             )}
           </div>
           <div className="p-3">
-            <h3 className="text-xl font-bold">{career.name}</h3>
+            <h3 className="text-xl font-bold">{career.jobName}</h3>
           </div>
         </Card>
 
         {/* Back: 직업명 + 추천 이유 */}
         <Card className="absolute inset-0 bg-white rounded-xl shadow-md p-5 overflow-auto [backface-visibility:hidden] [transform:rotateY(180deg)] hover:shadow-lg transition">
-          <h3 className="text-xl font-bold mb-2">{career.name}</h3>
+          <h3 className="text-xl font-bold mb-2">{career.jobName}</h3>
           <p className="text-gray-700 leading-relaxed">
             <b>추천 이유:</b> {career.reason}
           </p>

@@ -1,177 +1,245 @@
 'use client';
 
 import { useParams, useNavigate } from 'react-router-dom';
+import { useJobRecommendationDetail } from '../../../hooks/useJobRecommendation'; // ❗ 상세 조회 훅 사용
+
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useAuth } from '../../../hooks/useAuth';
-
-type Career = {
-  id: string;
-  name: string;
-  image: string;
-  reason: string;
-  role: string;
-  howTo: string;
-  majors: string[];
-  certificates: string[];
-  salary: string;
-  outlook: string;
-  knowledge: string[];
-  environment: string;
-  values: string[];
-  satisfaction: string;
-  labor: string;
-  skills: string[];
-};
+import { Loader2 } from 'lucide-react'; // 로딩 스피너
 
 export default function ResultDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [careers, setCareers] = useState<Career[]>([]);
-  const [current, setCurrent] = useState<Career | null>(null);
-  const { user } = useAuth();
-  const guarded = useRef(false);
 
-  useEffect(() => {
-    const raw = sessionStorage.getItem('recommendationResult');
-    if (!raw) {
-      if (!guarded.current) {
-        guarded.current = true;
-        navigate('/results');
-      }
-      return;
-    }
-    try {
-      const data = JSON.parse(raw);
-      const list: Career[] = data.careers || [];
-      setCareers(list);
-      const found = list.find((c) => c.id === id) || list[0] || null;
-      setCurrent(found);
-    } catch {
-      if (!guarded.current) {
-        guarded.current = true;
-        navigate('/results');
-      }
-    }
-  }, [id]);
+  // ❗ URL의 id를 숫자로 변환하여 훅에 전달
+  const recommendationId = id ? parseInt(id, 10) : null;
+  const { data: career, isLoading, error } = useJobRecommendationDetail(recommendationId);
 
-  const otherCareers = useMemo(
-    () => careers.filter((c) => c.id !== current?.id),
-    [careers, current],
-  );
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
-  if (!current) return null;
+  if (error || !career) {
+    return (
+      <div className="text-center pt-40">
+        <p>추천 정보를 불러오는 데 실패했습니다.</p>
+        <Button onClick={() => navigate('/results')}>목록으로 돌아가기</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-purple-50">
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16" />
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">당신에게 추천하는 직업</h1>
-      <p className="text-gray-600 mb-8">왼쪽 목록에서 다른 직업을 선택해 상세 정보를 확인하세요.</p>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+        <Card className="bg-white rounded-xl shadow p-6 sm:p-8">
+          <h2 className="text-3xl font-bold mb-2">{career.jobName}</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            추천일: {new Date(career.recommendedAt).toLocaleDateString()}
+          </p>
 
-      <div className="grid md:grid-cols-[260px_1fr] gap-6">
-        {/* Left: other careers */}
-        <aside className="space-y-3">
-          {otherCareers.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => setCurrent(c)}
-              className="w-full bg-white rounded-lg shadow hover:shadow-md transition p-3 text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="relative w-16 h-12 rounded overflow-hidden">
-                  <img
-                    src={c.image || '/placeholder.svg'}
-                    alt={c.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="text-sm font-semibold text-gray-900">{c.name}</div>
-              </div>
-            </button>
-          ))}
-        </aside>
-      </div>
-      {/* Right: main detail */}
-      <section>
-        <Card className="bg-white rounded-xl shadow p-6 sm:p-8 relative">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="relative w-full h-64 rounded-lg overflow-hidden">
-              <img
-                src={current.image || '/placeholder.svg'}
-                alt={current.name}
-                className="w-full h-full object-cover"
-              />
-              {user?.name && (
-                <div className="absolute bottom-0 right-0 p-2">
-                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                    {user.name.charAt(0)}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold mb-2">{current.name}</h2>
-              <p className="text-gray-600 mb-4">{current.reason}</p>
-              <div className="space-y-2 text-gray-800 text-sm">
-                <p>
-                  <b>추천 이유:</b> {current.reason}
-                </p>
-                <p>
-                  <b>직업이 하는 일:</b> {current.role}
-                </p>
-                <p>
-                  <b>직업이 되는 법:</b> {current.howTo}
-                </p>
-                <p>
-                  <b>관련 전공 리스트:</b> {current.majors.join(', ')}
-                </p>
-                <p>
-                  <b>관련 자격증:</b> {current.certificates.join(', ')}
-                </p>
-                <p>
-                  <b>임금 정보:</b> {current.salary}
-                </p>
-                <p>
-                  <b>직업 전망:</b> {current.outlook}
-                </p>
-                <p>
-                  <b>필요 지식 영역:</b> {current.knowledge.join(', ')}
-                </p>
-                <p>
-                  <b>근무 환경:</b> {current.environment}
-                </p>
-                <p>
-                  <b>직업 가치관:</b> {current.values.join(', ')}
-                </p>
-                <p>
-                  <b>직업 만족도:</b> {current.satisfaction}
-                </p>
-                <p>
-                  <b>일자리 현황:</b> {current.labor}
-                </p>
-                <p>
-                  <b>업무 수행 능력:</b> {current.skills.join(', ')}
-                </p>
-              </div>
-            </div>
+          <div className="space-y-4 text-gray-800">
+            <InfoSection title="직업 요약" content={career.jobSummary} />
+            <InfoSection title="추천 이유" content={career.reason} />
+            <InfoSection title="관련 전공" content={career.relatedMajors} />
+            <InfoSection title="관련 자격증" content={career.relatedCertificates} />
+            <InfoSection title="평균 임금" content={career.salary} />
+            <InfoSection title="직업 전망" content={career.prospect} />
+            <InfoSection title="필요 지식" content={career.requiredKnowledge} />
+            <InfoSection title="경력 경로" content={career.careerPath} />
+            <InfoSection title="근무 환경" content={career.environment} />
+            <InfoSection title="어울리는 가치관" content={career.jobValues} />
           </div>
 
-          <div className="mt-8 border-t pt-6">
-            <div className="text-center">
-              <Button
-                onClick={() => navigate('/results')}
-                className="bg-blue-600 text-white hover:bg-blue-700"
-              >
-                다른 추천 결과 보기
-              </Button>
-            </div>
+          <div className="mt-8 border-t pt-6 text-center">
+            <Button onClick={() => navigate('/results')} variant="outline">
+              목록으로 돌아가기
+            </Button>
           </div>
         </Card>
-      </section>
+      </main>
     </div>
   );
 }
+
+// 정보 섹션을 위한 작은 컴포넌트
+function InfoSection({ title, content }: { title: string; content: string }) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 border-b pb-1 mb-2">{title}</h3>
+      <p className="text-gray-700">{content}</p>
+    </div>
+  );
+}
+// type Career = {
+//   id: string;
+//   name: string;
+//   image: string;
+//   reason: string;
+//   role: string;
+//   howTo: string;
+//   majors: string[];
+//   certificates: string[];
+//   salary: string;
+//   outlook: string;
+//   knowledge: string[];
+//   environment: string;
+//   values: string[];
+//   satisfaction: string;
+//   labor: string;
+//   skills: string[];
+// };
+
+// export default function ResultDetailPage() {
+//   const { id } = useParams<{ id: string }>();
+//   const navigate = useNavigate();
+//   const [careers, setCareers] = useState<Career[]>([]);
+//   const [current, setCurrent] = useState<Career | null>(null);
+//   const { user } = useAuth();
+//   const guarded = useRef(false);
+
+//   useEffect(() => {
+//     const raw = sessionStorage.getItem('recommendationResult');
+//     if (!raw) {
+//       if (!guarded.current) {
+//         guarded.current = true;
+//         navigate('/results');
+//       }
+//       return;
+//     }
+//     try {
+//       const data = JSON.parse(raw);
+//       const list: Career[] = data.careers || [];
+//       setCareers(list);
+//       const found = list.find((c) => c.id === id) || list[0] || null;
+//       setCurrent(found);
+//     } catch {
+//       if (!guarded.current) {
+//         guarded.current = true;
+//         navigate('/results');
+//       }
+//     }
+//   }, [id]);
+
+//   const otherCareers = useMemo(
+//     () => careers.filter((c) => c.id !== current?.id),
+//     [careers, current],
+//   );
+
+//   if (!current) return null;
+
+//   return (
+//     <div className="min-h-screen bg-purple-50">
+//       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16" />
+//       <h1 className="text-3xl font-bold text-gray-900 mb-2">당신에게 추천하는 직업</h1>
+//       <p className="text-gray-600 mb-8">왼쪽 목록에서 다른 직업을 선택해 상세 정보를 확인하세요.</p>
+
+//       <div className="grid md:grid-cols-[260px_1fr] gap-6">
+//         {/* Left: other careers */}
+//         <aside className="space-y-3">
+//           {otherCareers.map((c) => (
+//             <button
+//               key={c.id}
+//               onClick={() => setCurrent(c)}
+//               className="w-full bg-white rounded-lg shadow hover:shadow-md transition p-3 text-left"
+//             >
+//               <div className="flex items-center gap-3">
+//                 <div className="relative w-16 h-12 rounded overflow-hidden">
+//                   <img
+//                     src={c.image || '/placeholder.svg'}
+//                     alt={c.name}
+//                     className="w-full h-full object-cover"
+//                   />
+//                 </div>
+//                 <div className="text-sm font-semibold text-gray-900">{c.name}</div>
+//               </div>
+//             </button>
+//           ))}
+//         </aside>
+//       </div>
+//       {/* Right: main detail */}
+//       <section>
+//         <Card className="bg-white rounded-xl shadow p-6 sm:p-8 relative">
+//           <div className="grid md:grid-cols-2 gap-6">
+//             <div className="relative w-full h-64 rounded-lg overflow-hidden">
+//               <img
+//                 src={current.image || '/placeholder.svg'}
+//                 alt={current.name}
+//                 className="w-full h-full object-cover"
+//               />
+//               {user?.name && (
+//                 <div className="absolute bottom-0 right-0 p-2">
+//                   <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+//                     {user.name.charAt(0)}
+//                   </div>
+//                 </div>
+//               )}
+//             </div>
+//             <div>
+//               <h2 className="text-3xl font-bold mb-2">{current.name}</h2>
+//               <p className="text-gray-600 mb-4">{current.reason}</p>
+//               <div className="space-y-2 text-gray-800 text-sm">
+//                 <p>
+//                   <b>추천 이유:</b> {current.reason}
+//                 </p>
+//                 <p>
+//                   <b>직업이 하는 일:</b> {current.role}
+//                 </p>
+//                 <p>
+//                   <b>직업이 되는 법:</b> {current.howTo}
+//                 </p>
+//                 <p>
+//                   <b>관련 전공 리스트:</b> {current.majors.join(', ')}
+//                 </p>
+//                 <p>
+//                   <b>관련 자격증:</b> {current.certificates.join(', ')}
+//                 </p>
+//                 <p>
+//                   <b>임금 정보:</b> {current.salary}
+//                 </p>
+//                 <p>
+//                   <b>직업 전망:</b> {current.outlook}
+//                 </p>
+//                 <p>
+//                   <b>필요 지식 영역:</b> {current.knowledge.join(', ')}
+//                 </p>
+//                 <p>
+//                   <b>근무 환경:</b> {current.environment}
+//                 </p>
+//                 <p>
+//                   <b>직업 가치관:</b> {current.values.join(', ')}
+//                 </p>
+//                 <p>
+//                   <b>직업 만족도:</b> {current.satisfaction}
+//                 </p>
+//                 <p>
+//                   <b>일자리 현황:</b> {current.labor}
+//                 </p>
+//                 <p>
+//                   <b>업무 수행 능력:</b> {current.skills.join(', ')}
+//                 </p>
+//               </div>
+//             </div>
+//           </div>
+
+//           <div className="mt-8 border-t pt-6">
+//             <div className="text-center">
+//               <Button
+//                 onClick={() => navigate('/results')}
+//                 className="bg-blue-600 text-white hover:bg-blue-700"
+//               >
+//                 다른 추천 결과 보기
+//               </Button>
+//             </div>
+//           </div>
+//         </Card>
+//       </section>
+//     </div>
+//   );
+// }
 //           {/* </div> && !currentMission && (
 //               <div className="flex items-center gap-2 text-amber-600 bg-amber-50 p-3 rounded-lg mb-4">
 //                 <AlertCircle className="w-4 h-4" />
