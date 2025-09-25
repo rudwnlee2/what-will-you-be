@@ -157,7 +157,7 @@
 src/main/java/com/example/whatwillyoube/whatwillyoube_backend/
 ├── config/          # 설정 클래스 (3개: Security, App, JpaAuditing)
 ├── controller/      # REST 컨트롤러 (4개)
-├── domain/          # 엔티티 클래스 (20개)
+├── domain/          # 엔티티 클래스 (19개)
 ├── dto/            # 데이터 전송 객체 (14개)
 ├── repository/     # JPA 리포지토리 (3개)
 ├── security/       # 보안 관련 클래스 (3개)
@@ -166,7 +166,7 @@ src/main/java/com/example/whatwillyoube/whatwillyoube_backend/
 └── WhatWillYouBeBackendApplication.java
 
 src/test/java/com/example/whatwillyoube/whatwillyoube_backend/
-├── controller/      # 컨트롤러 테스트 (2개)
+├── controller/      # 컨트롤러 테스트 (5개)
 ├── security/       # 보안 테스트 (1개)
 ├── service/        # 서비스 테스트 (4개)
 ├── util/           # 유틸리티 테스트 (2개)
@@ -265,6 +265,9 @@ spring:
 **Controller Layer 테스트:**
 - `MemberControllerTest.java` - 회원 관리 컨트롤러 테스트
 - `MemberControllerTest2.java` - 추가 회원 컨트롤러 테스트
+- `JobRecommendationsControllerTest.java` - 직업 추천 컨트롤러 테스트
+- `OptionsControllerTest.java` - 옵션 조회 컨트롤러 테스트
+- `RecommendationInfoControllerTest.java` - 추천 정보 컨트롤러 테스트
 
 **Security Layer 테스트:**
 - `JwtAuthenticationFilterTest.java` - JWT 인증 필터 테스트
@@ -367,7 +370,7 @@ spring:
 - 완전한 도메인 모델 설계
 - **완전한 테스트 환경 구축**
   - Service Layer 테스트 (4개 클래스)
-  - Controller Layer 테스트 (2개 클래스)
+  - Controller Layer 테스트 (5개 클래스)
   - Security Layer 테스트 (1개 클래스)
   - Utility Layer 테스트 (2개 클래스)
 - **코드 커버리지 측정** (Jacoco 통합)
