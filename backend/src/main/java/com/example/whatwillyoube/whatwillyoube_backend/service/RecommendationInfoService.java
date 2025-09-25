@@ -31,20 +31,12 @@ public class RecommendationInfoService {
         Optional<RecommendationInfo> infoOptional = recommendationInfoRepository.findById(memberId);
 
         if (infoOptional.isPresent()) {
+            // 이미 존재하면 업데이트
             info = infoOptional.get();
             info.update(requestDto);
         } else {
-            info = RecommendationInfo.builder()
-                    .member(member)
-                    .dream(requestDto.getDream())
-                    .dreamReason(requestDto.getDreamReason())
-                    .interest(requestDto.getInterest())
-                    .jobValue(requestDto.getJobValue())
-                    .mbti(requestDto.getMbti())
-                    .hobby(requestDto.getHobby())
-                    .favoriteSubject(requestDto.getFavoriteSubject())
-                    .holland(requestDto.getHolland())
-                    .build();
+            // 존재하지 않으면 새로 생성 후 저장
+            info = requestDto.toEntity(member);
             recommendationInfoRepository.save(info);
         }
 

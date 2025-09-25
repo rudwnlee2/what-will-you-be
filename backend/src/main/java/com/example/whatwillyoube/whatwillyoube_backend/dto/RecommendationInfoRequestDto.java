@@ -1,8 +1,6 @@
 package com.example.whatwillyoube.whatwillyoube_backend.dto;
 
-import com.example.whatwillyoube.whatwillyoube_backend.domain.Holland;
-import com.example.whatwillyoube.whatwillyoube_backend.domain.JobValue;
-import com.example.whatwillyoube.whatwillyoube_backend.domain.MBTI;
+import com.example.whatwillyoube.whatwillyoube_backend.domain.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -52,5 +50,20 @@ public class RecommendationInfoRequestDto {
         this.hobby = hobby;
         this.favoriteSubject = favoriteSubject;
         this.holland = holland;
+    }
+
+    // DTO -> Entity 변환
+    public RecommendationInfo toEntity(Member member) {
+        return RecommendationInfo.builder()
+                .member(member)
+                .dream(this.dream)
+                .dreamReason(this.dreamReason)
+                .interest(this.interest)
+                .jobValue(this.jobValue)
+                .mbti(this.mbti)
+                .hobby(this.hobby)
+                .favoriteSubject(this.favoriteSubject)
+                .holland(this.holland)
+                .build();
     }
 }
