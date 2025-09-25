@@ -1,7 +1,6 @@
 package com.example.whatwillyoube.whatwillyoube_backend.config;
 
 import com.example.whatwillyoube.whatwillyoube_backend.security.JwtAuthenticationFilter;
-import com.example.whatwillyoube.whatwillyoube_backend.security.UserDetailsServiceImpl;
 import com.example.whatwillyoube.whatwillyoube_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,7 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsService userDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -66,7 +66,7 @@ public class SecurityConfig {
         //1. URL별 인가(Authorization) 설정
         http.authorizeHttpRequests(auth -> auth
                 // 회원가입, 로그인, 아이디 중복 확인은 인증 없이 허용
-                .requestMatchers("/api/members/signup", "/api/members/login", "/api/members/check-loginid/**").permitAll()
+                .requestMatchers("/api/members/signup", "/api/members/login", "/api/members/check-loginId/**").permitAll()
                 // 옵션 조회는 인증 없이 허용
                 .requestMatchers("/api/options/**").permitAll()
                 // 그 외의 모든 요청은 인증된 사용자만 접근 가능

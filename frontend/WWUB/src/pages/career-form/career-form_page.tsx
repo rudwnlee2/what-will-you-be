@@ -231,7 +231,7 @@ export default function CareerFormSinglePage() {
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="MBTI 유형을 선택하세요" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-ground shadow-md border">
                       {MBTI_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -249,7 +249,7 @@ export default function CareerFormSinglePage() {
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="홀란드 유형을 선택하세요" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-ground shadow-md border">
                       {HOLLAND_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -294,7 +294,7 @@ export default function CareerFormSinglePage() {
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="가장 중요한 가치관을 선택하세요" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-ground shadow-md border">
                     {JOB_VALUE_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
