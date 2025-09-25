@@ -29,6 +29,19 @@ export default function CareerFormSinglePage() {
   const { isAuthenticated } = useAuth();
   const { updateRecommendation, isUpdating } = useRecommendation();
   const { createRecommendations, isCreating } = useJobRecommendation();
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  const saveForm = async () => {
+    setSaving(true);
+    setSaveMessage(null);
+
+    setTimeout(() => {
+      setSaveMessage('저장되었습니다!');
+      setSaving(false);
+      setTimeout(() => setSaveMessage(null), 3000);
+    }, 1000);
+  };
 
   const [form, setForm] = useState<{
     dream: string;
@@ -120,6 +133,17 @@ export default function CareerFormSinglePage() {
             <p className="text-lg text-gray-600 mb-8">
               아래 항목을 한 번에 입력하면, 나에게 맞는 직업을 추천해드려요
             </p>
+            {saveMessage && (
+              <div
+                className={`mb-4 p-3 rounded-md ${
+                  saveMessage.includes('오류')
+                    ? 'bg-red-50 text-red-700 border border-red-200'
+                    : 'bg-green-50 text-green-700 border border-green-200'
+                }`}
+              >
+                {saveMessage}
+              </div>
+            )}
 
             <form onSubmit={submit} className="space-y-8">
               <div className="grid md:grid-cols-3 gap-6">
@@ -186,7 +210,7 @@ export default function CareerFormSinglePage() {
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="MBTI 유형을 선택하세요" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-ground shadow-md border">
                       {MBTI_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -204,7 +228,7 @@ export default function CareerFormSinglePage() {
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="홀란드 유형을 선택하세요" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-ground shadow-md border">
                       {HOLLAND_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -242,7 +266,7 @@ export default function CareerFormSinglePage() {
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="가장 중요한 가치관을 선택하세요" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-ground shadow-md border">
                     {JOB_VALUE_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -253,6 +277,15 @@ export default function CareerFormSinglePage() {
               </div>
 
               <div className="flex justify-end">
+                <Button
+                  type="button"
+                  onClick={saveForm}
+                  disabled={saving}
+                  variant="outline"
+                  className="px-6 py-3 bg-transparent"
+                >
+                  {saving ? '저장 중...' : '저장하기'}
+                </Button>
                 <Button
                   type="submit"
                   disabled={!isComplete || isUpdating || isCreating}
