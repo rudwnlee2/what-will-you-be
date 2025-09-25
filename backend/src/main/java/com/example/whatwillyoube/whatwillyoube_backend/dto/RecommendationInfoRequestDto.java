@@ -52,18 +52,4 @@ public class RecommendationInfoRequestDto {
         this.holland = holland;
     }
 
-    // DTO -> Entity 변환
-    public RecommendationInfo toEntity(Member member) {
-        return RecommendationInfo.builder()
-                .member(member)
-                .dream(this.dream)
-                .dreamReason(this.dreamReason)
-                .interest(this.interest)
-                .jobValue(this.jobValue)
-                .mbti(this.mbti)
-                .hobby(this.hobby)
-                .favoriteSubject(this.favoriteSubject)
-                .holland(this.holland)
-                .build();
-    }
 }
