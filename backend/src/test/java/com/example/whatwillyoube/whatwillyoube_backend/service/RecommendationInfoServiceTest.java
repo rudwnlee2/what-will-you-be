@@ -1,5 +1,6 @@
 package com.example.whatwillyoube.whatwillyoube_backend.service;
 
+import com.example.whatwillyoube.whatwillyoube_backend.domain.Gender;
 import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
 import com.example.whatwillyoube.whatwillyoube_backend.domain.RecommendationInfo;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoRequestDto;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +41,16 @@ public class RecommendationInfoServiceTest {
 
     @BeforeEach
     void setUp() {
-        testMember = Member.builder().loginId("testuser").build();
+        testMember = Member.builder()
+                .loginId("testuser")
+                .password("Password!1")
+                .name("테스트유저")
+                .email("test@test.com")
+                .birth(LocalDate.of(2000, 1, 1))
+                .gender(Gender.MALE)
+                .phone("010-0000-0000")
+                .school("테스트학교")
+                .build();
         org.springframework.test.util.ReflectionTestUtils.setField(testMember, "id", 1L);
 
         requestDto = RecommendationInfoRequestDto.builder()
@@ -58,13 +69,14 @@ public class RecommendationInfoServiceTest {
     @DisplayName("추천 정보 생성 성공 (기존 정보가 없을 경우)")
     void createRecommendationInfo_WhenInfoNotExists() {
         // given
-        // 1. memberId로 회원을 찾으면 testMember가 반환된다고 설정
         when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
-        // 2. memberId로 추천 정보를 찾으면 결과가 없다고(empty) 설정 -> '생성' 로직을 타게 됨
-        when(recommendationInfoRepository.findById(1L)).thenReturn(Optional.empty());
+        when(recommendationInfoRepository.findByMemberId(1L)).thenReturn(Optional.empty());
+        when(recommendationInfoRepository.save(any(RecommendationInfo.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0)); // 저장된 객체 그대로 반환
 
         // when
-        RecommendationInfoResponseDto responseDto = recommendationInfoService.createOrUpdateRecommendationInfo(1L, requestDto);
+        RecommendationInfoResponseDto responseDto =
+                recommendationInfoService.createOrUpdateRecommendationInfo(1L, requestDto);
 
         // then
         assertNotNull(responseDto);
@@ -78,13 +90,12 @@ public class RecommendationInfoServiceTest {
     @DisplayName("추천 정보 수정 성공 (기존 정보가 있을 경우)")
     void updateRecommendationInfo_WhenInfoExists() {
         // given
-        // 1. memberId로 회원을 찾으면 testMember가 반환된다고 설정
         when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
-        // 2. memberId로 추천 정보를 찾으면 기존 정보(testRecommendationInfo)가 반환된다고 설정 -> '수정' 로git  로직을 타게 됨
-        when(recommendationInfoRepository.findById(1L)).thenReturn(Optional.of(testRecommendationInfo));
+        when(recommendationInfoRepository.findByMemberId(1L)).thenReturn(Optional.of(testRecommendationInfo));
 
         // when
-        RecommendationInfoResponseDto responseDto = recommendationInfoService.createOrUpdateRecommendationInfo(1L, requestDto);
+        RecommendationInfoResponseDto responseDto =
+                recommendationInfoService.createOrUpdateRecommendationInfo(1L, requestDto);
 
         // then
         assertNotNull(responseDto);
@@ -98,7 +109,6 @@ public class RecommendationInfoServiceTest {
     @DisplayName("추천 정보 생성/수정 실패 - 존재하지 않는 회원")
     void createOrUpdate_Fail_MemberNotFound() {
         // given
-        // memberId로 회원을 찾았지만 결과가 없다고 설정
         when(memberRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when & then
@@ -114,11 +124,11 @@ public class RecommendationInfoServiceTest {
     @DisplayName("추천 정보 조회 성공")
     void getRecommendationInfo_Success() {
         // given
-        // repository가 ID로 조회 시 testRecommendationInfo를 반환한다고 설정
-        when(recommendationInfoRepository.findById(1L)).thenReturn(Optional.of(testRecommendationInfo));
+        when(recommendationInfoRepository.findByMemberId(1L)).thenReturn(Optional.of(testRecommendationInfo));
 
         // when
-        RecommendationInfoResponseDto responseDto = recommendationInfoService.getRecommendationInfo(1L);
+        RecommendationInfoResponseDto responseDto =
+                recommendationInfoService.getRecommendationInfo(1L);
 
         // then
         assertNotNull(responseDto);
@@ -129,18 +139,16 @@ public class RecommendationInfoServiceTest {
     @DisplayName("추천 정보 조회 - 정보가 없을 경우 빈 DTO 반환")
     void getRecommendationInfo_ReturnsEmptyDto_WhenInfoNotExists() {
         // given
-        // repository가 ID로 조회 시 결과가 없다고 설정
-        when(recommendationInfoRepository.findById(1L)).thenReturn(Optional.empty());
+        when(recommendationInfoRepository.findByMemberId(1L)).thenReturn(Optional.empty());
 
         // when
-        RecommendationInfoResponseDto responseDto = recommendationInfoService.getRecommendationInfo(1L);
+        RecommendationInfoResponseDto responseDto =
+                recommendationInfoService.getRecommendationInfo(1L);
 
         // then
         assertNotNull(responseDto);
-
         assertEquals("", responseDto.getDream());
         assertEquals("", responseDto.getInterest());
-
         assertNull(responseDto.getJobValue());
         assertNull(responseDto.getMbti());
     }

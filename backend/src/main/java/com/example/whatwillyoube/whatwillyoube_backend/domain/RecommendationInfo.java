@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 public class RecommendationInfo extends BaseTimeEntity{
 
     @Id
-    private Long memberId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String dream;
     private String dreamReason;
@@ -34,9 +35,8 @@ public class RecommendationInfo extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Holland holland;
 
-    @MapsId //fk = pk 로 사용하려고
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false, unique = true) //FK + UNIQUE
     private Member member;
 
     @Builder

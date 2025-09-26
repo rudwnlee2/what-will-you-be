@@ -41,6 +41,9 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
     @Column(nullable = false)
     private String school;
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private RecommendationInfo recommendationInfo;
+
     @Builder
     public Member(String loginId, String password, String name, String email, LocalDate birth, Gender gender, String phone, String school) {
         this.loginId = loginId;

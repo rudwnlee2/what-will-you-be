@@ -1,8 +1,6 @@
 package com.example.whatwillyoube.whatwillyoube_backend.dto;
 
-import com.example.whatwillyoube.whatwillyoube_backend.domain.Holland;
-import com.example.whatwillyoube.whatwillyoube_backend.domain.JobValue;
-import com.example.whatwillyoube.whatwillyoube_backend.domain.MBTI;
+import com.example.whatwillyoube.whatwillyoube_backend.domain.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -53,4 +51,5 @@ public class RecommendationInfoRequestDto {
         this.favoriteSubject = favoriteSubject;
         this.holland = holland;
     }
+
 }
