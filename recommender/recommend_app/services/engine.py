@@ -47,7 +47,7 @@ def _chat_once(system_msg: str, user_msg: str, model: str = "gpt-4o-mini", tempe
 def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[str, Any]],
                                     model: str = "gpt-4o-mini",
                                     temperature: float = 0.7,
-                                    max_tokens: int = 3000) -> List[Dict[str, Any]]:
+                                    max_tokens: int = 2500) -> List[Dict[str, Any]]:
 
     reconstructs = []
     rec_json = json.dumps(recommendations, ensure_ascii=False)
@@ -55,8 +55,7 @@ def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[s
     system_msg = (
         "너는 중학생과 고등학생을 대상으로 직업을 추천하는 전문가다. "
         "항상 JSON만 반환해야 하며, 불필요한 설명은 포함하지 마라. "
-        "복잡한 개념은 쉽게 풀어서 설명하고, 어려운 용어 대신 일상적인 단어를 사용한다. "
-        "설명은 따뜻하고 친근한 말투로 한다. "
+        "복잡한 개념은 쉽게 풀어서 설명하고, 설명은 따뜻하고 친근한 말투로 한다. "
         "항상 3개의 직업을 추천해야 한다. "
         "추천하는 직업은 반드시 입력된 직업 정보와 연관이 있어야 하며, "
         "초기 추천 목록에 없는 직업도 선택할 수 있지만 반드시 관련이 있어야 한다. "
@@ -67,7 +66,7 @@ def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[s
         "초기 추천 직업 목록 중 사용자와 연관성이 높은 3가지 직업을 추천하라. "
         "반환할 JSON 키는 {jobName, jobSum, way, major, certificate, pay, jobProspect, knowledge, jobEnvironment, jobValues, reason}이다. "
         "'reason' 필드에는 사용자가 이 직업에 잘 맞을 것 같은 이유를 작성한다. "
-        "모든 필드 내용은 3문장으로 요약해라. "
+        "모든 필드 내용은 3문장으로 요약하지만, 너무 간결해서는 안된다. "
         "추천 결과는 사용자에게 더 어울리는 순서대로 정렬한다. "
     )
     response = _chat_once(system_msg, user_msg, model, temperature, max_tokens)
