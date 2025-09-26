@@ -29,10 +29,10 @@ class RecommendationInfoControllerTest {
     int port;
 
     @Autowired
-    MemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
-    RecommendationInfoRepository recommendationInfoRepository;
+    private RecommendationInfoRepository recommendationInfoRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
