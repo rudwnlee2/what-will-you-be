@@ -35,8 +35,8 @@ public class RecommendationInfo extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Holland holland;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false, unique = true) //FK + UNIQUE
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "member_id", unique = true)
     private Member member;
 
     @Builder
@@ -63,6 +63,10 @@ public class RecommendationInfo extends BaseTimeEntity{
         this.hobby = requestDto.getHobby();
         this.favoriteSubject = requestDto.getFavoriteSubject();
         this.holland = requestDto.getHolland();
+    }
+
+    public void setMember(Member member) {
+        this.member = member;
     }
 
 }

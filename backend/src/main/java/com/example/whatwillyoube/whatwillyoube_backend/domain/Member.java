@@ -41,7 +41,7 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
     @Column(nullable = false)
     private String school;
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private RecommendationInfo recommendationInfo;
 
     @Builder
@@ -55,6 +55,13 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
         this.phone = phone;
         this.school = school;
 
+    }
+
+    public void setRecommendationInfo(RecommendationInfo recommendationInfo) {
+        this.recommendationInfo = recommendationInfo;
+        if (recommendationInfo != null) {
+            recommendationInfo.setMember(this);
+        }
     }
 
     public void update(MemberRequestDto requestDto, PasswordEncoder passwordEncoder) {
