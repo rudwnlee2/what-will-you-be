@@ -70,7 +70,7 @@ public class RecommendationInfoServiceTest {
     void createRecommendationInfo_WhenInfoNotExists() {
         // given
         when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findByMemberId(1L)).thenReturn(Optional.empty());
+        when(recommendationInfoRepository.findByMember_Id(1L)).thenReturn(Optional.empty());
         when(recommendationInfoRepository.save(any(RecommendationInfo.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0)); // 저장된 객체 그대로 반환
 
@@ -91,7 +91,7 @@ public class RecommendationInfoServiceTest {
     void updateRecommendationInfo_WhenInfoExists() {
         // given
         when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findByMemberId(1L)).thenReturn(Optional.of(testRecommendationInfo));
+        when(recommendationInfoRepository.findByMember_Id(1L)).thenReturn(Optional.of(testRecommendationInfo));
 
         // when
         RecommendationInfoResponseDto responseDto =
@@ -124,7 +124,7 @@ public class RecommendationInfoServiceTest {
     @DisplayName("추천 정보 조회 성공")
     void getRecommendationInfo_Success() {
         // given
-        when(recommendationInfoRepository.findByMemberId(1L)).thenReturn(Optional.of(testRecommendationInfo));
+        when(recommendationInfoRepository.findByMember_Id(1L)).thenReturn(Optional.of(testRecommendationInfo));
 
         // when
         RecommendationInfoResponseDto responseDto =
@@ -139,7 +139,7 @@ public class RecommendationInfoServiceTest {
     @DisplayName("추천 정보 조회 - 정보가 없을 경우 빈 DTO 반환")
     void getRecommendationInfo_ReturnsEmptyDto_WhenInfoNotExists() {
         // given
-        when(recommendationInfoRepository.findByMemberId(1L)).thenReturn(Optional.empty());
+        when(recommendationInfoRepository.findByMember_Id(1L)).thenReturn(Optional.empty());
 
         // when
         RecommendationInfoResponseDto responseDto =

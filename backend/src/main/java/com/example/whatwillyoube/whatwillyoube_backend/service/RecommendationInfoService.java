@@ -26,7 +26,7 @@ public class RecommendationInfoService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
 
-        RecommendationInfo info = recommendationInfoRepository.findByMemberId(memberId)
+        RecommendationInfo info = recommendationInfoRepository.findByMember_Id(memberId)
                 .orElse(null);
 
         if (info != null) {
@@ -46,6 +46,8 @@ public class RecommendationInfoService {
                     .holland(requestDto.getHolland())
                     .build();
 
+            member.setRecommendationInfo(info);
+
             recommendationInfoRepository.save(info);
         }
 
@@ -54,7 +56,7 @@ public class RecommendationInfoService {
 
     @Transactional(readOnly = true)
     public RecommendationInfoResponseDto getRecommendationInfo(Long memberId) {
-        RecommendationInfo info = recommendationInfoRepository.findByMemberId(memberId)
+        RecommendationInfo info = recommendationInfoRepository.findByMember_Id(memberId)
                 .orElse(null);
 
         if (info != null) {

@@ -163,7 +163,7 @@ class RecommendationServiceTest {
         ArgumentCaptor<List<JobRecommendations>> saveCaptor = ArgumentCaptor.forClass(List.class);
         
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findById(memberId)).thenReturn(Optional.of(testRecommendationInfo));
+        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.of(testRecommendationInfo));
         
         mockRestClientSuccess();
         
@@ -195,7 +195,7 @@ class RecommendationServiceTest {
         assertEquals(testMember, savedRec.getMember());
 
         verify(memberRepository).findById(memberId);
-        verify(recommendationInfoRepository).findById(memberId);
+        verify(recommendationInfoRepository).findByMember_Id(memberId);
     }
 
     @Test
@@ -221,7 +221,7 @@ class RecommendationServiceTest {
         // given
         Long memberId = 1L;
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findById(memberId)).thenReturn(Optional.empty());
+        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.empty());
 
         // when & then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -229,7 +229,7 @@ class RecommendationServiceTest {
         assertEquals("추천 정보를 찾을 수 없습니다. memberId: " + memberId, exception.getMessage());
 
         verify(memberRepository).findById(memberId);
-        verify(recommendationInfoRepository).findById(memberId);
+        verify(recommendationInfoRepository).findByMember_Id(memberId);
         verifyNoInteractions(jobRecommendationsRepository);
     }
 
@@ -239,7 +239,7 @@ class RecommendationServiceTest {
         // given
         Long memberId = 1L;
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findById(memberId)).thenReturn(Optional.of(testRecommendationInfo));
+        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.of(testRecommendationInfo));
 
         mockRestClientFailure(new RuntimeException("API 호출 실패"));
 
@@ -249,7 +249,7 @@ class RecommendationServiceTest {
         assertTrue(exception.getMessage().contains("Python API 호출 실패"));
 
         verify(memberRepository).findById(memberId);
-        verify(recommendationInfoRepository).findById(memberId);
+        verify(recommendationInfoRepository).findByMember_Id(memberId);
         verifyNoInteractions(jobRecommendationsRepository);
     }
 
@@ -259,7 +259,7 @@ class RecommendationServiceTest {
         // given
         Long memberId = 1L;
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findById(memberId)).thenReturn(Optional.of(testRecommendationInfo));
+        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.of(testRecommendationInfo));
 
         when(restClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
@@ -283,7 +283,7 @@ class RecommendationServiceTest {
         // given
         Long memberId = 1L;
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findById(memberId)).thenReturn(Optional.of(testRecommendationInfo));
+        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.of(testRecommendationInfo));
 
         PythonApiResponseDto emptyResponse = new PythonApiResponseDto(List.of(), 1L);
 

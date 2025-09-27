@@ -39,7 +39,7 @@ public class RecommendationService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다. memberId: " + memberId));
 
-        RecommendationInfo recommendationInfo = recommendationInfoRepository.findById(memberId)
+        RecommendationInfo recommendationInfo = recommendationInfoRepository.findByMember_Id(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("추천 정보를 찾을 수 없습니다. memberId: " + memberId));
 
         PythonApiRequestDto pythonRequest = new PythonApiRequestDto(
