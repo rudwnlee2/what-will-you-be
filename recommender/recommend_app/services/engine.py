@@ -47,7 +47,7 @@ def _chat_once(system_msg: str, user_msg: str, model: str = "gpt-4o-mini", tempe
 def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[str, Any]],
                                     model: str = "gpt-4o-mini",
                                     temperature: float = 0.7,
-                                    max_tokens: int = 3000) -> List[Dict[str, Any]]:
+                                    max_tokens: int = 4000) -> List[Dict[str, Any]]:
 
     reconstructs = []
     rec_json = json.dumps(recommendations, ensure_ascii=False)
@@ -58,17 +58,21 @@ def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[s
         "복잡한 개념은 쉽게 풀어서 설명하고, 설명은 따뜻하고 친근한 말투로 한다. "
         "항상 3개의 직업을 추천해야 한다. "
         "추천하는 직업은 반드시 입력된 직업 정보와 연관이 있어야 한다. "
-        "초기 추천 목록에 없는 직업도 선택할 수 있지만 반드시 관련이 있어야 한다. "
+        "초기 추천 목록에 없는 직업도 선택할 수 있지만, 반드시 초기 추천 목록과 관련이 있어야 한다. "
     )
+
     user_msg = (
-        f"사용자 정보: {user_text}\n\n"
-        f"초기 추천 직업 목록:\n{rec_json}\n\n"
+       f"사용자 정보: {user_text}\n\n"
+       f"초기 추천 직업 목록:\n{rec_json}\n\n"
         "초기 추천 직업 목록 중 사용자와 연관성이 높은 3가지 직업을 추천하라. "
-        "반환할 JSON 키는 {'jobName', 'jobSum', 'way', 'major', 'certificate', 'pay', 'jobProspect', 'knowledge', 'jobEnvironment', 'jobValues', 'reason'}이다. "
+        "반환할 JSON 키: {'jobName', 'jobSum', 'way', 'major', 'certificate', 'pay', 'jobProspect', 'knowledge', 'jobEnvironment', 'jobValues', 'reason'}. "
         "'reason' 필드에는 사용자가 이 직업에 잘 맞을 것 같은 이유를 작성한다. "
         "모든 필드 내용은 3문장으로 요약하지만, 너무 간결해서는 안된다. "
-        "어떤 초기 직업 정보에 '해당 사항 없음'이라고 표시된 곳은 " # 해당 사항 없으면 gpt가 값 채우기
-        "너가 아는 지식을 활용해서 반드시 사용자에게 의미있는 설명을 생성하라. " # 근데 이렇게 되면 환각 일어날 위험 있지 않나요..?
+       # gpt가 '해당 사항 없음'을 채우게 하기.
+        "만약 초기 직업 정보에 '해당 사항 없음'이라고 되어 있는 항목이 있으면, "
+        "그대로 출력하지 말고 절대로 '해당 사항 없음'이라는 단어를 쓰지 마라. "
+        "대신 이 직업과 관련된 일반적인 특징, 상식, 혹은 유사 직업 정보를 활용해서 "
+        "사용자에게 의미 있는 설명을 반드시 작성하라. "
         "추천 결과는 사용자에게 더 어울리는 순서대로 정렬한다. "
     )
     response = _chat_once(system_msg, user_msg, model, temperature, max_tokens)
