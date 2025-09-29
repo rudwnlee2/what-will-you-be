@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 // 2. 확장된 인증 유틸리티 함수들을 가져옵니다.
-import { getCurrentUser, isLoggedIn, removeToken } from '@/api/auth';
+import { useAuth } from '@/hooks/useAuth';
 
 // 1. App.tsx로부터 받을 prop의 타입을 정의합니다.
 interface SiteHeaderProps {
@@ -19,57 +19,29 @@ interface SiteHeaderProps {
 }
 
 export default function SiteHeader({ onWipClick }: SiteHeaderProps) {
-  const [userName, setUserName] = useState<string | null>(null);
+  // ❗ 2. useAuth 훅으로 사용자 정보와 로그아웃 함수를 직접 가져옵니다.
+  const { user, logout, isAuthenticated } = useAuth();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
 
-  // 사용자 정보를 새로고침하는 함수
-  const refreshUser = () => {
-    const user = getCurrentUser();
-    setUserName(user?.username || null);
-  };
-
   useEffect(() => {
-    refreshUser(); // 컴포넌트가 처음 마운트될 때 사용자 정보 확인
-
-    // 다른 탭에서 로그인을 하거나 로그아웃했을 때, 상태를 동기화하기 위한 이벤트 리스너
-    const onStorageChange = () => refreshUser();
-    window.addEventListener('storage', onStorageChange);
-
-    // 스크롤 위치에 따라 헤더를 숨기거나 보여주는 로직
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsVisible(false); // 아래로 스크롤
-      } else {
-        setIsVisible(true); // 위로 스크롤
-      }
+      setIsVisible(currentScrollY <= lastScrollY || currentScrollY < 100);
       setLastScrollY(currentScrollY);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-
-    // 컴포넌트가 언마운트될 때 이벤트 리스너를 정리합니다. (메모리 누수 방지)
-    return () => {
-      window.removeEventListener('storage', onStorageChange);
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // '진로 탐색하기' 버튼 클릭 시의 동작
   const goCareer = () => {
-    if (!isLoggedIn()) {
-      navigate('/login'); // 로그인 안 되어 있으면 로그인 페이지로
+    // ❗ 4. useAuth의 isAuthenticated 상태를 사용
+    if (!isAuthenticated) {
+      navigate('/login');
     } else {
-      navigate('/career'); // 로그인 되어 있으면 진로 탐색 페이지로
+      navigate('/career-form');
     }
-  };
-
-  // 로그아웃 처리
-  const logout = () => {
-    removeToken(); // 토큰 삭제
-    refreshUser(); // 사용자 상태 새로고침 (userName을 null로 만듦)
-    navigate('/'); // 메인 페이지로 이동
   };
 
   return (
@@ -81,9 +53,9 @@ export default function SiteHeader({ onWipClick }: SiteHeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* 3. Next.js의 Link를 react-router-dom의 Link로 교체 (href -> to) */}
-          <Link to="/images" className="flex items-center">
+          <Link to="/" className="flex items-center">
             {/* 4. Next.js의 Image를 일반 img 태그로 교체 (public 폴더 기준 경로) */}
-            <img src="/WWUB 로고.png" alt="WWUB 로고" className="h-14 w-auto" />
+            <img src="/images/WWUB 로고.png" alt="WWUB 로고" className="h-20 w-auto" />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
@@ -103,11 +75,11 @@ export default function SiteHeader({ onWipClick }: SiteHeaderProps) {
 
           <div className="flex items-center space-x-3">
             {/* 5. 로그인 상태에 따라 다른 UI를 보여줍니다. */}
-            {userName ? (
+            {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="text-gray-900 font-semibold hover:underline">
-                    {userName}님, 환영합니다!
+                    {user.name}님, 환영합니다!
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-40 bg-white shadow-lg border">

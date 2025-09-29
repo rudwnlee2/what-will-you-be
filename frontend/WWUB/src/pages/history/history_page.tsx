@@ -1,72 +1,43 @@
 'use client';
-
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query'; // useQuery 도입
+import { getJobRecommendationsList } from '@/api/jobs'; //실제 API함수 호출
+import { useAuth } from '../../hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/layout/pagination';
-import { useEffect, useState } from 'react';
-import { Eye } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-
-interface HistorySession {
-  id: string;
-  date: string;
-  careers: Array<{
-    id: string;
-    name: string;
-    image: string;
-  }>;
-  confirmedCareerId?: string | null;
-}
-
-interface PaginationInfo {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  itemsPerPage: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
+import { Eye, Loader2 } from 'lucide-react'; // 로딩아이콘
 
 export default function HistoryPage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [history, setHistory] = useState<HistorySession[]>([]);
-  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
-  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const fetchHistory = async (page: number) => {
-    setLoading(true);
-    // Mock data for now
-    setTimeout(() => {
-      setHistory([]);
-      setPagination({
-        currentPage: 1,
-        totalPages: 1,
-        totalItems: 0,
-        itemsPerPage: 10,
-        hasNextPage: false,
-        hasPrevPage: false,
-      });
-      setLoading(false);
-    }, 1000);
-  };
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    fetchHistory(currentPage);
-  }, [navigate, currentPage, isAuthenticated]);
+  // React Query를 사용하여 API 데이터 호출
+  const { data, isLoading } = useQuery({
+    // 페이지가 바뀔 때마다 쿼리를 다시 실행하도록 queryKey에 currentPage를 포함
+    queryKey: ['jobRecommendations', currentPage],
+    // API는 페이지를 0부터 계산하므로, UI의 페이지 번호에서 1을 빼서 전달
+    queryFn: () => getJobRecommendationsList(currentPage - 1, 10), // 페이지당 10개씩
+    enabled: isAuthenticated, // 로그인 상태일 때만 쿼리 활성화
+    placeholderData: (previousData) => previousData, // 새 데이터 로딩 중 이전 데이터 유지
+  });
+  const history = data?.content || [];
+  const paginationInfo = data
+    ? {
+        currentPage: data.pageable.pageNumber + 1,
+        totalPages: data.totalPages,
+        totalItems: data.totalElements,
+        itemsPerPage: data.pageable.pageSize,
+      }
+    : null;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-
-  const viewSavedResults = (sessionId: string) => {
-    navigate(`/results/saved/${sessionId}`);
+  // 올바른 상세 페이지 경로로 이동
+  const viewDetail = (recommendationId: number) => {
+    navigate(`/results/detail/${recommendationId}`);
   };
 
   return (
@@ -76,94 +47,56 @@ export default function HistoryPage() {
           <CardContent className="p-6 sm:p-8">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold">진로 추천 기록</h1>
-              {pagination && (
-                <div className="text-sm text-gray-600">
-                  총 {pagination.totalItems}개 중{' '}
-                  {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}-
-                  {Math.min(
-                    pagination.currentPage * pagination.itemsPerPage,
-                    pagination.totalItems,
-                  )}
-                  개
-                </div>
+              {paginationInfo && (
+                <div className="text-sm text-gray-600">총 {paginationInfo.totalItems}개</div>
               )}
             </div>
 
-            {loading ? (
+            {isLoading ? (
               <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-gray-600 mt-4">로딩 중...</p>
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto" />
+                <p className="text-gray-600 mt-4">기록을 불러오는 중...</p>
               </div>
             ) : history.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-600 mb-4">아직 추천 기록이 없습니다.</p>
-                <Button
-                  onClick={() => navigate('/career-form')}
-                  className="bg-blue-600 text-white hover:bg-blue-700"
-                >
+                <Button onClick={() => navigate('/career-form')} className="bg-blue-600">
                   진로 탐색하러 가기
                 </Button>
               </div>
             ) : (
               <>
-                <div className="space-y-6">
-                  {history.map((h) => (
+                <div className="space-y-4">
+                  {history.map((item) => (
                     <div
-                      key={h.id}
-                      className="border rounded-lg p-6 hover:shadow-md transition-shadow"
+                      key={item.recommendationId}
+                      className="border rounded-lg p-4 sm:p-6 flex justify-between items-center hover:shadow-md transition-shadow"
                     >
-                      <div className="flex justify-between items-center mb-4">
-                        <div className="text-sm text-gray-500">
-                          {new Date(h.date).toLocaleString()}
-                        </div>
-                        <Button
-                          onClick={() => viewSavedResults(h.id)}
-                          size="sm"
-                          variant="outline"
-                          className="text-blue-600 hover:text-blue-700"
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          결과 보기
-                        </Button>
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-800">{item.jobName}</h3>
+                        {/* ❗ 4. API 응답 타입에 맞춰 createdDate 사용 */}
+                        <p className="text-sm text-gray-500 mt-1">
+                          추천일: {new Date(item.createdDate).toLocaleDateString()}
+                        </p>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {h.careers.slice(0, 3).map((c) => (
-                          <div
-                            key={c.id}
-                            onClick={() => viewSavedResults(h.id)}
-                            className="relative bg-white rounded-lg border shadow-sm hover:shadow transition p-3 cursor-pointer hover:border-blue-300"
-                          >
-                            <div className="relative w-full h-24 rounded overflow-hidden">
-                              <img
-                                src={c.image || '/placeholder.svg'}
-                                alt={c.name}
-                                className="w-full h-full object-cover"
-                              />
-                              {h.confirmedCareerId === c.id && (
-                                <div className="absolute top-1 right-1 bg-yellow-400 rounded-full p-1">
-                                  <svg
-                                    className="w-3 h-3 text-white"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                            <div className="mt-2 font-medium text-sm">{c.name}</div>
-                          </div>
-                        ))}
-                      </div>
+                      <Button
+                        onClick={() => viewDetail(item.recommendationId)}
+                        size="sm"
+                        variant="outline"
+                        className="text-blue-600"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        결과 보기
+                      </Button>
                     </div>
                   ))}
                 </div>
 
-                {pagination && pagination.totalPages > 1 && (
+                {paginationInfo && paginationInfo.totalPages > 1 && (
                   <div className="mt-8">
                     <Pagination
-                      currentPage={pagination.currentPage}
-                      totalPages={pagination.totalPages}
+                      currentPage={paginationInfo.currentPage}
+                      totalPages={paginationInfo.totalPages}
                       onPageChange={handlePageChange}
                     />
                   </div>
