@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJobRecommendation } from '../../hooks/useJobRecommendation'; // 직업 추천 훅
 
@@ -11,8 +11,14 @@ export default function LoadingPage() {
   const navigate = useNavigate();
   // ❗ useJobRecommendation 훅을 사용하여 API 호출 상태를 관리합니다.
   const { createRecommendations, isCreating, createError } = useJobRecommendation();
+  const effectRan = useRef(false); // effect 실행 여부를 추적할 ref 생성
 
   useEffect(() => {
+    //  effect가 이미 실행되었다면 아무것도 하지 않고 return
+    if (effectRan.current === true) {
+      return;
+    }
+
     // 페이지가 로드될 때 직업 추천 생성을 바로 시작합니다.
     createRecommendations(undefined, {
       onSuccess: () => {
@@ -22,6 +28,10 @@ export default function LoadingPage() {
       },
       // onError는 훅 자체에서 처리하므로 여기서는 비워둡니다.
     });
+    // effect가 실행되었음을 표시하고, cleanup 함수에서 이 값을 유지합니다.
+    return () => {
+      effectRan.current = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
