@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // ❗ useLocation 추가
+import { useNavigate } from 'react-router-dom'; // ❗ useLocation 추가
+import { useQueryClient } from '@tanstack/react-query'; // ❗ queryClient 훅 import
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../../hooks/useAuth';
@@ -10,14 +11,14 @@ import type { UserProfile } from '../../types/user.types';
 
 export default function ResultsPage() {
   const navigate = useNavigate();
-  const location = useLocation(); // ❗ location 훅 사용
+  const queryClient = useQueryClient(); // ❗ queryClient 인스턴스 가져오기
   const { user } = useAuth();
 
-  // ❗ sessionStorage 대신 location.state에서 데이터를 직접 받습니다.
-  const recommendations = useMemo(
-    () => (location.state?.recommendations as JobRecommendationDetail[]) || [],
-    [location.state],
-  );
+  // ❗ 1. location.state 대신 React Query 캐시에서 직접 데이터를 가져옵니다.
+  const recommendations: JobRecommendationDetail[] | undefined = queryClient.getQueryData([
+    'recommendationResult',
+  ]);
+
   const [selected, setSelected] = useState<number | null>(0);
   const [flip, setFlip] = useState<Record<number, boolean>>({});
 
@@ -35,10 +36,10 @@ export default function ResultsPage() {
   };
 
   const selectedCareer = useMemo(
-    () => (selected != null ? recommendations[selected] : null),
+    // 👇 recommendations가 존재하는지(&&) 먼저 확인하는 조건을 추가합니다.
+    () => (selected != null && recommendations ? recommendations[selected] : null),
     [selected, recommendations],
   );
-
   return (
     <div className="min-h-screen bg-purple-50">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
@@ -48,7 +49,7 @@ export default function ResultsPage() {
         </p>
 
         <div className="flex flex-col md:flex-row gap-6 items-stretch">
-          {recommendations.map((c, idx) => {
+          {recommendations?.map((c, idx) => {
             const isSelected = selected === idx;
             return (
               <div
