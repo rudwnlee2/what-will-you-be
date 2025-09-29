@@ -261,28 +261,23 @@ export default function CareerFormSinglePage() {
               </div>
 
               <div>
-                <Label className="font-semibold">좋아하는 과목 (복수 선택 가능)</Label>
-                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {/* 1. 라벨은 하나만 남기고, 문구를 '하나만 선택'으로 수정합니다. */}
+                <Label className="font-semibold">좋아하는 과목 (하나만 선택)</Label>
+
+                {/* 2. 불필요한 div를 없애고 RadioGroup에 grid 스타일을 적용합니다. */}
+                <RadioGroup
+                  value={form.favoriteSubject}
+                  onValueChange={(value) => setForm((p) => ({ ...p, favoriteSubject: value }))}
+                  className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3"
+                >
+                  {/* 3. map 함수는 한 번만 사용하여 각 과목을 RadioGroupItem으로 만듭니다. */}
                   {SUBJECT_OPTIONS.map((subject) => (
                     <div key={subject} className="flex items-center space-x-2">
-                      <RadioGroup
-                        value={form.favoriteSubject}
-                        onValueChange={(value) =>
-                          setForm((p) => ({ ...p, favoriteSubject: value }))
-                        }
-                        className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3"
-                      >
-                        {SUBJECT_OPTIONS.map((subject) => (
-                          <div key={subject} className="flex items-center space-x-2">
-                            <RadioGroupItem value={subject} id={subject} />
-                            <Label htmlFor={subject}>{subject}</Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
+                      <RadioGroupItem value={subject} id={subject} />
                       <Label htmlFor={subject}>{subject}</Label>
                     </div>
                   ))}
-                </div>
+                </RadioGroup>
               </div>
 
               <div>
