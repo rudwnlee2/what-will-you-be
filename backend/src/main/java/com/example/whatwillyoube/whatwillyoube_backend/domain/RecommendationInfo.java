@@ -65,7 +65,7 @@ public class RecommendationInfo extends BaseTimeEntity{
         this.holland = requestDto.getHolland();
     }
 
-    public void setMember(Member member) {
+    void setMember(Member member) {
         this.member = member;
     }
 
