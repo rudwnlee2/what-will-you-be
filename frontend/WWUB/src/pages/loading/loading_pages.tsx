@@ -15,9 +15,10 @@ export default function LoadingPage() {
   useEffect(() => {
     // 페이지가 로드될 때 직업 추천 생성을 바로 시작합니다.
     createRecommendations(undefined, {
-      onSuccess: (data) => {
-        // 성공 시, 결과 데이터를 state에 담아 results 페이지로 이동합니다.
-        navigate('/results', { state: { recommendations: data } });
+      onSuccess: () => {
+        // ❗ state로 데이터를 넘겨주지 않고, 그냥 페이지 이동만 합니다.
+        // 데이터는 React Query 캐시에 이미 저장되어 있습니다.
+        navigate('/results');
       },
       // onError는 훅 자체에서 처리하므로 여기서는 비워둡니다.
     });

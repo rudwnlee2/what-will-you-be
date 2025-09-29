@@ -22,8 +22,28 @@ export const useJobRecommendation = () => {
 
   const createMutation = useMutation({
     mutationFn: createJobRecommendation,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jobRecommendations'] });
+    onSuccess: (data) => {
+      // ❗ 1. 성공 시 반환된 data를 받습니다.
+      // ❗ 2. 생성된 최신 추천 결과를 'jobRecommendations' 목록 쿼리의 캐시에 직접 업데이트합니다.
+      // 이렇게 하면 목록 페이지(history)가 즉시 최신 상태로 반영됩니다.
+      queryClient.setQueryData(['jobRecommendations', 1], (oldData: any) => {
+        // 기존 목록 데이터가 있으면 그 데이터를 사용하고, 없으면 기본 페이지 구조를 만듭니다.
+        const existingContent = oldData?.content || [];
+        return {
+          ...oldData,
+          content: data
+            .map((detail) => ({
+              // 상세 데이터를 목록 아이템 형식으로 변환
+              recommendationId: detail.recommendationId,
+              jobName: detail.jobName,
+              reason: detail.reason,
+              createdDate: detail.recommendedAt,
+            }))
+            .concat(existingContent),
+        };
+      });
+      // ❗ 3. 추천 결과 페이지가 사용할 개별 추천 데이터도 캐시에 넣어줍니다.
+      queryClient.setQueryData(['recommendationResult'], data);
     },
   });
 
