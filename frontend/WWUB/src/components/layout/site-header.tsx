@@ -61,7 +61,7 @@ export default function SiteHeader({ onWipClick }: SiteHeaderProps) {
     if (!isLoggedIn()) {
       navigate('/login'); // 로그인 안 되어 있으면 로그인 페이지로
     } else {
-      navigate('/career'); // 로그인 되어 있으면 진로 탐색 페이지로
+      navigate('/career-form'); // 로그인 되어 있으면 진로 탐색 페이지로
     }
   };
 
@@ -81,9 +81,9 @@ export default function SiteHeader({ onWipClick }: SiteHeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* 3. Next.js의 Link를 react-router-dom의 Link로 교체 (href -> to) */}
-          <Link to="/images" className="flex items-center">
+          <Link to="/" className="flex items-center">
             {/* 4. Next.js의 Image를 일반 img 태그로 교체 (public 폴더 기준 경로) */}
-            <img src="/WWUB 로고.png" alt="WWUB 로고" className="h-14 w-auto" />
+            <img src="/images/WWUB 로고.png" alt="WWUB 로고" className="h-20 w-auto" />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
