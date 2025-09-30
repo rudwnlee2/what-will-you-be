@@ -259,7 +259,7 @@ export default function SignupPage() {
               <SelectTrigger id="gender" aria-invalid={!!errors.gender}>
                 <SelectValue placeholder="성별을 선택하세요" />
               </SelectTrigger>
-              <SelectContent className="bg-ground shadow-md border">
+              <SelectContent className="bg-white shadow-md border">
                 <SelectItem value="MALE">남성</SelectItem>
                 <SelectItem value="FEMALE">여성</SelectItem>
               </SelectContent>
