@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import {
   AlertDialog,
@@ -33,17 +32,10 @@ export default function EditProfilePage() {
   const [profile, setProfileState] = useState({
     name: '',
     email: '',
-    birth: '',
-    gender: '',
     phone: '',
     school: '',
   });
   const [preview, setPreview] = useState<string | undefined>(undefined);
-
-  // Editable fields (password managed in users store)
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -54,17 +46,11 @@ export default function EditProfilePage() {
       setProfileState({
         name: user.name || '',
         email: user.email || '',
-        birth: user.birth || '',
-        gender: user.gender || '',
         phone: user.phone || '',
         school: user.school || '',
       });
     }
   }, [isAuthenticated, navigate, user]);
-
-  useEffect(() => {
-    setPasswordMismatch(!!confirmPassword && password !== confirmPassword);
-  }, [password, confirmPassword]);
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -80,18 +66,19 @@ export default function EditProfilePage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordMismatch) return;
+    if (!user) return; // user 정보가 없으면 실행하지 않음
     const updatedData: UpdateProfileData = {
+      // 수정 불가능한 원본 데이터
+      loginId: user.loginId,
+      birth: user.birth,
+      gender: user.gender,
+      // 수정 가능한 최신 데이터
       name: profile.name,
       email: profile.email,
       phone: profile.phone,
       school: profile.school,
+      // 비밀번호는 전송하지 않음
     };
-    // 비밀번호가 입력된 경우에만 포함
-    if (password) {
-      updatedData.password = password;
-    }
-
     updateProfile(updatedData); // ❗ API 호출로 변경
   };
 
@@ -157,33 +144,6 @@ export default function EditProfilePage() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="password">비밀번호</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="변경 시 입력"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                  <div className="relative">
-                    <Label htmlFor="confirmPassword">비밀번호 확인</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="변경 시 입력"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={passwordMismatch ? 'border-red-500' : ''}
-                    />
-                    {passwordMismatch && (
-                      <div className="absolute right-2 top-[52px] flex items-center gap-1 text-red-600 text-xs">
-                        <AlertTriangle className="w-4 h-4" />
-                        비밀번호가 일치하지 않습니다
-                      </div>
-                    )}
-                  </div>
-                  <div>
                     <Label htmlFor="phone">전화번호</Label>
                     <Input
                       id="phone"
@@ -214,11 +174,16 @@ export default function EditProfilePage() {
                   </div>
                   <div>
                     <Label htmlFor="birth">생년월일</Label>
-                    <Input id="birth" value={profile.birth || ''} disabled />
+                    <Input id="birth" value={user?.birth || ''} disabled />
                   </div>
                   <div>
                     <Label htmlFor="gender">성별</Label>
-                    <Input id="gender" value={profile.gender || ''} disabled />
+                    <Input id="gender" value={user?.gender === 'MALE' ? '남성' : '여성'} disabled />
+                  </div>
+                  {/* ❗ 3. 비밀번호 필드를 수정 불가 영역으로 이동 및 비활성화 */}
+                  <div>
+                    <Label htmlFor="password">비밀번호</Label>
+                    <Input id="password" type="password" placeholder="********" disabled />
                   </div>
                 </div>
               </section>
