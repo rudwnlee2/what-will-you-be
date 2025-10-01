@@ -5,6 +5,7 @@ import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
 import com.example.whatwillyoube.whatwillyoube_backend.domain.RecommendationInfo;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.RecommendationInfoRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,10 +113,10 @@ public class RecommendationInfoServiceTest {
         when(memberRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        MemberNotFoundException exception = assertThrows(MemberNotFoundException.class, () -> {
             recommendationInfoService.createOrUpdateRecommendationInfo(999L, requestDto);
         });
-        assertEquals("존재하지 않는 회원입니다.", exception.getMessage());
+        assertTrue(exception.getMessage().contains("존재하지 않는 회원입니다"));
 
         verifyNoInteractions(recommendationInfoRepository);
     }

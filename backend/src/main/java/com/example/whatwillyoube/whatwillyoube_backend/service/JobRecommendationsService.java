@@ -4,6 +4,9 @@ import com.example.whatwillyoube.whatwillyoube_backend.domain.JobRecommendations
 import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsListDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.RecommendationAccessDeniedException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.RecommendationNotFoundException;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.JobRecommendationsRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +29,7 @@ public class JobRecommendationsService {
     public Page<JobRecommendationsListDto> getJobRecommendationsList(Long memberId, int page, int size) {
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new MemberNotFoundException(String.valueOf(memberId)));
 
         Pageable pageable = PageRequest.of(page, size); // 페이지 번호와 크기 설정
         Page<JobRecommendations> recommendations = jobRecommendationsRepository.findByMemberOrderByCreatedDateDesc(member, pageable);
@@ -36,11 +39,11 @@ public class JobRecommendationsService {
 
     public JobRecommendationsResponseDto getJobRecommendationDetail(Long memberId, Long recommendationId) {
         JobRecommendations recommendation = jobRecommendationsRepository.findById(recommendationId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 추천 정보입니다."));
+                .orElseThrow(() -> new RecommendationNotFoundException(recommendationId));
 
         // 2. (중요) 해당 추천 기록이 요청한 회원의 것인지 권한 확인
         if (!recommendation.getMember().getId().equals(memberId)) {
-            throw new RuntimeException("해당 추천 정보를 조회할 권한이 없습니다.");
+            throw new RecommendationAccessDeniedException(memberId);
         }
 
         // 3. Entity -> DTO로 변환하여 반환
@@ -52,11 +55,11 @@ public class JobRecommendationsService {
 
         // 1. 추천 기록 조회
         JobRecommendations recommendation = jobRecommendationsRepository.findById(recommendationId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 추천 정보입니다."));
+                .orElseThrow(() -> new RecommendationNotFoundException(recommendationId));
 
         // 2. (중요) 해당 추천 기록이 요청한 회원의 것인지 권한 확인
         if (!recommendation.getMember().getId().equals(memberId)) {
-            throw new RuntimeException("해당 추천 정보를 삭제할 권한이 없습니다.");
+            throw new RecommendationAccessDeniedException(memberId);
         }
 
         // 3. 레코드 삭제

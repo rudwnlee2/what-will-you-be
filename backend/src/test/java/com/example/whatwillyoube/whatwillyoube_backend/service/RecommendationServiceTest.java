@@ -4,6 +4,10 @@ import com.example.whatwillyoube.whatwillyoube_backend.domain.*;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsResponseDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.PythonApiRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.PythonApiResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.ExternalApiException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.InvalidApiResponseException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.RecommendationInfoNotFoundException;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.JobRecommendationsRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.RecommendationInfoRepository;
@@ -206,9 +210,9 @@ class RecommendationServiceTest {
         when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
 
         // when & then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        MemberNotFoundException exception = assertThrows(MemberNotFoundException.class,
                 () -> recommendationService.generateJobRecommendations(memberId));
-        assertEquals("회원을 찾을 수 없습니다. memberId: " + memberId, exception.getMessage());
+        assertTrue(exception.getMessage().contains("존재하지 않는 회원입니다"));
 
         verify(memberRepository).findById(memberId);
         verifyNoInteractions(recommendationInfoRepository);
@@ -224,9 +228,9 @@ class RecommendationServiceTest {
         when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.empty());
 
         // when & then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        RecommendationInfoNotFoundException exception = assertThrows(RecommendationInfoNotFoundException.class,
                 () -> recommendationService.generateJobRecommendations(memberId));
-        assertEquals("추천 정보를 찾을 수 없습니다. memberId: " + memberId, exception.getMessage());
+        assertTrue(exception.getMessage().contains("추천 정보를 찾을 수 없습니다"));
 
         verify(memberRepository).findById(memberId);
         verify(recommendationInfoRepository).findByMember_Id(memberId);
@@ -244,7 +248,7 @@ class RecommendationServiceTest {
         mockRestClientFailure(new RuntimeException("API 호출 실패"));
 
         // when & then
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
+        ExternalApiException exception = assertThrows(ExternalApiException.class,
                 () -> recommendationService.generateJobRecommendations(memberId));
         assertTrue(exception.getMessage().contains("Python API 호출 실패"));
 
@@ -270,7 +274,7 @@ class RecommendationServiceTest {
         when(responseSpec.toEntity(PythonApiResponseDto.class)).thenReturn(ResponseEntity.ok(null));
 
         // when & then
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
+        InvalidApiResponseException exception = assertThrows(InvalidApiResponseException.class,
                 () -> recommendationService.generateJobRecommendations(memberId));
         assertEquals("Python API로부터 유효한 추천 응답을 받지 못했습니다.", exception.getMessage());
 
@@ -296,7 +300,7 @@ class RecommendationServiceTest {
         when(responseSpec.toEntity(PythonApiResponseDto.class)).thenReturn(ResponseEntity.ok(emptyResponse));
 
         // when & then
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
+        InvalidApiResponseException exception = assertThrows(InvalidApiResponseException.class,
                 () -> recommendationService.generateJobRecommendations(memberId));
         assertEquals("Python API로부터 유효한 추천 응답을 받지 못했습니다.", exception.getMessage());
 
