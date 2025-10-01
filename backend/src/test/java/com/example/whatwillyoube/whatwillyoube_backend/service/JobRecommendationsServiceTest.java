@@ -4,6 +4,9 @@ import com.example.whatwillyoube.whatwillyoube_backend.domain.JobRecommendations
 import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsListDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.RecommendationAccessDeniedException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.RecommendationNotFoundException;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.JobRecommendationsRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,10 +95,10 @@ public class JobRecommendationsServiceTest {
         when(memberRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        MemberNotFoundException exception = assertThrows(MemberNotFoundException.class, () -> {
             jobRecommendationsService.getJobRecommendationsList(999L, 0, 5);
         });
-        assertEquals("존재하지 않는 회원입니다.", exception.getMessage());
+        assertTrue(exception.getMessage().contains("존재하지 않는 회원입니다"));
     }
 
     @Test
@@ -122,10 +125,10 @@ public class JobRecommendationsServiceTest {
         when(jobRecommendationsRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        RecommendationNotFoundException exception = assertThrows(RecommendationNotFoundException.class, () -> {
             jobRecommendationsService.getJobRecommendationDetail(1L, 999L);
         });
-        assertEquals("존재하지 않는 추천 정보입니다.", exception.getMessage());
+        assertTrue(exception.getMessage().contains("존재하지 않는 추천 정보입니다"));
     }
 
     @Test
@@ -136,10 +139,10 @@ public class JobRecommendationsServiceTest {
         when(jobRecommendationsRepository.findById(100L)).thenReturn(Optional.of(testRecommendation));
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        RecommendationAccessDeniedException exception = assertThrows(RecommendationAccessDeniedException.class, () -> {
             jobRecommendationsService.getJobRecommendationDetail(2L, 100L);
         });
-        assertEquals("해당 추천 정보를 조회할 권한이 없습니다.", exception.getMessage());
+        assertTrue(exception.getMessage().contains("추천 정보를 조회/삭제할 권한이 없습니다"));
     }
 
     @Test
@@ -166,10 +169,10 @@ public class JobRecommendationsServiceTest {
         when(jobRecommendationsRepository.findById(100L)).thenReturn(Optional.of(testRecommendation));
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        RecommendationAccessDeniedException exception = assertThrows(RecommendationAccessDeniedException.class, () -> {
             jobRecommendationsService.deleteJobRecommendation(2L, 100L);
         });
-        assertEquals("해당 추천 정보를 삭제할 권한이 없습니다.", exception.getMessage());
+        assertTrue(exception.getMessage().contains("추천 정보를 조회/삭제할 권한이 없습니다"));
 
         verify(jobRecommendationsRepository, never()).delete(any(JobRecommendations.class));
     }

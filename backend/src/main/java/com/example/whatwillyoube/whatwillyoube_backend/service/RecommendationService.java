@@ -6,6 +6,10 @@ import com.example.whatwillyoube.whatwillyoube_backend.domain.RecommendationInfo
 import com.example.whatwillyoube.whatwillyoube_backend.dto.JobRecommendationsResponseDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.PythonApiRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.PythonApiResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.ExternalApiException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.InvalidApiResponseException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.RecommendationInfoNotFoundException;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.JobRecommendationsRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.RecommendationInfoRepository;
@@ -37,10 +41,10 @@ public class RecommendationService {
     public List<JobRecommendationsResponseDto> generateJobRecommendations(Long memberId) {
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다. memberId: " + memberId));
+                .orElseThrow(() -> new MemberNotFoundException(String.valueOf(memberId)));
 
         RecommendationInfo recommendationInfo = recommendationInfoRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("추천 정보를 찾을 수 없습니다. memberId: " + memberId));
+                .orElseThrow(() -> new RecommendationInfoNotFoundException(memberId));
 
         PythonApiRequestDto pythonRequest = new PythonApiRequestDto(
                 memberId,
@@ -64,13 +68,13 @@ public class RecommendationService {
                     .retrieve()
                     .toEntity(PythonApiResponseDto.class);
         } catch (Exception e) {
-            throw new IllegalStateException("Python API 호출 실패: " + e.getMessage());
+            throw new ExternalApiException(e.getMessage());
         }
 
         PythonApiResponseDto apiResponse = responseEntity.getBody();
 
         if (apiResponse == null || apiResponse.getRecommendedJobs() == null || apiResponse.getRecommendedJobs().isEmpty()) {
-            throw new IllegalStateException("Python API로부터 유효한 추천 응답을 받지 못했습니다.");
+            throw new InvalidApiResponseException();
         }
 
         // 새로 받은 추천 결과를 JobRecommendation 엔티티로 변환하여 DB에 저장
