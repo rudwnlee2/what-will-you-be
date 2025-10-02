@@ -3,6 +3,10 @@ package com.example.whatwillyoube.whatwillyoube_backend.service;
 import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.DuplicateEmailException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.DuplicateLoginIdException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.InvalidPasswordException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +28,10 @@ public class MemberService {
 
         // ID 및 이메일 중복 검사 (필요 시 추가)
         if (memberRepository.findByLoginId(memberRequestDto.getLoginId()).isPresent()) {
-            throw new RuntimeException("이미 사용 중인 아이디입니다.");
+            throw new DuplicateLoginIdException();
         }
         if (memberRepository.findByEmail(memberRequestDto.getEmail()).isPresent()) {
-            throw new RuntimeException("이미 사용 중인 이메일입니다.");
+            throw new DuplicateEmailException();
         }
 
         // Request DTO에서 toEntity 메서드를 호출하여 Member 객체 생성
@@ -40,10 +44,10 @@ public class MemberService {
 
     public String login(String loginId, String password) {
         Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new MemberNotFoundException(loginId));
 
         if (!passwordEncoder.matches(password, member.getPassword())) {
-            throw new RuntimeException("비밀번호가 틀렸습니다.");
+            throw new InvalidPasswordException();
         }
 
         return jwtUtil.createToken(member.getEmail(), member.getName());
@@ -51,7 +55,7 @@ public class MemberService {
 
     public MemberResponseDto getMember(Long id) {
         Member  member = memberRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new MemberNotFoundException(String.valueOf(id)));
 
         return MemberResponseDto.from(member);
     }
@@ -61,7 +65,7 @@ public class MemberService {
 
         // 'id'(PK)로 회원을 정확하고 안전하게 찾습니다.
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다. (ID: " + id + ")"));
+                .orElseThrow(() -> new MemberNotFoundException(String.valueOf(id)));
 
         // 엔티티의 update 메서드를 호출하여 정보 변경
         member.update(memberRequestDto, passwordEncoder);
@@ -72,7 +76,7 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다. (ID: " + id + ")"));
+                .orElseThrow(() -> new MemberNotFoundException(String.valueOf(id)));
 
         memberRepository.delete(member);
     }

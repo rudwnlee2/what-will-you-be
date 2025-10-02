@@ -6,6 +6,7 @@ import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.LoginRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.DuplicateLoginIdException;
 import com.example.whatwillyoube.whatwillyoube_backend.security.UserDetailsImpl;
 import com.example.whatwillyoube.whatwillyoube_backend.service.MemberService;
 import com.example.whatwillyoube.whatwillyoube_backend.util.JwtUtil;
@@ -36,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest(controllers = MemberController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, com.example.whatwillyoube.whatwillyoube_backend.exception.GlobalExceptionHandler.class})
 @TestPropertySource(properties = {
         "jwt.secret.key=dGVzdC1zZWNyZXQta2V5LXRlc3Qtc2VjcmV0LWtleS10ZXN0LXNlY3JldC1rZXkK",
         "jwt.token.expiration=60000"
@@ -185,7 +186,7 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("회원가입 실패 - 아이디 중복 시 예외 발생")
+    @DisplayName("회원가입 실패 - 아이디 중복 시 409 반환")
     void signUp_fail_duplicateLoginId() throws Exception {
         MemberRequestDto requestDto = new MemberRequestDto(
                 "testId", "Password!1", "테스터", "test@test.com",
@@ -194,67 +195,51 @@ class MemberControllerTest {
         );
 
         given(memberService.signUp(any(MemberRequestDto.class)))
-                .willThrow(new RuntimeException("이미 사용 중인 아이디입니다."));
+                .willThrow(new DuplicateLoginIdException());
 
-        try {
-            mockMvc.perform(post("/api/members/signup")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(requestDto))
-                            .with(csrf()));
-        } catch (Exception e) {
-            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
-            assert e.getCause() instanceof RuntimeException;
-        }
+        mockMvc.perform(post("/api/members/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .with(csrf()))
+                .andExpect(status().isConflict());
     }
 
     @Test
-    @DisplayName("로그인 실패 - 존재하지 않는 회원 시 예외 발생")
+    @DisplayName("로그인 실패 - 존재하지 않는 회원 시 404 반환")
     void login_fail_memberNotFound() throws Exception {
         LoginRequestDto requestDto = new LoginRequestDto("nonExistentId", "Password!1");
         given(memberService.login(anyString(), anyString()))
-                .willThrow(new RuntimeException("존재하지 않는 회원입니다."));
+                .willThrow(new com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException("nonExistentId"));
 
-        try {
-            mockMvc.perform(post("/api/members/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(requestDto)));
-        } catch (Exception e) {
-            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
-            assert e.getCause() instanceof RuntimeException;
-        }
+        mockMvc.perform(post("/api/members/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    @DisplayName("로그인 실패 - 비밀번호 불일치 시 예외 발생")
+    @DisplayName("로그인 실패 - 비밀번호 불일치 시 401 반환")
     void login_fail_wrongPassword() throws Exception {
         LoginRequestDto requestDto = new LoginRequestDto("testId", "wrongPassword");
         given(memberService.login(anyString(), anyString()))
-                .willThrow(new RuntimeException("비밀번호가 틀렸습니다."));
+                .willThrow(new com.example.whatwillyoube.whatwillyoube_backend.exception.custom.InvalidPasswordException());
 
-        try {
-            mockMvc.perform(post("/api/members/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(requestDto)));
-        } catch (Exception e) {
-            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
-            assert e.getCause() instanceof RuntimeException;
-        }
+        mockMvc.perform(post("/api/members/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto)))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("내 정보 조회 실패 - 존재하지 않는 회원 시 예외 발생")
+    @DisplayName("내 정보 조회 실패 - 존재하지 않는 회원 시 404 반환")
     void myPage_fail_memberNotFound() throws Exception {
         given(memberService.getMember(1L))
-                .willThrow(new RuntimeException("존재하지 않는 회원입니다."));
+                .willThrow(new com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException("1"));
         UserDetailsImpl principal = new UserDetailsImpl(testMember);
 
-        try {
-            mockMvc.perform(get("/api/members/me")
-                            .with(SecurityMockMvcRequestPostProcessors.user(principal)));
-        } catch (Exception e) {
-            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
-            assert e.getCause() instanceof RuntimeException;
-        }
+        mockMvc.perform(get("/api/members/me")
+                        .with(SecurityMockMvcRequestPostProcessors.user(principal)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -275,19 +260,15 @@ class MemberControllerTest {
     }
 
     @Test
-    @DisplayName("회원 탈퇴 실패 - 존재하지 않는 회원 시 예외 발생")
+    @DisplayName("회원 탈퇴 실패 - 존재하지 않는 회원 시 404 반환")
     void deleteMember_fail_memberNotFound() throws Exception {
-        doThrow(new RuntimeException("존재하지 않는 회원입니다."))
+        doThrow(new com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException("1"))
                 .when(memberService).deleteMember(1L);
         UserDetailsImpl principal = new UserDetailsImpl(testMember);
 
-        try {
-            mockMvc.perform(delete("/api/members/me")
-                            .with(SecurityMockMvcRequestPostProcessors.user(principal)));
-        } catch (Exception e) {
-            // RuntimeException이 ServletException으로 래핑되어 발생하는 것이 정상
-            assert e.getCause() instanceof RuntimeException;
-        }
+        mockMvc.perform(delete("/api/members/me")
+                        .with(SecurityMockMvcRequestPostProcessors.user(principal)))
+                .andExpect(status().isNotFound());
     }
 
     @Test

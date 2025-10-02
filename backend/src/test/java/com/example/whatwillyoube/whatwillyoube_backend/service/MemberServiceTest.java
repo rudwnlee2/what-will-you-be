@@ -4,6 +4,9 @@ import com.example.whatwillyoube.whatwillyoube_backend.domain.Gender;
 import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.MemberResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.DuplicateEmailException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.DuplicateLoginIdException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -108,7 +111,7 @@ public class MemberServiceTest {
         when(memberRepository.findByLoginId(memberRequestDto.getLoginId())).thenReturn(Optional.of(testMember));
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        DuplicateLoginIdException exception = assertThrows(DuplicateLoginIdException.class, () -> {
             memberService.signUp(memberRequestDto);
         });
 
@@ -126,7 +129,7 @@ public class MemberServiceTest {
         when(memberRepository.findByEmail(memberRequestDto.getEmail())).thenReturn(Optional.of(testMember));
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> memberService.signUp(memberRequestDto));
+        DuplicateEmailException exception = assertThrows(DuplicateEmailException.class, () -> memberService.signUp(memberRequestDto));
         assertEquals("이미 사용 중인 이메일입니다.", exception.getMessage());
         verify(memberRepository, never()).save(any(Member.class));
     }
@@ -201,10 +204,10 @@ public class MemberServiceTest {
         when(memberRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when & then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        MemberNotFoundException exception = assertThrows(MemberNotFoundException.class, () -> {
             memberService.deleteMember(999L);
         });
-        assertEquals("존재하지 않는 회원입니다. (ID: 999)", exception.getMessage());
+        assertTrue(exception.getMessage().contains("존재하지 않는 회원입니다"));
 
         verify(memberRepository, never()).delete(any(Member.class));
     }
