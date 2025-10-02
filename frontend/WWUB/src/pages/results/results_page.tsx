@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // ❗ useLocation 추가
 import { useQueryClient } from '@tanstack/react-query'; // ❗ queryClient 훅 import
