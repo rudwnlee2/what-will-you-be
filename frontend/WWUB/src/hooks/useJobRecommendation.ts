@@ -57,7 +57,7 @@ export const useJobRecommendation = () => {
     createError: createMutation.error,
 
     // Methods & Status (Delete)
-    delete: (id: number) => deleteMutation.mutate(id),
+    delete: deleteMutation.mutate,
     isDeleting: deleteMutation.isPending,
     deleteError: deleteMutation.error,
   };

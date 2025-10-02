@@ -1,19 +1,54 @@
 'use client';
 
 import { useParams, useNavigate } from 'react-router-dom';
-import { useJobRecommendationDetail } from '../../../hooks/useJobRecommendation'; // ❗ 상세 조회 훅 사용
+import {
+  useJobRecommendation,
+  useJobRecommendationDetail,
+} from '../../../hooks/useJobRecommendation'; // ❗ 상세 조회 훅 사용 ❗ useJobRecommendation 훅 추가 import
+import { useQueryClient } from '@tanstack/react-query'; // ❗ queryClient 훅 import
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react'; // 로딩 스피너
+import { Loader2, Trash2 } from 'lucide-react'; // 로딩 스피너 Trash2 아이콘 import
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'; // ❗ 확인 팝업 컴포넌트 import
 
 export default function ResultDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient(); // ❗ queryClient 인스턴스 가져오기
   // ❗ URL의 id를 숫자로 변환하여 훅에 전달
   const recommendationId = id ? parseInt(id, 10) : null;
   const { data: career, isLoading, error } = useJobRecommendationDetail(recommendationId);
+  const { delete: deleteRecommendation, isDeleting } = useJobRecommendation(); // ❗ 삭제 함수와 로딩 상태 가져오기
+
+  // ❗ 삭제 확인 및 실행 함수
+  const handleDelete = () => {
+    if (!recommendationId) return;
+
+    deleteRecommendation(recommendationId, {
+      onSuccess: () => {
+        alert('추천 기록이 삭제되었습니다.');
+        // history 페이지의 데이터를 최신화하도록 쿼리를 무효화합니다.
+        queryClient.invalidateQueries({ queryKey: ['jobRecommendations'] });
+        // 삭제 후에는 목록(history) 페이지로 이동합니다.
+        navigate('/history');
+      },
+      onError: (err: Error) => {
+        alert(`삭제 중 오류가 발생했습니다: ${err.message}`);
+      },
+    });
+  };
 
   if (isLoading) {
     return (
@@ -27,7 +62,7 @@ export default function ResultDetailPage() {
     return (
       <div className="text-center pt-40">
         <p>추천 정보를 불러오는 데 실패했습니다.</p>
-        <Button onClick={() => navigate('/results')}>목록으로 돌아가기</Button>
+        <Button onClick={() => navigate('/history')}>목록으로 돌아가기</Button>
       </div>
     );
   }
@@ -58,6 +93,34 @@ export default function ResultDetailPage() {
             <Button onClick={() => navigate('/results')} variant="outline">
               목록으로 돌아가기
             </Button>
+          </div>
+          <div className="mt-8 border-t pt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
+            <Button onClick={() => navigate('/results')} variant="outline">
+              이전 목록으로 돌아가기
+            </Button>
+
+            {/* 삭제 확인 팝업을 여는 버튼 */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <Trash2 className="w-4 h-4 mr-2" />이 추천 기록 삭제
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>정말로 삭제하시겠습니까?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    이 추천 기록은 영구적으로 삭제되며, 복구할 수 없습니다.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>취소</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                    {isDeleting ? '삭제 중...' : '삭제'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </Card>
       </main>
