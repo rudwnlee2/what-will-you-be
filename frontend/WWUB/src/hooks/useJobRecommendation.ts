@@ -10,7 +10,7 @@ import {
 } from '../api/jobs';
 import { getToken } from '../api/auth';
 // 필요한 타입을 job.types.ts에서 가져옵니다.
-import type { JobRecommendationsListResponse } from '../types/job.types';
+
 /** 직업 추천 목록과 생성/삭제를 관리하는 훅 */
 export const useJobRecommendation = () => {
   const queryClient = useQueryClient();
@@ -23,36 +23,15 @@ export const useJobRecommendation = () => {
 
   const createMutation = useMutation({
     mutationFn: createJobRecommendation,
+    // 👇 onSuccess 로직을 아래와 같이 단순화합니다.
     onSuccess: (data) => {
-      // ❗ 1. 성공 시 반환된 data를 받습니다.
-      // ❗ 2. 생성된 최신 추천 결과를 'jobRecommendations' 목록 쿼리의 캐시에 직접 업데이트합니다.
-      // 이렇게 하면 목록 페이지(history)가 즉시 최신 상태로 반영됩니다.
-      queryClient.setQueryData(
-        ['jobRecommendations', 1],
-        (oldData: JobRecommendationsListResponse | undefined) => {
-          // 기존 목록 데이터가 있으면 그 데이터를 사용하고, 없으면 기본 페이지 구조를 만듭니다.
-          const existingContent = oldData?.content || [];
-          return {
-            ...oldData,
-            content: data
-              .map((detail) => ({
-                // 상세 데이터를 목록 아이템 형식으로 변환
-                recommendationId: detail.recommendationId,
-                jobName: detail.jobName,
-                reason: detail.reason,
-                createdDate: detail.recommendedAt,
-              }))
-              .concat(existingContent),
-            // 페이지 정보도 기본값을 설정해주는 것이 더 안정적입니다.
-            pageable: oldData?.pageable || { pageNumber: 0, pageSize: 12 },
-            totalElements: (oldData?.totalElements || 0) + data.length,
-            totalPages: oldData?.totalPages || 1,
-            first: oldData?.first ?? true,
-            last: oldData?.last ?? true,
-          };
-        },
-      );
-      // ❗ 3. 추천 결과 페이지가 사용할 개별 추천 데이터도 캐시에 넣어줍니다.
+      // 1. 'jobRecommendations' 쿼리를 '무효화'하여 다음 번에 history 페이지에 접근할 때
+      //    자동으로 최신 데이터를 다시 불러오도록 설정합니다.
+      //    (모든 페이지를 무효화하기 위해 페이지 번호 '1'을 제거합니다)
+      queryClient.invalidateQueries({ queryKey: ['jobRecommendations'] });
+
+      // 2. 추천 결과 페이지가 즉시 사용할 수 있도록, 이번 추천 결과는 캐시에 직접 저장합니다.
+      //    이 로직은 간단하고 오류 가능성이 적으므로 그대로 둡니다.
       queryClient.setQueryData(['recommendationResult'], data);
     },
   });
@@ -78,7 +57,7 @@ export const useJobRecommendation = () => {
     createError: createMutation.error,
 
     // Methods & Status (Delete)
-    delete: (id: number) => deleteMutation.mutate(id),
+    delete: deleteMutation.mutate,
     isDeleting: deleteMutation.isPending,
     deleteError: deleteMutation.error,
   };

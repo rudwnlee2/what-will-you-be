@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJobRecommendation } from '../../hooks/useJobRecommendation'; // 직업 추천 훅
@@ -13,22 +11,28 @@ export default function LoadingPage() {
   const { createRecommendations, isCreating, createError } = useJobRecommendation();
   const effectRan = useRef(false); // effect 실행 여부를 추적할 ref 생성
 
+  // ❗ API 호출 로직을 재사용할 수 있도록 별도 함수로 분리
+  const runRecommendation = () => {
+    createRecommendations(undefined, {
+      onSuccess: () => {
+        navigate('/results');
+      },
+      // 👇 1. onError 콜백을 추가합니다.
+      onError: (error: Error) => {
+        // 콘솔에 에러를 기록하여 개발자가 쉽게 확인할 수 있게 합니다.
+        console.error('직업 추천 생성 실패:', error);
+        // UI는 createError 상태에 따라 자동으로 업데이트됩니다.
+      },
+    });
+  };
+
   useEffect(() => {
-    //  effect가 이미 실행되었다면 아무것도 하지 않고 return
     if (effectRan.current === true) {
       return;
     }
 
-    // 페이지가 로드될 때 직업 추천 생성을 바로 시작합니다.
-    createRecommendations(undefined, {
-      onSuccess: () => {
-        // ❗ state로 데이터를 넘겨주지 않고, 그냥 페이지 이동만 합니다.
-        // 데이터는 React Query 캐시에 이미 저장되어 있습니다.
-        navigate('/results');
-      },
-      // onError는 훅 자체에서 처리하므로 여기서는 비워둡니다.
-    });
-    // effect가 실행되었음을 표시하고, cleanup 함수에서 이 값을 유지합니다.
+    runRecommendation(); // 분리된 함수 호출
+
     return () => {
       effectRan.current = true;
     };
@@ -37,11 +41,7 @@ export default function LoadingPage() {
 
   // 에러 발생 시 재시도하는 함수
   const handleRetry = () => {
-    createRecommendations(undefined, {
-      onSuccess: () => {
-        navigate('/results');
-      },
-    });
+    runRecommendation(); // 동일한 함수 재사용
   };
 
   return (
@@ -50,15 +50,17 @@ export default function LoadingPage() {
         <Card className="bg-white shadow-xl">
           <CardContent className="p-8 sm:p-10 text-center space-y-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {isCreating && '당신에게 맞는 직업을 찾고 있어요...'}
-              {createError && '오류가 발생했습니다'}
+              {/* 👇 로딩 중일 때만 로딩 메시지가 보이도록 isCreating && 제거 */}
+              {createError ? '오류가 발생했습니다' : '당신에게 맞는 직업을 찾고 있어요...'}
             </h1>
             <p className="text-gray-600">
-              {isCreating && 'AI가 입력하신 정보를 분석하고 있습니다. 잠시만 기다려주세요.'}
-              {createError && '추천 결과를 불러오는 데 실패했습니다.'}
+              {createError
+                ? '추천 결과를 불러오는 데 실패했습니다.'
+                : 'AI가 입력하신 정보를 분석하고 있습니다. 잠시만 기다려주세요.'}
             </p>
 
-            {isCreating && (
+            {/* 👇 isCreating이 true이고, createError가 없을 때만 스피너를 보여줍니다. */}
+            {isCreating && !createError && (
               <div className="flex justify-center py-4">
                 <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
               </div>

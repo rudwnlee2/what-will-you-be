@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useUpdateProfile, useDeleteAccount } from '../../../hooks/useUser'; // ❗ 새 훅 import
 import type { UpdateProfileData } from '../../../types/user.types';
+import { AlertTriangle } from 'lucide-react'; // ❗ 비밀번호 불일치 아이콘
 
 export default function EditProfilePage() {
   const navigate = useNavigate();
@@ -35,7 +36,18 @@ export default function EditProfilePage() {
     phone: '',
     school: '',
   });
+
+  // ❗ 1. 비밀번호 상태 관리 로직을 다시 추가합니다.
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
   const [preview, setPreview] = useState<string | undefined>(undefined);
+
+  //  비밀번호 일치 여부를 실시간으로 확인하는 useEffect 추가
+  useEffect(() => {
+    // 확인 비밀번호가 입력되었을 때만 불일치 여부를 검사
+    setPasswordMismatch(!!confirmPassword && password !== confirmPassword);
+  }, [password, confirmPassword]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -67,6 +79,13 @@ export default function EditProfilePage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return; // user 정보가 없으면 실행하지 않음
+
+    // ❗ 3. 비밀번호 유효성 검사를 강화합니다.
+    if (!password || passwordMismatch) {
+      alert('비밀번호를 올바르게 입력해주세요. 정보 수정을 위해서는 비밀번호 확인이 필요합니다.');
+      return;
+    }
+
     const updatedData: UpdateProfileData = {
       // 수정 불가능한 원본 데이터
       loginId: user.loginId,
@@ -77,7 +96,7 @@ export default function EditProfilePage() {
       email: profile.email,
       phone: profile.phone,
       school: profile.school,
-      // 비밀번호는 전송하지 않음
+      password: password, // 사용자가 입력한 비밀번호 포함
     };
     updateProfile(updatedData); // ❗ API 호출로 변경
   };
@@ -161,6 +180,36 @@ export default function EditProfilePage() {
                       onChange={(e) => setProfileState((p) => ({ ...p, school: e.target.value }))}
                     />
                   </div>
+                  {/* ❗ 5. 비밀번호 필드를 수정 가능 영역으로 이동 */}
+                  <div>
+                    <Label htmlFor="password">비밀번호</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="비밀번호 입력"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      정보 수정을 위해 현재 비밀번호를 입력하세요.
+                    </p>
+                  </div>
+                  <div className="relative">
+                    <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="비밀번호 재입력"
+                    />
+                    {passwordMismatch && (
+                      <div className="absolute right-2 top-9 flex items-center gap-1">
+                        <AlertTriangle className="w-4 h-4 text-red-500" />
+                        <span className="text-xs text-red-500">불일치</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </section>
 
@@ -179,11 +228,6 @@ export default function EditProfilePage() {
                   <div>
                     <Label htmlFor="gender">성별</Label>
                     <Input id="gender" value={user?.gender === 'MALE' ? '남성' : '여성'} disabled />
-                  </div>
-                  {/* ❗ 3. 비밀번호 필드를 수정 불가 영역으로 이동 및 비활성화 */}
-                  <div>
-                    <Label htmlFor="password">비밀번호</Label>
-                    <Input id="password" type="password" placeholder="********" disabled />
                   </div>
                 </div>
               </section>

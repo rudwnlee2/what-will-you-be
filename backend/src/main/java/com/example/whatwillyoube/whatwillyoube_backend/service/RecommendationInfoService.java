@@ -4,6 +4,7 @@ import com.example.whatwillyoube.whatwillyoube_backend.domain.Member;
 import com.example.whatwillyoube.whatwillyoube_backend.domain.RecommendationInfo;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoResponseDto;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.RecommendationInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class RecommendationInfoService {
     public RecommendationInfoResponseDto createOrUpdateRecommendationInfo(Long memberId, RecommendationInfoRequestDto requestDto) {
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new MemberNotFoundException(String.valueOf(memberId)));
 
         RecommendationInfo info = recommendationInfoRepository.findByMember_Id(memberId)
                 .orElse(null);
