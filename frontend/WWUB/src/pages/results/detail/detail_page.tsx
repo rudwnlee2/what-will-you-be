@@ -89,16 +89,11 @@ export default function ResultDetailPage() {
             <InfoSection title="어울리는 가치관" content={career.jobValues} />
           </div>
 
-          <div className="mt-8 border-t pt-6 text-center">
+          {/* 2. 중복된 버튼 영역을 하나로 통합했습니다. */}
+          <div className="mt-8 border-t pt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
             <Button onClick={() => navigate('/results')} variant="outline">
               목록으로 돌아가기
             </Button>
-          </div>
-          <div className="mt-8 border-t pt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Button onClick={() => navigate('/results')} variant="outline">
-              이전 목록으로 돌아가기
-            </Button>
-
             {/* 삭제 확인 팝업을 여는 버튼 */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
