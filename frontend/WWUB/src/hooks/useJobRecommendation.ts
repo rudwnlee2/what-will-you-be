@@ -23,19 +23,15 @@ export const useJobRecommendation = () => {
 
   const createMutation = useMutation({
     mutationFn: createJobRecommendation,
-    // 👇 onSuccess 로직을 아래와 같이 단순화합니다.
+    // 👇 onSuccess 로직을 아래의 단순화된 코드로 교체합니다.
     onSuccess: (data) => {
-      // 1. 'jobRecommendations' 쿼리를 '무효화'하여 다음 번에 history 페이지에 접근할 때
-      //    자동으로 최신 데이터를 다시 불러오도록 설정합니다.
-      //    (모든 페이지를 무효화하기 위해 페이지 번호 '1'을 제거합니다)
+      // 'history' 페이지가 나중에 최신 데이터를 불러오도록 쿼리를 무효화합니다.
       queryClient.invalidateQueries({ queryKey: ['jobRecommendations'] });
 
-      // 2. 추천 결과 페이지가 즉시 사용할 수 있도록, 이번 추천 결과는 캐시에 직접 저장합니다.
-      //    이 로직은 간단하고 오류 가능성이 적으므로 그대로 둡니다.
+      // 'results' 페이지가 즉시 사용할 데이터를 캐시에 저장합니다.
       queryClient.setQueryData(['recommendationResult'], data);
     },
   });
-
   const deleteMutation = useMutation({
     mutationFn: deleteJobRecommendation, // mutationFn은 recommendationId를 인자로 받음
     onSuccess: () => {

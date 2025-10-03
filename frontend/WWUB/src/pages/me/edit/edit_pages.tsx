@@ -1,5 +1,3 @@
-'use client';
-
 import type React from 'react';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -190,7 +188,6 @@ export default function EditProfilePage() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="비밀번호 입력"
                     />
-                  
                   </div>
                   <div className="relative">
                     <Label htmlFor="confirmPassword">비밀번호 확인</Label>
