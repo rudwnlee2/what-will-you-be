@@ -171,11 +171,13 @@ function FlipCard({
         </Card>
 
         {/* Back: 직업명 + 추천 이유 */}
-        <Card className="absolute inset-0 bg-white rounded-xl shadow-md p-5 overflow-auto [backface-visibility:hidden] [transform:rotateY(180deg)] hover:shadow-lg transition">
-          <h3 className="text-xl font-bold mb-2">{career.jobName}</h3>
-          <p className="text-gray-700 leading-relaxed">
-            <b>추천 이유:</b> {career.reason}
-          </p>
+        <Card className="absolute inset-0 bg-white rounded-xl shadow-md p-5 flex flex-col justify-between [backface-visibility:hidden] [transform:rotateY(180deg)] hover:shadow-lg transition">
+          <div>
+            <h3 className="text-xl font-bold mb-2">{career.jobName}</h3>
+            <p className="text-gray-700 leading-relaxed">
+              <b>추천 이유:</b> {career.reason}
+            </p>
+          </div>
           {/* ❗ 10. 삭제 버튼 추가 */}
           <Button
             size="sm"
