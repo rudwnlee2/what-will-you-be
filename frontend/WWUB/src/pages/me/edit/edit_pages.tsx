@@ -182,7 +182,7 @@ export default function EditProfilePage() {
                   </div>
                   {/* ❗ 5. 비밀번호 필드를 수정 가능 영역으로 이동 */}
                   <div>
-                    <Label htmlFor="password">비밀번호</Label>
+                    <Label htmlFor="password">비밀번호 수정 및 확인</Label>
                     <Input
                       id="password"
                       type="password"
@@ -190,9 +190,7 @@ export default function EditProfilePage() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="비밀번호 입력"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      정보 수정을 위해 현재 비밀번호를 입력하세요.
-                    </p>
+                  
                   </div>
                   <div className="relative">
                     <Label htmlFor="confirmPassword">비밀번호 확인</Label>
