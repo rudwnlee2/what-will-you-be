@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useJobRecommendation } from '../../hooks/useJobRecommendation'; // 직업 추천 훅
 
@@ -7,35 +7,24 @@ import { Loader2 } from 'lucide-react';
 export default function LoadingPage() {
   const navigate = useNavigate();
   // ❗ useJobRecommendation 훅을 사용하여 API 호출 상태를 관리합니다.
-  const { createRecommendations, createError } = useJobRecommendation();
-  const effectRan = useRef(false); // effect 실행 여부를 추적할 ref 생성
+  const { createRecommendations } = useJobRecommendation();
 
   // ❗ API 호출 로직을 재사용할 수 있도록 별도 함수로 분리
-  const runRecommendation = () => {
+  // ❗ API 호출 로직을 useEffect 안으로 다시 합치거나 그대로 두어도 좋습니다.
+  useEffect(() => {
     createRecommendations(undefined, {
       onSuccess: () => {
+        // 성공 시 결과 페이지로 이동
         navigate('/results');
       },
-      // 👇 1. onError 콜백을 추가합니다.
       onError: (error: Error) => {
+        // 실패 시 알림을 띄우고 이전 페이지로 이동
         alert(`추천 생성 중 오류가 발생했습니다: ${error.message}`);
         navigate('/career-form');
       },
     });
-  };
-
-  useEffect(() => {
-    if (effectRan.current === true) {
-      return;
-    }
-
-    runRecommendation(); // 분리된 함수 호출
-
-    return () => {
-      effectRan.current = true;
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // 의존성 배열을 비워 최초 마운트 시 실행되도록 합니다.
 
   return (
     <div className="min-h-screen bg-purple-50">
@@ -48,17 +37,9 @@ export default function LoadingPage() {
             <p className="text-gray-600">
               AI가 입력하신 정보를 분석하고 있습니다. 잠시만 기다려주세요.
             </p>
-
             <div className="flex justify-center py-4">
               <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
             </div>
-
-            {/* 에러 발생 시 navigate 되기 전 잠시 표시될 수 있는 UI */}
-            {createError && (
-              <div className="space-y-4">
-                <p className="text-red-600">오류가 발생하여 이전 페이지로 돌아갑니다.</p>
-              </div>
-            )}
           </CardContent>
         </Card>
       </main>
