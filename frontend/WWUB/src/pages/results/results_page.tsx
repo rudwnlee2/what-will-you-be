@@ -113,7 +113,7 @@ export default function ResultsPage() {
         )}
         {/* ❗ 8. 삭제 확인 팝업(AlertDialog) */}
         <AlertDialog open={itemToDelete !== null} onOpenChange={() => setItemToDelete(null)}>
-          <AlertDialogContent>
+          <AlertDialogContent className="bg-white shadow-lg rounded-lg">
             <AlertDialogHeader>
               <AlertDialogTitle>정말로 삭제하시겠습니까?</AlertDialogTitle>
               <AlertDialogDescription>
@@ -179,12 +179,11 @@ function FlipCard({
           {/* ❗ 10. 삭제 버튼 추가 */}
           <Button
             size="sm"
-            variant="destructive"
             onClick={(e) => {
               e.stopPropagation(); // 카드 전체가 클릭되는 것을 방지
               onDeleteClick();
             }}
-            className="w-full"
+            className="w-full bg-red-600 text-white hover:bg-red-700"
           >
             <Trash2 className="w-4 h-4 mr-2" />이 추천 삭제하기
           </Button>

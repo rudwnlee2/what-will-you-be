@@ -95,11 +95,11 @@ export default function ResultDetailPage() {
             {/* 삭제 확인 팝업을 여는 버튼 */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">
+                <Button className="bg-red-600 text-white hover:bg-red-700">
                   <Trash2 className="w-4 h-4 mr-2" />이 추천 기록 삭제
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent className="bg-white shadow-lg rounded-lg">
                 <AlertDialogHeader>
                   <AlertDialogTitle>정말로 삭제하시겠습니까?</AlertDialogTitle>
                   <AlertDialogDescription>
