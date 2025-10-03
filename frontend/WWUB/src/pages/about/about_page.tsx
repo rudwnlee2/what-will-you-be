@@ -54,9 +54,8 @@ const sections = [
     이를 보완하기 위해, LLM이 신뢰할 수 있는 외부 정보를 검색·참조한 뒤 답변하도록 하는 방식이 바로
     <strong>RAG</strong>입니다.
   </p>
-      <br/>
+      <br/><br/>
   <h2 className="text-2xl font-bold">이 서비스에서 AI는 어떤 데이터를 참조하나요?</h2>
-      <br/>
       <br/>
   <p>
     이 서비스에서는 정부 기관인 <strong>고용24</strong>에서 제공하는
