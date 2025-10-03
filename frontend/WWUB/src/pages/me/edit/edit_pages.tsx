@@ -26,7 +26,7 @@ export default function EditProfilePage() {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const { mutate: updateProfile, isPending: isSaving } = useUpdateProfile();
-  const { mutate: deleteAccount } = useDeleteAccount();
+  const { mutate: deleteAccount, isPending: isDeleting } = useDeleteAccount();
 
   const [profile, setProfileState] = useState({
     name: '',
@@ -227,7 +227,36 @@ export default function EditProfilePage() {
                 </div>
               </section>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-between">
+              {/* ❗ 3. 버튼 영역을 수정합니다. */}
+              <div className="flex flex-col sm:flex-row gap-3 justify-between items-center pt-6 border-t">
+                {/* 회원 탈퇴 버튼 및 팝업 */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      type="button"
+                      // `variant="destructive"` 대신 직접 스타일을 지정하여 충돌을 방지합니다.
+                      className="w-full sm:w-auto bg-red-600 text-white hover:bg-red-700"
+                    >
+                      회원 탈퇴
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-white shadow-lg rounded-lg">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>정말로 탈퇴하시겠습니까?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        계정과 모든 개인 정보, 추천 기록이 영구적으로 삭제됩니다. 이 작업은 되돌릴
+                        수 없습니다.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>취소</AlertDialogCancel>
+                      <AlertDialogAction onClick={onDeleteAccount} disabled={isDeleting}>
+                        {isDeleting ? '탈퇴 처리 중...' : '탈퇴하기'}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
                 <Button
                   type="submit"
                   disabled={isSaving}
@@ -235,27 +264,6 @@ export default function EditProfilePage() {
                 >
                   {isSaving ? '저장중...' : '저장하기'}
                 </Button>
-
-                {/* Account Deletion */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button type="button" variant="destructive">
-                      회원 탈퇴
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>정말로 삭제 하시겠습니까?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        계정과 개인 정보, 추천 기록이 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>아니오</AlertDialogCancel>
-                      <AlertDialogAction onClick={onDeleteAccount}>예</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
               </div>
             </form>
           </CardContent>
