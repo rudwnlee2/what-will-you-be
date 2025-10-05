@@ -1,4 +1,3 @@
-'use client';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query'; // useQuery 도입

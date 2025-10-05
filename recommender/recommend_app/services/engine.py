@@ -47,28 +47,48 @@ def _chat_once(system_msg: str, user_msg: str, model: str = "gpt-4o-mini", tempe
 def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[str, Any]],
                                     model: str = "gpt-4o-mini",
                                     temperature: float = 0.7,
-                                    max_tokens: int = 2500) -> List[Dict[str, Any]]:
+                                    max_tokens: int = 4000) -> List[Dict[str, Any]]:
 
     reconstructs = []
     rec_json = json.dumps(recommendations, ensure_ascii=False)
 
     system_msg = (
-        "너는 중학생과 고등학생을 대상으로 직업을 추천하는 전문가다. "
-        "항상 JSON만 반환해야 하며, 불필요한 설명은 포함하지 마라. "
-        "복잡한 개념은 쉽게 풀어서 설명하고, 설명은 따뜻하고 친근한 말투로 한다. "
-        "항상 3개의 직업을 추천해야 한다. "
-        "추천하는 직업은 반드시 입력된 직업 정보와 연관이 있어야 하며, "
-        "초기 추천 목록에 없는 직업도 선택할 수 있지만 반드시 관련이 있어야 한다. "
+        "너는 중고등학생에게 직업을 추천하는 전문가다. "
+        "목표: 사용자 정보와 초기 추천 직업을 바탕으로 정확히 3개 직업을 추천한다. "
+        "스타일/톤: 쉽고 친근하게, 학생이 이해하기 쉽게 설명한다. "
+        "대상: 중학생·고등학생. "
+        "응답: 반드시 JSON만 출력한다."
     )
+
     user_msg = (
         f"사용자 정보: {user_text}\n\n"
         f"초기 추천 직업 목록:\n{rec_json}\n\n"
-        "초기 추천 직업 목록 중 사용자와 연관성이 높은 3가지 직업을 추천하라. "
-        "반환할 JSON 키는 {jobName, jobSum, way, major, certificate, pay, jobProspect, knowledge, jobEnvironment, jobValues, reason}이다. "
-        "'reason' 필드에는 사용자가 이 직업에 잘 맞을 것 같은 이유를 작성한다. "
-        "모든 필드 내용은 3문장으로 요약하지만, 너무 간결해서는 안된다. "
-        "추천 결과는 사용자에게 더 어울리는 순서대로 정렬한다. "
+        "출력 규칙:\n"
+        "1. 항상 3개 직업을 추천하고, 초기 목록과 관련 있어야 한다.\n"
+        "2. 각 직업은 다음 필드를 포함한다: "
+        "jobName, jobSum, way, major, certificate, pay, jobProspect, knowledge, jobEnvironment, jobValues, reason.\n"
+        "3. 각 필드는 최소 3문장으로 작성한다.\n"
+        "4. 초기 정보가 비어 있으면 관련 정보로 채우고, 첫 문장에 '초기 정보에 없었다'고 밝혀라.\n"
+        "5. 추천 결과는 사용자와 잘 맞는 순서대로 정렬한다.\n"
+        "6. 아래 예시와 동일한 구조로 출력하라:\n"
+        "[\n"
+        "  {\n"
+        "    \"jobName\": \"예시 직업명\",\n"
+        "    \"jobSum\": \"3문장으로 요약된 직업 설명\",\n"
+        "    \"way\": \"3문장으로 요약된 되는 길\",\n"
+        "    \"major\": \"...\",\n"
+        "    \"certificate\": \"...\",\n"
+        "    \"pay\": \"...\",\n"
+        "    \"jobProspect\": \"...\",\n"
+        "    \"knowledge\": \"...\",\n"
+        "    \"jobEnvironment\": \"...\",\n"
+        "    \"jobValues\": \"...\",\n"
+        "    \"reason\": \"3문장으로 요약된 추천 이유\"\n"
+        "  }\n"
+        "]"
+        "7. JSON 문법 오류가 없게 출력한다."
     )
+
     response = _chat_once(system_msg, user_msg, model, temperature, max_tokens)
     clean_response = extract_json_from_gpt(response)
 
