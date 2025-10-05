@@ -71,9 +71,8 @@ public class RecommendationInfoServiceTest {
     void createRecommendationInfo_WhenInfoNotExists() {
         // given
         when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findByMember_Id(1L)).thenReturn(Optional.empty());
         when(recommendationInfoRepository.save(any(RecommendationInfo.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0)); // 저장된 객체 그대로 반환
+                .thenAnswer(invocation -> invocation.getArgument(0)); // 그대로 반환
 
         // when
         RecommendationInfoResponseDto responseDto =
@@ -90,9 +89,8 @@ public class RecommendationInfoServiceTest {
     @Test
     @DisplayName("추천 정보 수정 성공 (기존 정보가 있을 경우)")
     void updateRecommendationInfo_WhenInfoExists() {
-        // given
+        testMember.setRecommendationInfo(testRecommendationInfo);
         when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findByMember_Id(1L)).thenReturn(Optional.of(testRecommendationInfo));
 
         // when
         RecommendationInfoResponseDto responseDto =
@@ -103,6 +101,7 @@ public class RecommendationInfoServiceTest {
         assertEquals(requestDto.getDream(), responseDto.getDream());
         assertEquals(requestDto.getInterest(), responseDto.getInterest());
 
+        //cascade 기반이므로 별도 save 호출 없음
         verify(recommendationInfoRepository, never()).save(any(RecommendationInfo.class));
     }
 
@@ -124,8 +123,9 @@ public class RecommendationInfoServiceTest {
     @Test
     @DisplayName("추천 정보 조회 성공")
     void getRecommendationInfo_Success() {
-        // given
-        when(recommendationInfoRepository.findByMember_Id(1L)).thenReturn(Optional.of(testRecommendationInfo));
+
+        testMember.setRecommendationInfo(testRecommendationInfo);
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
 
         // when
         RecommendationInfoResponseDto responseDto =
@@ -134,13 +134,14 @@ public class RecommendationInfoServiceTest {
         // then
         assertNotNull(responseDto);
         assertEquals(testRecommendationInfo.getDream(), responseDto.getDream());
+        assertEquals(testRecommendationInfo.getInterest(), responseDto.getInterest());
     }
 
     @Test
     @DisplayName("추천 정보 조회 - 정보가 없을 경우 빈 DTO 반환")
     void getRecommendationInfo_ReturnsEmptyDto_WhenInfoNotExists() {
-        // given
-        when(recommendationInfoRepository.findByMember_Id(1L)).thenReturn(Optional.empty());
+
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(testMember));
 
         // when
         RecommendationInfoResponseDto responseDto =

@@ -18,8 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class JobRecommendationsControllerTest {
 
