@@ -5,6 +5,7 @@ import com.example.whatwillyoube.whatwillyoube_backend.domain.RecommendationInfo
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoRequestDto;
 import com.example.whatwillyoube.whatwillyoube_backend.dto.RecommendationInfoResponseDto;
 import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.MemberNotFoundException;
+import com.example.whatwillyoube.whatwillyoube_backend.exception.custom.RecommendationInfoNotFoundException;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.MemberRepository;
 import com.example.whatwillyoube.whatwillyoube_backend.repository.RecommendationInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,9 @@ public class RecommendationInfoService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(String.valueOf(memberId)));
 
-        RecommendationInfo info = recommendationInfoRepository.findByMember_Id(memberId)
-                .orElse(null);
+//        RecommendationInfo info = recommendationInfoRepository.findByMemberIdWithMember(memberId)
+//                .orElseThrow(() -> new RecommendationInfoNotFoundException(memberId));
+        RecommendationInfo info = member.getRecommendationInfo();
 
         if (info != null) {
             // 이미 존재하면 업데이트
@@ -57,8 +59,11 @@ public class RecommendationInfoService {
 
     @Transactional(readOnly = true)
     public RecommendationInfoResponseDto getRecommendationInfo(Long memberId) {
-        RecommendationInfo info = recommendationInfoRepository.findByMember_Id(memberId)
-                .orElse(null);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(String.valueOf(memberId)));
+
+        RecommendationInfo info = member.getRecommendationInfo();
 
         if (info != null) {
             return new RecommendationInfoResponseDto(info);

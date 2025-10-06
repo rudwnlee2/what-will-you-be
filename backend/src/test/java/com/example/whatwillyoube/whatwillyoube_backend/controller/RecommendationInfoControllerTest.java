@@ -20,7 +20,6 @@ import java.time.LocalDate;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class RecommendationInfoControllerTest {
@@ -64,6 +63,10 @@ class RecommendationInfoControllerTest {
 
         member = memberRepository.saveAndFlush(memberRequestDto.toEntity(passwordEncoder));
 
+        // 테스트 시 반드시 member.setRecommendationInfo()를 이용해 연관관계 설정해야 함.
+        // (테스트 중 자동 cascade 저장 확인 목적)
+        member.setRecommendationInfo(null);
+
         // 토큰 생성
         token = jwtUtil.createToken(member.getEmail(), member.getName());
     }
@@ -92,9 +95,9 @@ class RecommendationInfoControllerTest {
                 .contentType(ContentType.JSON)
                 .header("Authorization", token)
                 .body(requestDto)
-        .when()
+                .when()
                 .put("/api/recommendation-info")
-        .then()
+                .then()
                 .log().all()
                 .statusCode(200)
                 .body("dream", equalTo("개발자"))
@@ -105,9 +108,8 @@ class RecommendationInfoControllerTest {
     @Test
     @DisplayName("추천 정보 조회 성공")
     void getRecommendationInfo_success() {
-        // given: 먼저 저장
-        RecommendationInfo dtoToEntity = RecommendationInfo.builder()
-                .member(member)
+        // given: 먼저 RecommendationInfo를 member에 연결
+        RecommendationInfo info = RecommendationInfo.builder()
                 .dream("개발자")
                 .dreamReason("코딩을 좋아해서")
                 .interest("IT")
@@ -116,16 +118,18 @@ class RecommendationInfoControllerTest {
                 .hobby("프로그래밍")
                 .favoriteSubject("수학")
                 .holland(Holland.INVESTIGATIVE)
+                .member(member)
                 .build();
 
-        recommendationInfoRepository.save(dtoToEntity);
+        member.setRecommendationInfo(info);
+        memberRepository.saveAndFlush(member);
 
         given()
                 .log().all()
                 .header("Authorization", token)
-        .when()
+                .when()
                 .get("/api/recommendation-info")
-        .then()
+                .then()
                 .log().all()
                 .statusCode(200)
                 .body("dream", equalTo("개발자"))
@@ -135,9 +139,8 @@ class RecommendationInfoControllerTest {
     @Test
     @DisplayName("추천 정보 수정 성공")
     void updateRecommendationInfo_success() {
-        // given: 기존 데이터 저장
+        // given: 기존 데이터 저장 (member 기준 cascade)
         RecommendationInfo info = RecommendationInfo.builder()
-                .member(member)
                 .dream("개발자")
                 .dreamReason("코딩을 좋아해서")
                 .interest("IT")
@@ -146,10 +149,13 @@ class RecommendationInfoControllerTest {
                 .hobby("프로그래밍")
                 .favoriteSubject("수학")
                 .holland(Holland.INVESTIGATIVE)
+                .member(member)
                 .build();
 
-        recommendationInfoRepository.save(info);
+        member.setRecommendationInfo(info);
+        memberRepository.saveAndFlush(member);
 
+        // 수정용 DTO
         RecommendationInfoRequestDto updateDto = new RecommendationInfoRequestDto(
                 member.getId(),
                 "데이터사이언티스트",
@@ -167,9 +173,9 @@ class RecommendationInfoControllerTest {
                 .header("Authorization", token)
                 .contentType(ContentType.JSON)
                 .body(updateDto)
-        .when()
+                .when()
                 .put("/api/recommendation-info")
-        .then()
+                .then()
                 .log().all()
                 .statusCode(200)
                 .body("dream", equalTo("데이터사이언티스트"))

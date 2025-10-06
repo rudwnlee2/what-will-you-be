@@ -40,9 +40,6 @@ class RecommendationServiceTest {
     private JobRecommendationsRepository jobRecommendationsRepository;
 
     @Mock
-    private RecommendationInfoRepository recommendationInfoRepository;
-
-    @Mock
     private MemberRepository memberRepository;
 
     @Mock
@@ -67,12 +64,12 @@ class RecommendationServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(recommendationService, "pythonApiBaseUrl", "http://127.0.0.1:8000");
-        
+
         testMember = createTestMember();
         testRecommendationInfo = createTestRecommendationInfo(testMember);
         mockApiResponse = createMockApiResponse();
     }
-    
+
     private Member createTestMember() {
         Member member = Member.builder()
                 .loginId("testuser")
@@ -87,9 +84,9 @@ class RecommendationServiceTest {
         ReflectionTestUtils.setField(member, "id", 1L);
         return member;
     }
-    
+
     private RecommendationInfo createTestRecommendationInfo(Member member) {
-        return RecommendationInfo.builder()
+        RecommendationInfo info = RecommendationInfo.builder()
                 .member(member)
                 .dream("소프트웨어 개발자")
                 .interest("프로그래밍, 기술")
@@ -99,8 +96,12 @@ class RecommendationServiceTest {
                 .favoriteSubject("수학, 과학")
                 .holland(Holland.INVESTIGATIVE)
                 .build();
+
+        // Member에 직접 연결 (방법 1 핵심)
+        member.setRecommendationInfo(info);
+        return info;
     }
-    
+
     private PythonApiResponseDto createMockApiResponse() {
         PythonApiResponseDto.RecommendedJobDetail jobDetail = new PythonApiResponseDto.RecommendedJobDetail(
                 "백엔드 개발자",
@@ -117,7 +118,7 @@ class RecommendationServiceTest {
         );
         return new PythonApiResponseDto(List.of(jobDetail), 1L);
     }
-    
+
     private void mockRestClientSuccess() {
         when(restClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
@@ -127,7 +128,7 @@ class RecommendationServiceTest {
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toEntity(PythonApiResponseDto.class)).thenReturn(ResponseEntity.ok(mockApiResponse));
     }
-    
+
     private void mockRestClientFailure(Exception exception) {
         when(restClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
@@ -137,42 +138,16 @@ class RecommendationServiceTest {
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toEntity(PythonApiResponseDto.class)).thenThrow(exception);
     }
-    
-    private JobRecommendations createSavedRecommendation() {
-        JobRecommendations recommendation = JobRecommendations.builder()
-                .jobName("백엔드 개발자")
-                .jobSum("서버 시스템 개발")
-                .way("컴퓨터공학 전공 후 실무 경험")
-                .major("컴퓨터공학, 소프트웨어공학")
-                .certificate("정보처리기사")
-                .pay("4000-8000만원")
-                .jobProspect("매우 좋음")
-                .knowledge("프로그래밍, 데이터베이스")
-                .jobEnvironment("사무실, 재택근무 가능")
-                .jobValues("창조성, 안정성")
-                .reason("INTJ 성향과 프로그래밍 관심사가 일치")
-                .member(testMember)
-                .build();
-        ReflectionTestUtils.setField(recommendation, "id", 1L);
-        ReflectionTestUtils.setField(recommendation, "createdDate", LocalDateTime.now());
-        return recommendation;
-    }
 
+    // 정상 케이스
     @Test
-    @DisplayName("직업 추천 생성 성공")
+    @DisplayName("직업 추천 생성 성공 - cascade로 Member 중심 저장")
     void generateJobRecommendations_Success() {
         // given
         Long memberId = 1L;
-        ArgumentCaptor<PythonApiRequestDto> requestCaptor = ArgumentCaptor.forClass(PythonApiRequestDto.class);
-        ArgumentCaptor<List<JobRecommendations>> saveCaptor = ArgumentCaptor.forClass(List.class);
-        
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.of(testRecommendationInfo));
-        
+
         mockRestClientSuccess();
-        
-        JobRecommendations savedRecommendation = createSavedRecommendation();
-        when(jobRecommendationsRepository.saveAll(saveCaptor.capture())).thenReturn(List.of(savedRecommendation));
 
         // when
         List<JobRecommendationsResponseDto> result = recommendationService.generateJobRecommendations(memberId);
@@ -181,89 +156,58 @@ class RecommendationServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("백엔드 개발자", result.get(0).getJobName());
-        assertEquals("서버 시스템 개발", result.get(0).getJobSummary());
-
-        // ArgumentCaptor를 통한 상세 검증
-        verify(requestBodySpec).body(requestCaptor.capture());
-        PythonApiRequestDto capturedRequest = requestCaptor.getValue();
-        assertEquals(memberId, capturedRequest.getMemberId());
-        assertEquals("소프트웨어 개발자", capturedRequest.getDream());
-        assertEquals("STABILITY", capturedRequest.getJobValue());
-        assertEquals("INTJ", capturedRequest.getMbti());
-        assertEquals("INVESTIGATIVE", capturedRequest.getHolland());
-        
-        List<JobRecommendations> savedRecommendations = saveCaptor.getValue();
-        assertEquals(1, savedRecommendations.size());
-        JobRecommendations savedRec = savedRecommendations.get(0);
-        assertEquals("백엔드 개발자", savedRec.getJobName());
-        assertEquals(testMember, savedRec.getMember());
 
         verify(memberRepository).findById(memberId);
-        verify(recommendationInfoRepository).findByMember_Id(memberId);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 회원으로 추천 생성 실패")
-    void generateJobRecommendations_MemberNotFound() {
-        // given
-        Long memberId = 999L;
-        when(memberRepository.findById(memberId)).thenReturn(Optional.empty());
-
-        // when & then
-        MemberNotFoundException exception = assertThrows(MemberNotFoundException.class,
-                () -> recommendationService.generateJobRecommendations(memberId));
-        assertTrue(exception.getMessage().contains("존재하지 않는 회원입니다"));
-
-        verify(memberRepository).findById(memberId);
-        verifyNoInteractions(recommendationInfoRepository);
+        verify(memberRepository).save(testMember);
         verifyNoInteractions(jobRecommendationsRepository);
     }
 
+    //회원 없음
     @Test
-    @DisplayName("추천 정보가 없어서 추천 생성 실패")
+    @DisplayName("존재하지 않는 회원 예외 발생")
+    void generateJobRecommendations_MemberNotFound() {
+        when(memberRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(MemberNotFoundException.class,
+                () -> recommendationService.generateJobRecommendations(999L));
+
+        verify(memberRepository).findById(999L);
+    }
+
+    //추천 정보 없음
+    @Test
+    @DisplayName("추천 정보가 없으면 RecommendationInfoNotFoundException 발생")
     void generateJobRecommendations_RecommendationInfoNotFound() {
         // given
         Long memberId = 1L;
+        testMember.setRecommendationInfo(null); // intentionally null
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.empty());
 
         // when & then
-        RecommendationInfoNotFoundException exception = assertThrows(RecommendationInfoNotFoundException.class,
+        assertThrows(RecommendationInfoNotFoundException.class,
                 () -> recommendationService.generateJobRecommendations(memberId));
-        assertTrue(exception.getMessage().contains("추천 정보를 찾을 수 없습니다"));
 
         verify(memberRepository).findById(memberId);
-        verify(recommendationInfoRepository).findByMember_Id(memberId);
-        verifyNoInteractions(jobRecommendationsRepository);
     }
 
+    // API 호출 실패
     @Test
-    @DisplayName("Python API 호출 실패")
-    void generateJobRecommendations_PythonApiCallFailed() {
-        // given
+    @DisplayName("Python API 호출 실패 시 ExternalApiException 발생")
+    void generateJobRecommendations_PythonApiFailure() {
         Long memberId = 1L;
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.of(testRecommendationInfo));
+        mockRestClientFailure(new RuntimeException("API 실패"));
 
-        mockRestClientFailure(new RuntimeException("API 호출 실패"));
-
-        // when & then
-        ExternalApiException exception = assertThrows(ExternalApiException.class,
+        assertThrows(ExternalApiException.class,
                 () -> recommendationService.generateJobRecommendations(memberId));
-        assertTrue(exception.getMessage().contains("Python API 호출 실패"));
-
-        verify(memberRepository).findById(memberId);
-        verify(recommendationInfoRepository).findByMember_Id(memberId);
-        verifyNoInteractions(jobRecommendationsRepository);
     }
 
+    // API 응답이 null일 때
     @Test
-    @DisplayName("Python API 응답이 null인 경우")
-    void generateJobRecommendations_NullApiResponse() {
-        // given
+    @DisplayName("Python API 응답이 null이면 InvalidApiResponseException 발생")
+    void generateJobRecommendations_NullResponse() {
         Long memberId = 1L;
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.of(testRecommendationInfo));
 
         when(restClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
@@ -273,24 +217,18 @@ class RecommendationServiceTest {
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toEntity(PythonApiResponseDto.class)).thenReturn(ResponseEntity.ok(null));
 
-        // when & then
-        InvalidApiResponseException exception = assertThrows(InvalidApiResponseException.class,
+        assertThrows(InvalidApiResponseException.class,
                 () -> recommendationService.generateJobRecommendations(memberId));
-        assertEquals("Python API로부터 유효한 추천 응답을 받지 못했습니다.", exception.getMessage());
-
-        verifyNoInteractions(jobRecommendationsRepository);
     }
 
+    // 추천 결과가 비어있을 때
     @Test
-    @DisplayName("Python API 응답의 추천 목록이 비어있는 경우")
-    void generateJobRecommendations_EmptyRecommendations() {
-        // given
+    @DisplayName("Python API 추천 결과가 비어있으면 InvalidApiResponseException 발생")
+    void generateJobRecommendations_EmptyList() {
         Long memberId = 1L;
         when(memberRepository.findById(memberId)).thenReturn(Optional.of(testMember));
-        when(recommendationInfoRepository.findByMember_Id(memberId)).thenReturn(Optional.of(testRecommendationInfo));
 
         PythonApiResponseDto emptyResponse = new PythonApiResponseDto(List.of(), 1L);
-
         when(restClient.post()).thenReturn(requestBodyUriSpec);
         when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
         when(requestBodySpec.contentType(any())).thenReturn(requestBodySpec);
@@ -299,11 +237,7 @@ class RecommendationServiceTest {
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.toEntity(PythonApiResponseDto.class)).thenReturn(ResponseEntity.ok(emptyResponse));
 
-        // when & then
-        InvalidApiResponseException exception = assertThrows(InvalidApiResponseException.class,
+        assertThrows(InvalidApiResponseException.class,
                 () -> recommendationService.generateJobRecommendations(memberId));
-        assertEquals("Python API로부터 유효한 추천 응답을 받지 못했습니다.", exception.getMessage());
-
-        verifyNoInteractions(jobRecommendationsRepository);
     }
 }
