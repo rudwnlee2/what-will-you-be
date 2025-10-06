@@ -35,8 +35,7 @@ public class RecommendationInfo extends BaseTimeEntity{
     @Enumerated(EnumType.STRING)
     private Holland holland;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "member_id", unique = true)
+    @OneToOne(mappedBy = "recommendationInfo", fetch = FetchType.LAZY)
     private Member member;
 
     @Builder

@@ -33,19 +33,27 @@ public class RecommendationService {
     private final RecommendationInfoRepository recommendationInfoRepository;
     private final MemberRepository memberRepository;
     private final RestClient restClient;
-    
+
     @Value("${api.python.url}")
     private String pythonApiBaseUrl;
 
-    //프론트에서 요청 들어오면 디비에서 추처에 필요한 정보(RecommendationInfoRepository) 조회 후 파이썬 전달
+    /**
+     * 프론트 요청 시, DB의 RecommendationInfo를 조회해 Python API로 전송
+     * Python에서 받은 추천 결과를 JobRecommendations로 저장
+     */
     public List<JobRecommendationsResponseDto> generateJobRecommendations(Long memberId) {
 
+        //회원 존재 여부 확인
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(String.valueOf(memberId)));
 
-        RecommendationInfo recommendationInfo = recommendationInfoRepository.findByMember_Id(memberId)
-                .orElseThrow(() -> new RecommendationInfoNotFoundException(memberId));
+        //member 엔티티에서 직접 접근
+        RecommendationInfo recommendationInfo = member.getRecommendationInfo();
+        if (recommendationInfo == null) {
+            throw new RecommendationInfoNotFoundException(memberId);
+        }
 
+        //Python API 요청 DTO 생성
         PythonApiRequestDto pythonRequest = new PythonApiRequestDto(
                 memberId,
                 recommendationInfo.getDream(),
@@ -58,6 +66,7 @@ public class RecommendationService {
         );
 
         String pythonApiUrl = pythonApiBaseUrl + "/api/recommend/";
+
         ResponseEntity<PythonApiResponseDto> responseEntity;
         try {
             responseEntity = restClient.post()
@@ -68,40 +77,40 @@ public class RecommendationService {
                     .retrieve()
                     .toEntity(PythonApiResponseDto.class);
         } catch (Exception e) {
-            throw new ExternalApiException(e.getMessage());
+            throw new ExternalApiException("Python API 호출 실패: " + e.getMessage());
         }
 
         PythonApiResponseDto apiResponse = responseEntity.getBody();
 
+        //Python 응답 유효성 검증
         if (apiResponse == null || apiResponse.getRecommendedJobs() == null || apiResponse.getRecommendedJobs().isEmpty()) {
             throw new InvalidApiResponseException();
         }
 
-        // 새로 받은 추천 결과를 JobRecommendation 엔티티로 변환하여 DB에 저장
-        List<JobRecommendations> newRecommendations = apiResponse.getRecommendedJobs().stream()
-                .map(jobDetail -> JobRecommendations.builder()
-                        .jobName(jobDetail.getJobName())
-                        .jobSum(jobDetail.getJobSum())
-                        .way(jobDetail.getWay())
-                        .major(jobDetail.getMajor())
-                        .certificate(jobDetail.getCertificate())
-                        .pay(jobDetail.getPay())
-                        .jobProspect(jobDetail.getJobProspect())
-                        .knowledge(jobDetail.getKnowledge())
-                        .jobEnvironment(jobDetail.getJobEnvironment())
-                        .jobValues(jobDetail.getJobValues())
-                        .reason(jobDetail.getReason())
-                        .member(member) // Member와 연결
-                        .build())
+        //Python 응답을 JobRecommendations 엔티티로 변환 + Member와 연결
+        apiResponse.getRecommendedJobs().forEach(jobDetail -> {
+            JobRecommendations job = JobRecommendations.builder()
+                    .jobName(jobDetail.getJobName())
+                    .jobSum(jobDetail.getJobSum())
+                    .way(jobDetail.getWay())
+                    .major(jobDetail.getMajor())
+                    .certificate(jobDetail.getCertificate())
+                    .pay(jobDetail.getPay())
+                    .jobProspect(jobDetail.getJobProspect())
+                    .knowledge(jobDetail.getKnowledge())
+                    .jobEnvironment(jobDetail.getJobEnvironment())
+                    .jobValues(jobDetail.getJobValues())
+                    .reason(jobDetail.getReason())
+                    .build();
+
+            member.addJobRecommendation(job);
+        });
+
+        memberRepository.save(member);
+
+        // 저장된 추천 결과를 DTO로 변환 후 반환
+        return member.getJobRecommendations().stream()
+                .map(JobRecommendationsResponseDto::fromEntity)
                 .collect(Collectors.toList());
-
-        List<JobRecommendations> savedRecommendations = jobRecommendationsRepository.saveAll(newRecommendations);
-
-        // 저장된 최종 결과를 프론트엔드에 전달할 DTO로 변환
-        return savedRecommendations.stream()
-                .map(JobRecommendationsResponseDto::fromEntity) // DTO의 정적 팩토리 메서드 사용
-                .collect(Collectors.toList());
-
     }
-
 }

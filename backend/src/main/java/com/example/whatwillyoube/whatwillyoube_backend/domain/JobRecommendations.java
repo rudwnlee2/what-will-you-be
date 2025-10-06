@@ -51,8 +51,8 @@ public class JobRecommendations extends BaseTimeEntity{
     @Column(nullable = false)
     private String reason;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @Builder
@@ -73,5 +73,7 @@ public class JobRecommendations extends BaseTimeEntity{
         this.reason = reason;
         this.member = member;
     }
+
+    void setMember(Member member) { this.member = member; }
 
 }

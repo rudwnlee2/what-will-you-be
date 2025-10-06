@@ -7,6 +7,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "members")
@@ -41,8 +43,12 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
     @Column(nullable = false)
     private String school;
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "recommendation_info_id", unique = true)
     private RecommendationInfo recommendationInfo;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<JobRecommendations> jobRecommendations = new ArrayList<>();
 
     @Builder
     public Member(String loginId, String password, String name, String email, LocalDate birth, Gender gender, String phone, String school) {
@@ -57,11 +63,23 @@ public class Member extends BaseTimeEntity{ // BaseTimeEntity 상속
 
     }
 
+    // ===== 연관관계 편의 메서드 =====
+
     public void setRecommendationInfo(RecommendationInfo recommendationInfo) {
         this.recommendationInfo = recommendationInfo;
         if (recommendationInfo != null) {
             recommendationInfo.setMember(this);
         }
+    }
+
+    public void addJobRecommendation(JobRecommendations job) {
+        jobRecommendations.add(job);
+        job.setMember(this);
+    }
+
+    public void removeJobRecommendation(JobRecommendations job) {
+        jobRecommendations.remove(job);
+        job.setMember(null); // orphanRemoval=true -> 컬렉션에서 제거되면 DB에서 삭제
     }
 
     public void update(MemberRequestDto requestDto, PasswordEncoder passwordEncoder) {
