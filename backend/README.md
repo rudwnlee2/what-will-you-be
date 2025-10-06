@@ -16,6 +16,7 @@
 - ✅ **완전한 테스트 환경 구축** (Service, Controller, Security, Util Layer)
 - ✅ **코드 커버리지 측정** (Jacoco 통합)
 - ✅ **통합 테스트** (Rest-Assured 적용)
+- ✅ **예외 처리 시스템** (GlobalExceptionHandler, 커스텀 예외 9개)
 - 🚧 친구 관계 관리 (도메인 설계 완료)
 - 🚧 개인/그룹 미션 시스템 (도메인 설계 완료)
 
@@ -158,7 +159,11 @@ src/main/java/com/example/whatwillyoube/whatwillyoube_backend/
 ├── config/          # 설정 클래스 (3개: Security, App, JpaAuditing)
 ├── controller/      # REST 컨트롤러 (4개)
 ├── domain/          # 엔티티 클래스 (19개)
-├── dto/            # 데이터 전송 객체 (14개)
+├── dto/            # 데이터 전송 객체 (15개)
+├── exception/      # 예외 처리 클래스
+│   ├── custom/     # 커스텀 예외 (9개)
+│   ├── BusinessException.java
+│   └── GlobalExceptionHandler.java
 ├── repository/     # JPA 리포지토리 (3개)
 ├── security/       # 보안 관련 클래스 (3개)
 ├── service/        # 비즈니스 로직 (4개)
@@ -167,6 +172,7 @@ src/main/java/com/example/whatwillyoube/whatwillyoube_backend/
 
 src/test/java/com/example/whatwillyoube/whatwillyoube_backend/
 ├── controller/      # 컨트롤러 테스트 (5개)
+├── repository/      # 리포지토리 테스트 (빈 디렉토리)
 ├── security/       # 보안 테스트 (1개)
 ├── service/        # 서비스 테스트 (4개)
 ├── util/           # 유틸리티 테스트 (2개)
@@ -179,6 +185,7 @@ src/test/java/com/example/whatwillyoube/whatwillyoube_backend/
 - **Service**: Member, JobRecommendations, RecommendationInfo, Recommendation
 - **Security**: JWT 필터, UserDetails 구현체
 - **Domain**: 완전한 엔티티 설계 (상속, 복합키 포함)
+- **Exception**: 전역 예외 처리기, 커스텀 비즈니스 예외 9개
 
 ## 🗃 도메인 모델
 
@@ -368,6 +375,10 @@ spring:
 - 추천 결과 저장/조회/삭제
 - 옵션 조회 API
 - 완전한 도메인 모델 설계
+- **예외 처리 시스템**
+  - GlobalExceptionHandler로 전역 예외 처리
+  - 9개 커스텀 비즈니스 예외 클래스
+  - BusinessException 기반 예외 계층 구조
 - **완전한 테스트 환경 구축**
   - Service Layer 테스트 (4개 클래스)
   - Controller Layer 테스트 (5개 클래스)
@@ -385,7 +396,7 @@ spring:
 - [ ] 관리자 기능
 
 ### 🔧 기술 개선 계획
-- [ ] 예외 처리 표준화
+- [x] **예외 처리 표준화** (GlobalExceptionHandler, 커스텀 예외 9개)
 - [ ] API 문서 자동화 (Swagger)
 - [x] **Service Layer 테스트 코드 작성**
 - [x] **Controller Layer 테스트 코드 작성**
@@ -444,4 +455,4 @@ PYTHON_API_URL=http://127.0.0.1:8000
 ---
 
 **개발팀** | What Will You Be Project  
-**최종 업데이트** | 2024년 12월 (테스트 환경 완성)
+**최종 업데이트** | 2024년 12월 (예외 처리 시스템 추가)
