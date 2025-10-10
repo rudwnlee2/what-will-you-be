@@ -124,3 +124,24 @@ def extract_json_from_gpt(response: str):
             except json.JSONDecodeError:
                 return block  # 파싱 실패 시 문자열 그대로
         return response
+
+
+def fill_missing_with_web_search(job_entry: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    '해당 사항 없음'인 필드를 OpenAI 웹 검색 결과로 채움
+    검색 쿼리: jobName + 컬럼명
+    """
+    for key, value in job_entry.items():
+        if value == "해당 사항 없음":
+            search_query = f"{job_entry.get('jobName', '')} {key}"
+            try:
+                resp = client.responses.create(
+                    model="gpt-4o",
+                    tools=[{"type": "web_search_preview"}],
+                    input=f"{search_query}에 대한 정보를 알려줘."
+                )
+                job_entry[key] = resp.output_text.strip()
+            except Exception as e:
+                print(f"웹 검색 실패: {search_query}, 오류: {e}")
+                job_entry[key] = "정보 없음 (검색 실패)"
+    return job_entry

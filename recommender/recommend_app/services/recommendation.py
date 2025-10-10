@@ -29,6 +29,7 @@ def generate_recommendation(user_input: Dict[str, Any]) -> Dict[str, Any]:
     """
     # 1. 사용자 입력을 하나의 텍스트로 변환
     user_text = _concat_dict_values(user_input) #json으로 들어온걸 변환해야함
+    print(user_text) # "개발자", "코딩", "안정성", "INTJ", "독서", "수학", "RIASEC" 순서
 
     # 2. AI 엔진을 통해 텍스트를 벡터로 변환 (임베딩)
     query_vector = engine.get_embedding(user_text)
@@ -43,15 +44,14 @@ def generate_recommendation(user_input: Dict[str, Any]) -> Dict[str, Any]:
     if not recommendations:
         return {"recommendations": []}
 
+    # 4-1. '해당 사항 없음' 필드를 웹 검색 api 기능 사용하여 채우기
+    for i, rec in enumerate(recommendations):
+        recommendations[i] = engine.fill_missing_with_web_search(rec)
+
     # 5. AI 엔진을 통해 추천 이유 및 요약 메시지 생성 (RAG)
-    # reconstructed_recs = engine.get_reconstruct_job_info(user_text, recommendations) # 요약한 직업 정보
-    # reasons = engine.get_recommendation_reason(user_text, recommendations)
-    # recommendations_with_reasons = _add_reasons_to_recommendations(reconstructed_recs, reasons)
-    # gpt_message = engine.get_overall_reason(user_text, recommendations)
     recommendations_with_reasons = engine.get_reconstruct_job_info_reason(user_text, recommendations)
 
     # 6. 최종 결과 조합하여 반환
     return {
         "recommendations": recommendations_with_reasons
-        # "gpt_message": gpt_message,
     }
