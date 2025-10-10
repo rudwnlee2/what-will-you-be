@@ -49,7 +49,6 @@ def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[s
                                     temperature: float = 0.7,
                                     max_tokens: int = 4000) -> List[Dict[str, Any]]:
 
-    reconstructs = []
     rec_json = json.dumps(recommendations, ensure_ascii=False)
 
     system_msg = (
@@ -98,7 +97,11 @@ def get_reconstruct_job_info_reason(user_text: str, recommendations: List[Dict[s
             reconstructs = json.loads(clean_response)
         except json.JSONDecodeError:
             print("JSON 파싱 실패, 초기 추천 데이터 반환")
-            reconstructs = recommendations
+            reconstructs = []
+            for rec in recommendations:
+                rec_with_reason = rec.copy()
+                rec_with_reason['reason'] = "초기 데이터 기반 추천. 당신과 어울려요."
+                reconstructs.append(rec_with_reason)
     else:
         reconstructs = clean_response
 
