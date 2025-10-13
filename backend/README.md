@@ -49,5 +49,3 @@
 
 ### Overview
 *추후 제공 예정*
-
-서버: `http://localhost:8080`
