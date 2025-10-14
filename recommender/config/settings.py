@@ -91,4 +91,4 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # ✅ 여기에 API 키를 하드코딩
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "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"
