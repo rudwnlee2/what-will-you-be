@@ -1,10 +1,21 @@
 from pathlib import Path
+import os
+from dotenv import load_dotenv  # ✅ 추가
 
+# --- .env 파일 불러오기 ---
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, '.env'))  # ✅ 이 줄이 핵심
 
-SECRET_KEY = 'django-insecure-+pi67e5vy)&v5qf65%)$fm&-*rykespi$+@-6yhzqo4%@27zvs'
-DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+# --- Django 기본 설정 ---
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+
+# --- OpenAI 설정 ---
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_MODEL_NAME = os.getenv('OPENAI_MODEL_NAME', 'gpt-4o-mini')
+OPENAI_EMBEDDING_MODEL = os.getenv('OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -89,6 +100,3 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://localhost:8080",
 ]
-
-# ✅ 여기에 API 키를 하드코딩
-OPENAI_API_KEY = "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"

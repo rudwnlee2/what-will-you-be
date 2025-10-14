@@ -57,6 +57,9 @@ dependencies {
 	testImplementation 'org.hamcrest:hamcrest:2.2'         // 응답 값 검증
 	// (선택) XML 응답도 다루려면 추가
 	// testImplementation 'io.rest-assured:xml-path:5.4.0'
+
+	//.env파일 관련
+	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 }
 
 tasks.named('test') {
