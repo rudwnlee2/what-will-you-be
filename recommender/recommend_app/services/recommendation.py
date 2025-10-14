@@ -22,7 +22,6 @@ def generate_recommendation(user_input: Dict[str, Any]) -> Dict[str, Any]:
 
     # 1. 사용자 입력을 하나의 텍스트로 변환
     user_text = _concat_dict_values(user_input) #json으로 들어온걸 변환해야함
-    # print(user_text) # "개발자", "코딩", "안정성", "INTJ", "독서", "수학", "RIASEC" 순서
 
     # 2. AI 엔진을 통해 텍스트를 벡터로 변환 (임베딩)
     query_vector = engine.get_embedding(user_text)
