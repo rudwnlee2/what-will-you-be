@@ -63,38 +63,6 @@ recommend_app/
 
 ```
 
-## 🚀 실행 방법
-
-### 환경 설정
-```bash
-# 가상환경 생성 및 활성화
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 의존성 설치
-pip install django djangorestframework
-pip install openai faiss-cpu numpy python-dotenv django-cors-headers
-```
-
-### 환경변수 설정 (.env)
-```env
-SECRET_KEY=your-django-secret-key
-DEBUG=True
-ALLOWED_HOSTS=127.0.0.1,localhost
-OPENAI_API_KEY=your-openai-api-key
-OPENAI_MODEL_NAME=gpt-4o-mini
-OPENAI_EMBEDDING_MODEL=text-embedding-3-small
-```
-
-### 서버 실행
-```bash
-# 데이터베이스 마이그레이션
-python manage.py migrate
-
-# 개발 서버 실행 (포트 8000)
-python manage.py runserver 8000
-```
-
 ## 📁 데이터 구조
 
 ### FAISS 벡터 데이터베이스
