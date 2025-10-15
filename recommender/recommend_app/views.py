@@ -28,9 +28,9 @@ def _to_camel_item(item: Dict) -> Dict:
 class RecommendAPIView(APIView):
     def post(self, request):
         try:
-            # 요청 데이터 로그 출력
-            print(f"📝 수신 데이터: {request.data}")
-            print(f"📝 Content-Type: {request.content_type}")
+            # # 요청 데이터 로그 출력
+            # print(f"📝 수신 데이터: {request.data}")
+            # print(f"📝 Content-Type: {request.content_type}")
             
             # 1) 입력 검증
             req = RecommendationRequestSerializer(data=request.data)
@@ -60,8 +60,8 @@ class RecommendAPIView(APIView):
                 "memberId": member_id,      # Java DTO 구조에 맞춤
             }
             
-            print(f"📤 전송 데이터: {payload}")
-            print(f"📤 전송 Content-Type: application/json")
+            # print(f"📤 전송 데이터: {payload}")
+            # print(f"📤 전송 Content-Type: application/json")
 
             return Response(payload, status=status.HTTP_200_OK)
 
