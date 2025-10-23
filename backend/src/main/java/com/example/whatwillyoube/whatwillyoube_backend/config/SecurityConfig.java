@@ -35,7 +35,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOrigin("https://www.wwub.site/"); // 해당 ip에만 응답 허용
+        configuration.addAllowedOrigin("http://www.wwub.site"); // 해당 ip에만 응답 허용
         configuration.addAllowedMethod("*"); // 모든 HTTP 요청을 허용
         configuration.addAllowedHeader("*"); // 모든 헤더에 대한 응답 허용
         configuration.setAllowCredentials(true); // 내 서버가 응답할 때 json을 자바스크립트에서 처리할 수 있게 할지를 설정
