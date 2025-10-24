@@ -28,7 +28,7 @@ def generate_recommendation(user_input: Dict[str, Any]) -> Dict[str, Any]:
 
     # 3. 벡터 저장소에서 데이터 로드 및 유사도 검색
     index, metadata_list, chunks_meta = vector_store._load_faiss_index_and_metadata()
-    selected_job_ids, indices = vector_store.similarity_search(index, query_vector, chunks_meta, top_jobs=3)
+    selected_job_ids, indices = vector_store.similarity_search(index, query_vector, chunks_meta, top_jobs=4)
     
     # 4. 검색 결과를 기반으로 추천 직업 목록 생성
     recommendations = vector_store.build_job_metadata(selected_job_ids, chunks_meta, metadata_list)
